@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">{{ 'Edit Article' if article else 'Create New Article' }}</h1>
+
+    <form method="POST" class="card">
+        <div class="card-body">
+            {{ form.csrf_token }}
+
+            <div class="form-group mb-3">
+                {{ form.title.label(class="form-label") }}
+                {{ form.title(class="form-control" + (" is-invalid" if form.title.errors else "")) }}
+                {% if form.title.errors %}
+                    {% for error in form.title.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <div class="form-group mb-3">
+                {{ form.content.label(class="form-label") }}
+                {{ form.content(class="form-control" + (" is-invalid" if form.content.errors else ""), rows=10) }}
+                {% if form.content.errors %}
+                    {% for error in form.content.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <button type="submit" class="btn btn-primary">{{ 'Update' if article else 'Create' }}</button>
+                <a href="{{ url_for('articles.list_articles') }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

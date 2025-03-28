@@ -1,0 +1,95 @@
+/* Base layout styles */
+.navbar { margin-bottom: 20px; }
+.card { margin-bottom: 20px; }
+.alert { margin-top: 20px; }
+.form-control { margin-bottom: 10px; }
+.btn { margin-top: 10px; }
+.container { max-width: 960px; }
+
+/* Theme variables */
+:root {
+    --bg-color: #ffffff;
+    --text-color: #000000;
+    --navbar-bg: #f8f9fa;
+    --navbar-color: #000000;
+    --card-bg: #ffffff;
+    --card-color: #000000;
+    --alert-bg: #f8f9fa;
+    --alert-color: #000000;
+    --input-bg: #ffffff;
+    --input-color: #000000;
+    --border-color: #dee2e6;
+    --link-color: #0d6efd;
+}
+
+[data-theme="dark"] {
+    --bg-color: #343a40;
+    --text-color: #ffffff;
+    --navbar-bg: #212529;
+    --navbar-color: #ffffff;
+    --card-bg: #495057;
+    --card-color: #ffffff;
+    --alert-bg: #495057;
+    --alert-color: #ffffff;
+    --input-bg: #495057;
+    --input-color: #ffffff;
+    --border-color: #6c757d;
+    --link-color: #8bb9fe;
+}
+
+/* Theme application */
+html, body {
+    background-color: var(--bg-color) !important;
+    color: var(--text-color) !important;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.navbar {
+    background-color: var(--navbar-bg) !important;
+    transition: background-color 0.3s ease;
+}
+
+.navbar-light .navbar-brand,
+.navbar-light .navbar-nav .nav-link {
+    color: var(--navbar-color) !important;
+}
+
+.card {
+    background-color: var(--card-bg) !important;
+    color: var(--card-color) !important;
+    border-color: var(--border-color);
+}
+
+.alert {
+    background-color: var(--alert-bg) !important;
+    color: var(--alert-color) !important;
+    border-color: var(--border-color);
+}
+
+.form-control {
+    background-color: var(--input-bg) !important;
+    color: var(--input-color) !important;
+    border-color: var(--border-color);
+}
+
+.form-control:focus {
+    border-color: var(--link-color);
+}
+
+a {
+    color: var(--link-color);
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--link-color);
+    text-decoration: underline;
+}
+
+.alert-success,
+.alert-danger,
+.alert-warning,
+.alert-info {
+    color: var(--alert-color) !important;
+    background-color: var(--alert-bg) !important;
+}

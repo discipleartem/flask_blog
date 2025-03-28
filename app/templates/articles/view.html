@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="article-container">
+    <h1>{{ article.title }}</h1>
+    <div class="article-meta">
+        <span>Author: {{ article.author }}</span>
+        <span>Date: {{ article.created_at }}</span>
+    </div>
+    <div class="article-content">
+        {{ article.content }}
+    </div>
+
+    {% if current_user.id == article.user_id %}
+    <div class="article-actions">
+        <a href="{{ url_for('articles.edit_article', article_id=article.id) }}" class="btn btn-primary">Edit</a>
+        <form action="{{ url_for('articles.delete_article', article_id=article.id) }}" method="post" class="d-inline">
+            <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
+        </form>
+    </div>
+    {% endif %}
+
+    <div class="comments-section mt-4">
+        <h3>Comments ({{ comments|length }})</h3>
+
+        {% if current_user.is_authenticated %}
+            {% include 'comments/_form.html' %}
+        {% else %}
+            <p class="text-muted">Please <a href="{{ url_for('auth.login') }}">login</a> to leave a comment</p>
+        {% endif %}
+
+        <div class="comments-list">
+            {% if comments %}
+                {% for comment in comments %}
+                <div class="comment-item card mb-2">
+                    <div class="card-body">
+                        <div class="comment-content">{{ comment.content }}</div>
+                        <div class="comment-meta text-muted">
+                            <small>
+                                {{ comment.author }} -
+                                {{ comment.created_at }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted">No comments yet</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
