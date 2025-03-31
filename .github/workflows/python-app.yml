@@ -47,7 +47,6 @@ jobs:
 
     - name: Update files to PythonAnywhere
       run: |
-        cd flask_blog/
         git pull origin main
 
     - name: Reload webapp
