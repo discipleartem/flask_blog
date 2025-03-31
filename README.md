@@ -40,6 +40,26 @@ project/
 │   │   ├── auth_routes.py          # Авторизация и регистрация
 │   │   └── comment_routes.py       # Обработка комментариев
 │   │
+│   ├── tests
+│   ├── __init__.py
+│   ├── conftest.py
+│   ├── unit                        # Модульные тесты
+│   │   ├── auth/
+│   │   │   ├── test_forms.py
+│   │   │   ├── test_models.py
+│   │   │   └── test_routes.py
+│   │   ├── article
+│   │   │   ├── test_forms.py
+│   │   │   ├── test_models.py
+│   │   │   └── test_routes.py
+│   │   └── comment
+│   │       ├── test_forms.py
+│   │       ├── test_models.py
+│   │       └── test_routes.py
+│   └── functional              # Функциональные тесты
+       ├── test_auth.py
+       ├── test_article.py
+       └── test_comment.py
 │   ├── static/                     # Статические файлы
 │   │   ├── css/
 │   │   │   └── styles.css         # Стили и темы оформления
