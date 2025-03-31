@@ -15,18 +15,13 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    # Default configuration
-    app.config.from_mapping(
-        SECRET_KEY='dev',
-        DATABASE=os.path.join(app.instance_path, 'blog.db'),
-    )
 
     if test_config is None:
         # Load config.py if not testing
-        app.config.from_object('config.DevelopmentConfig')
+        app.config.from_object('config.ProductionConfig')
     else:
         # Load test config if passed in
-        app.config.update(test_config)
+        app.config.from_object('config.DevelopmentConfig')
 
     # Ensure instance folder exists
     try:

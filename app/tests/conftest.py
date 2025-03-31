@@ -39,16 +39,20 @@ def runner(app):
 @pytest.fixture
 def init_database(app):
     with app.app_context():
-        # Setup test database with initial data
-        User.create_user('admin', 'qwerty')
         db = get_db()
-        # Add test user with hashed password
+        # Clear existing data first
+        db.execute('DELETE FROM users')
+        db.commit()
+
+        # Create admin user
+        User.create_user('admin', 'qwerty')
+
+        # Add test user
         db.execute(
             'INSERT INTO users (username, password_hash) VALUES (?, ?)',
             ('test', 'pbkdf2:sha256:50000$TCI4GzcX$0de171a4f4dac32e3364c7ddc7c14f3e2fa61f2d17574483f7ffbb431b4acb2f')
         )
         db.commit()
-        yield
 
 @pytest.fixture
 def login_user(client):
