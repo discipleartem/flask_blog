@@ -27,7 +27,7 @@ jobs:
       run: |
         pytest
 
-  # автоматизация deploy на PythonAnywhere
+# автоматизация deploy на PythonAnywhere
   deploy:
     runs-on: ubuntu-22.04
     steps:
@@ -44,10 +44,14 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
+    - name: Install PythonAnywhere CLI tools
+      run: |
+        pip install pythonanywhere
+
     - name: Deploy to PythonAnywhere
       env:
         PA_API_TOKEN: ${{ secrets.PA_API_TOKEN }}
         PA_USERNAME: ${{ secrets.PA_USERNAME }}
       run: |
-        pa_autoconfigure_flask.py --python=3.13 https://github.com/your-username/your-repo.git
+        pa_autoconfigure_flask.py --python=3.13 https://github.com/discipleartem/flask_blog.git
         pa_reload_webapp.py --username $PA_USERNAME --api_token $PA_API_TOKEN
