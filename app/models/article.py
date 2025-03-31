@@ -1,4 +1,5 @@
 from app.db import get_db
+from datetime import datetime
 
 class Article:
     """Model for working with articles in the database"""
@@ -14,12 +15,12 @@ class Article:
     def get_all():
         """Retrieve all articles"""
         db = get_db()
-        articles = db.execute(
-            'SELECT a.*, u.username as author '
-            'FROM articles a '
-            'JOIN users u ON a.user_id = u.id '
-            'ORDER BY created_at DESC'
-        ).fetchall()
+        articles = db.execute('''
+            SELECT a.*, u.username as author 
+            FROM articles a 
+            JOIN users u ON a.user_id = u.id 
+            ORDER BY created_at DESC
+        ''').fetchall()
         return [Article(**dict(article)) for article in articles]
 
     @staticmethod
@@ -41,22 +42,24 @@ class Article:
     def create(title, content, user_id):
         """Create a new article"""
         db = get_db()
-        cursor = db.execute(
-            'INSERT INTO articles (title, content, user_id) VALUES (?, ?, ?)',
-            (title, content, user_id)
-        )
+        cursor = db.execute('''
+            INSERT INTO articles (title, content, user_id, created_at) 
+            VALUES (?, ?, ?, ?)
+        ''', (title, content, user_id, datetime.now()))
         db.commit()
         return cursor.lastrowid
 
-
     def update(self, title, content):
-        """Update article"""
+        """Update article title and content"""
         db = get_db()
-        db.execute(
-            'UPDATE articles SET title = ?, content = ? WHERE id = ?',
-            (title, content, self.id)
-        )
+        db.execute('''
+            UPDATE articles 
+            SET title = ?, content = ?, updated_at = ? 
+            WHERE id = ?
+        ''', (title, content, datetime.now(), self.id))
         db.commit()
+        self.title = title
+        self.content = content
 
     def delete(self):
         """Delete article"""
