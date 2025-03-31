@@ -4,6 +4,23 @@ class Config:
     # Отключаем отслеживание изменений в SQLAlchemy
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+class ProductionConfig(Config):
+    ENV = 'production'
+    DEBUG = False
+    TESTING = False
+
+    #bash export SECRET_KEY='your_secret_key_value' устанавливает переменную окружения SECRET_KEY на сервере
+    SECRET_KEY = (os.environ.get('SECRET_KEY')) # берем SECRET_KEY из переменных окружения
+    DATABASE = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance', 'blog.db')
+
+    # Enforce HTTPS
+    SESSION_COOKIE_SECURE = True
+    REMEMBER_COOKIE_SECURE = True
+
+    # Restrict cookie access
+    SESSION_COOKIE_HTTPONLY = True
+    REMEMBER_COOKIE_HTTPONLY = True
+
 class DevelopmentConfig(Config):
     # Указываем, что это режим разработки
     ENV = 'development'
