@@ -43,11 +43,14 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install pythonanywhere
+        pip install pythonanywhere --upgrade
 
     - name: Upload files to PythonAnywhere
+      env:
+        PA_USERNAME: ${{ secrets.PA_USERNAME }}
+        PA_API_TOKEN: ${{ secrets.PA_API_TOKEN }}
       run: |
-        python -m pa_autoconfigure_flask https://github.com/discipleartem/flask_blog.git --nuke
+        python -m pa_autoconfigure_flask.main https://github.com/discipleartem/flask_blog.git --nuke
 
     - name: Re-Deploy Pythonanywhere
       uses: umuttopalak/pythonanywhere-deploy-action@v1.1.0
