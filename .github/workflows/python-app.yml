@@ -41,9 +41,14 @@ jobs:
 
     - name: Install dependencies
       run: |
+        source ~/.virtualenvs/flask_blog_venv/bin/activate
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install pythonanywhere
+
+    - name: Upload files to PythonAnywhere
+      run: |
+        pa_autoconfigure_flask.py https://github.com/discipleartem/flask_blog.git --nuke
 
     - name: Re-Deploy Pythonanywhere
       uses: umuttopalak/pythonanywhere-deploy-action@v1.1.0
@@ -52,12 +57,3 @@ jobs:
         username: ${{ secrets.PA_USERNAME }}
         api_token: ${{ secrets.PA_API_TOKEN }}
         domain_name: ${{ secrets.PA_DOMAIN_NAME }}
-
-
-    - name: Reload webapp
-      uses: jensvog/pythonanywhere-webapp-reload-action@v1
-      with:
-        host: 'www.pythonanywhere.com'
-        username: ${{ secrets.PA_USERNAME }}
-        api-token: ${{ secrets.PA_API_TOKEN }}
-        domain-name: ${{ secrets.PA_DOMAIN_NAME }}
