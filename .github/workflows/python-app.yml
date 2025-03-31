@@ -44,14 +44,11 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Install PythonAnywhere CLI tools
-      run: |
-        pip install --upgrade pythonanywhere
+    - name: Re-Deploy Pythonanywhere
+      uses: umuttopalak/pythonanywhere-deploy-action@v1.1.0
+      with:
+        host: 'www.pythonanywhere.com'
+        username: { { secrets.PA_USERNAME } }
+        api_token: { { secrets.PA_API_TOKEN } }
+        domain_name: { { secrets.PA_DOMAIN_NAME } }
 
-    - name: Deploy to PythonAnywhere
-      env:
-        PA_API_TOKEN: ${{ secrets.PA_API_TOKEN }}
-        PA_USERNAME: ${{ secrets.PA_USERNAME }}
-      run: |
-        python -m pythonanywhere.client --api_token=${{ secrets.PA_API_TOKEN }} deploy --repo=https://github.com/discipleartem/flask_blog.git --domain=${{ secrets.PA_USERNAME }}.pythonanywhere.com --python=3.13
-        pa_reload_webapp
