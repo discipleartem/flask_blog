@@ -45,17 +45,15 @@ jobs:
         pip install -r requirements.txt
         pip install pythonanywhere --upgrade
 
-    - name: Upload files to PythonAnywhere
-      env:
-        PA_USERNAME: ${{ secrets.PA_USERNAME }}
-        PA_API_TOKEN: ${{ secrets.PA_API_TOKEN }}
+    - name: Update files to PythonAnywhere
       run: |
-        python -m pa_autoconfigure_flask.main https://github.com/discipleartem/flask_blog.git --nuke
+        cd flask_blog/
+        git pull origin main
 
-    - name: Re-Deploy Pythonanywhere
-      uses: umuttopalak/pythonanywhere-deploy-action@v1.1.0
+    - name: Reload webapp
+      uses: jensvog/pythonanywhere-webapp-reload-action@v1
       with:
-        host: 'www.pythonanywhere.com'
+        host: 'pythonanywhere.com'
         username: ${{ secrets.PA_USERNAME }}
-        api_token: ${{ secrets.PA_API_TOKEN }}
-        domain_name: ${{ secrets.PA_DOMAIN_NAME }}
+        api-token: ${{ secrets.PA_API_TOKEN }}
+        domain-name: ${{ secrets.PA_DOMAIN_NAME }}
