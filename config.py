@@ -19,7 +19,7 @@ class DevelopmentConfig(Config):
     )
 
     # Путь к файлу базы данных SQLite
-    DATABASE_URI = 'sqlite:///app.db'
+    DATABASE = 'instance/blog.db'
 
 
 

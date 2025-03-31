@@ -9,6 +9,12 @@ def create_app(test_config=None):
     # Create Flask app instance
     app = Flask(__name__, instance_relative_config=True)
 
+    # проверяем, что директория instance существует
+    try:
+        os.makedirs(app.instance_path)
+    except OSError:
+        pass
+
     # Default configuration
     app.config.from_mapping(
         SECRET_KEY='dev',
@@ -34,7 +40,13 @@ def create_app(test_config=None):
 
     # Initialize database
     from . import db
-    db.init_app(app)
+
+    # Register database callbacks
+    app.teardown_appcontext(db.close_db)
+
+    # Initialize database tables
+    with app.app_context():
+        db.init_db()
 
     # Register blueprints
     from app.routes.auth_routes import bp as auth_bp
