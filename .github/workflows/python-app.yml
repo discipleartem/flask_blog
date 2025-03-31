@@ -49,5 +49,6 @@ jobs:
         PA_API_TOKEN: ${{ secrets.PA_API_TOKEN }}
         PA_USERNAME: ${{ secrets.PA_USERNAME }}
       run: |
+        source .virtualenvs/flask_blog_venv/bin/activate 
         pa_autoconfigure_flask.py --python=3.13 https://github.com/your-username/your-repo.git
         pa_reload_webapp.py --username $PA_USERNAME --api_token $PA_API_TOKEN
