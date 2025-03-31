@@ -1,4 +1,4 @@
-name: Python application
+name: Flask application
 
 on:
   push:
@@ -8,9 +8,7 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-22.04
-
     steps:
     - name: Check out repository code
       uses: actions/checkout@v3
@@ -28,3 +26,29 @@ jobs:
     - name: Run tests
       run: |
         pytest
+
+  # автоматизация deploy на PythonAnywhere
+  deploy:
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.13.1'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Deploy to PythonAnywhere
+      env:
+        PA_API_TOKEN: ${{ secrets.PA_API_TOKEN }}
+        PA_USERNAME: ${{ secrets.PA_USERNAME }}
+      run: |
+        source .virtualenvs/flask_blog_venv/bin/activate 
+        pa_autoconfigure_flask.py --python=3.13 https://github.com/your-username/your-repo.git
+        pa_reload_webapp.py --username $PA_USERNAME --api_token $PA_API_TOKEN
