@@ -23,7 +23,7 @@ A simple blog application built with Flask framework that supports user authenti
 ```markdown
 project/
 ├── app/
-│   ├── forms/                       # Формы Flask-WTF
+│   ├── forms/                      # Формы Flask-WTF
 │   │   ├── __init__.py
 │   │   ├── article_forms.py        # Форма для статей
 │   │   ├── auth_forms.py           # Формы авторизации и регистрации
@@ -80,6 +80,8 @@ project/
 │   │   └── base.html              # Базовый шаблон
 │   │
 │   └── __init__.py                # Инициализация приложения
+│├── instance 
+│    ├──blog.db                     # База данных SQLite 
 │
 ├── config.py                       # Конфигурация
 ├── requirements.txt                # Зависимости проекта
