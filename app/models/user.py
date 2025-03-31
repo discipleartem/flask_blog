@@ -19,20 +19,15 @@ class User(UserMixin):
 
     @staticmethod
     def create_user(username, password):
-        """Создание нового пользователя"""
         db = get_db()
-        cursor = db.cursor()
-
-        try:
-            password_hash = generate_password_hash(password)
-            cursor.execute(
-                'INSERT INTO users (username, password_hash) VALUES (?, ?)',
-                (username, password_hash)
-            )
-            db.commit()
-            return True
-        except sqlite3.IntegrityError:
+        if db.execute('SELECT id FROM users WHERE username = ?', (username,)).fetchone():
             return False
+        db.execute(
+            'INSERT INTO users (username, password_hash) VALUES (?, ?)',
+            (username, generate_password_hash(password))
+        )
+        db.commit()
+        return True
 
     @staticmethod
     def get_by_username(username):
@@ -48,12 +43,12 @@ class User(UserMixin):
 
     @staticmethod
     def get_by_id(user_id):
-        """Получение пользователя по ID"""
+        if not user_id:
+            return None
         db = get_db()
         user = db.execute(
             'SELECT * FROM users WHERE id = ?', (user_id,)
         ).fetchone()
-
         if user:
             return User(user['id'], user['username'], user['password_hash'])
         return None
