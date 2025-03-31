@@ -47,7 +47,7 @@ jobs:
 
     - name: Upload files to PythonAnywhere
       run: |
-        pa_autoconfigure_flask.py https://github.com/discipleartem/flask_blog.git --nuke
+        python -m pa_autoconfigure_flask https://github.com/discipleartem/flask_blog.git --nuke
 
     - name: Re-Deploy Pythonanywhere
       uses: umuttopalak/pythonanywhere-deploy-action@v1.1.0
