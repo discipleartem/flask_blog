@@ -4,12 +4,6 @@ from flask import g, current_app
 
 DATABASE = 'blog.db'
 
-""" current_app
-Это прокси-объект Flask, который указывает на текущее активное приложение
-Позволяет безопасно получать доступ к конфигурации приложения из любого места кода
-Особенно важен при тестировании, где мы используем разные конфигурации для тестовой и боевой базы данных
-В вашем коде это нужно для current_app.config.get('DATABASE', DATABASE), чтобы использовать тестовую БД из конфигурации при тестах"""
-
 def get_db():
     """Соединение с базой данных"""
     if 'db' not in g:
@@ -25,37 +19,59 @@ def close_db(_=None):
     if db is not None:
         db.close()
 
+
+
+def check_table_exists(db, table_name):
+    """Check if a table exists in the database"""
+    return db.execute("""
+        SELECT 1 FROM sqlite_master 
+        WHERE type='table' AND name=?
+    """, (table_name,)).fetchone() is not None
+
+
+def check_column_exists(db, table_name, column_name):
+    """Check if a column exists in the table"""
+    try:
+        db.execute(f"SELECT {column_name} FROM {table_name} LIMIT 0")
+        return True
+    except sqlite3.OperationalError:
+        return False
+
+
 def init_db():
-    """Initialize database and tables if they don't exist"""
+    """Initialize database if it doesn't exist"""
     db = get_db()
     try:
-        # Check if database file exists
-        db_path = current_app.config.get('DATABASE', DATABASE)
-        db_exists = os.path.exists(db_path)
-
-        if not db_exists:
-            # Create database file
-            db.commit()
-
-        # Check if required tables exist
-        required_tables = ['users', 'articles', 'comments']
-        existing_tables = db.execute("""
-            SELECT name FROM sqlite_master WHERE type='table'
+        # Check if any tables exist (excluding system tables)
+        tables = db.execute("""
+            SELECT name FROM sqlite_master 
+            WHERE type='table' 
+            AND name NOT IN ('sqlite_sequence')
         """).fetchall()
-        existing_tables = [table['name'] for table in existing_tables]
 
-        # Create only missing tables
-        if not all(table in existing_tables for table in required_tables):
+        if not tables:
+            # Initialize new database from schema
             schema_path = os.path.join(os.path.dirname(current_app.root_path), 'schema.sql')
             with open(schema_path, 'r', encoding='utf-8') as f:
                 db.executescript(f.read())
             db.commit()
-            print("Database tables initialized.")
-        else:
-            print("Database and tables already exist.")
+            print("Database initialized from schema")
+
+        # Check for pending migrations
+        migrations_dir = os.path.join(current_app.root_path, 'migrations')
+        if os.path.exists(migrations_dir):
+            pending_migrations = []
+            for file in sorted(os.listdir(migrations_dir)):
+                if file.endswith('.sql'):
+                    pending_migrations.append(file)
+
+            if pending_migrations:
+                print("\nPending migrations found:")
+                for migration in pending_migrations:
+                    print(f"- {migration}")
+                print("\nTo apply migrations, run:")
+                print("flask migrations-cli migrate")
 
     except sqlite3.Error as e:
         db.rollback()
         raise Exception(f"Database initialization failed: {e}")
-    except IOError as e:
-        raise Exception(f"Could not read schema file: {e}")

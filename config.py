@@ -6,11 +6,13 @@ class Config:
 
 class ProductionConfig(Config):
     ENV = 'production'
+    FLASK_ENV = 'production'
+    FLASK_APP='app.py'
     DEBUG = False
     TESTING = False
 
     #bash export SECRET_KEY='your_secret_key_value' устанавливает переменную окружения SECRET_KEY на сервере
-    SECRET_KEY = (os.environ.get('SECRET_KEY')) # берем SECRET_KEY из переменных окружения
+    SECRET_KEY = os.environ.get('SECRET_KEY') # берем SECRET_KEY из переменных окружения
     DATABASE = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance', 'blog.db')
 
     # Enforce HTTPS
