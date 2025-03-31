@@ -41,7 +41,6 @@ jobs:
 
     - name: Install dependencies
       run: |
-        source .virtualenvs/flask_blog_venv/bin/activate
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install pythonanywhere
@@ -53,3 +52,12 @@ jobs:
         username: ${{ secrets.PA_USERNAME }}
         api_token: ${{ secrets.PA_API_TOKEN }}
         domain_name: ${{ secrets.PA_DOMAIN_NAME }}
+
+
+    - name: Reload webapp
+      uses: jensvog/pythonanywhere-webapp-reload-action@v1
+      with:
+        host: 'www.pythonanywhere.com'
+        username: ${{ secrets.PA_USERNAME }}
+        api-token: ${{ secrets.PA_API_TOKEN }}
+        domain-name: ${{ secrets.PA_DOMAIN_NAME }}
