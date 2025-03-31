@@ -46,12 +46,12 @@ jobs:
 
     - name: Install PythonAnywhere CLI tools
       run: |
-        pip install pythonanywhere
+        pip install --upgrade pythonanywhere
 
     - name: Deploy to PythonAnywhere
       env:
         PA_API_TOKEN: ${{ secrets.PA_API_TOKEN }}
         PA_USERNAME: ${{ secrets.PA_USERNAME }}
       run: |
-        pa_autoconfigure_webapp --python=3.13 https://github.com/discipleartem/flask_blog.git --domain=${{ secrets.PA_USERNAME }}.pythonanywhere.com
+        python -m pythonanywhere.client --api_token=${{ secrets.PA_API_TOKEN }} deploy --repo=https://github.com/discipleartem/flask_blog.git --domain=${{ secrets.PA_USERNAME }}.pythonanywhere.com --python=3.13
         pa_reload_webapp
