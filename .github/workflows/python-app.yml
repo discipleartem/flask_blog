@@ -47,8 +47,7 @@ jobs:
 
     - name: Update files to PythonAnywhere
       run: |
-        git config pull.rebase false
-        git pull origin main
+        git pull
 
     - name: Reload webapp
       uses: jensvog/pythonanywhere-webapp-reload-action@v1
