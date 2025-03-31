@@ -33,6 +33,8 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
+      with:
+        fetch-depth: 0  # Fetch all history and branches
 
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -48,8 +50,8 @@ jobs:
     - name: Update files to PythonAnywhere
       run: |
         git config --global pull.rebase false
-        git checkout main
-        git pull origin main || (git fetch origin main && git reset --hard origin/main)
+        git fetch origin
+        git reset --hard origin/main
 
     - name: Reload webapp
       uses: jensvog/pythonanywhere-webapp-reload-action@v1
