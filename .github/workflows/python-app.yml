@@ -47,6 +47,7 @@ jobs:
 
     - name: Update files to PythonAnywhere
       run: |
+        git config pull.rebase false
         git pull origin main
 
     - name: Reload webapp
