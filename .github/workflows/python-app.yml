@@ -50,10 +50,10 @@ jobs:
 
     - name: Update files to PythonAnywhere
       run: |
-        git config --global pull.rebase false
-        git fetch origin
-        git reset --hard origin/main
-      working-directory: /home/discipleartem/flask_blog
+        sshpass -p "${{ secrets.PA_SSH_PASSWORD }}" \
+        ssh -o StrictHostKeyChecking=no ${{ secrets.PA_USERNAME }}@ssh.pythonanywhere.com \
+        "cd ~/home/${{ secrets.PA_USERNAME }}/flask_blog && git pull origin main"
+        
 
     - name: Reload webapp
       uses: jensvog/pythonanywhere-webapp-reload-action@v1
