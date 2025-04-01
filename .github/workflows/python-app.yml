@@ -2,9 +2,9 @@ name: Flask application
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, dev ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, dev ]
 
 jobs:
   build:
@@ -27,6 +27,14 @@ jobs:
       run: |
         export SECRET_KEY=${{ secrets.SECRET_KEY }}
         pytest
+
+  reload:
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Wait for webhook to complete
+      run: sleep 30 # Adjust the sleep time as needed to wait for the webhook to complete
 
     - name: Reload webapp
       uses: jensvog/pythonanywhere-webapp-reload-action@v1
