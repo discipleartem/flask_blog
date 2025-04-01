@@ -2,7 +2,8 @@ import os
 from flask import Flask
 from flask_login import LoginManager
 from config import ProductionConfig, DevelopmentConfig
-
+import logging
+from logging.handlers import RotatingFileHandler
 
 # Create login_manager as a global variable
 login_manager = LoginManager()
@@ -43,7 +44,7 @@ def create_app(prod_config=True):
     # Register blueprints
     from app.routes.auth_routes import bp as auth_bp
     from app.routes.article_routes import bp as article_bp
-    from app.routes.сomment_routes import bp as comment_bp
+    from app.routes.comment_routes import bp as comment_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(article_bp)
@@ -52,5 +53,14 @@ def create_app(prod_config=True):
     # Регистрируем блюпринты
     from webhook_handler import webhook
     app.register_blueprint(webhook)
+
+    # Set up logging
+    if not app.debug: # если не в режиме отладки
+        pa_username = os.getenv('PA_USERNAME')
+        file_handler = RotatingFileHandler(f"/var/log/{pa_username}.pythonanywhere.com.server.log", maxBytes=10240, backupCount=10)
+        file_handler.setLevel(logging.INFO)
+        formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]')
+        file_handler.setFormatter(formatter)
+        app.logger.addHandler(file_handler)
 
     return app
