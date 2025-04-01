@@ -94,4 +94,5 @@ Install dependencies:
 
 ```pip install -r requirements.txt```
 
-
+For migration of the database, use the following command:
+```flask migrations-cli migrate```
