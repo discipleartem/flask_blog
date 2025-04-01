@@ -19,6 +19,7 @@ class ProductionConfig(Config):
 
     #bash export SECRET_KEY=your_secret_key_value устанавливает переменную окружения SECRET_KEY на сервере
     SECRET_KEY = os.environ.get('SECRET_KEY') # берем SECRET_KEY из переменных окружения
+    GITHUB_WEBHOOK_SECRET = os.environ.get('GITHUB_WEBHOOK_SECRET')
 
     # Enforce HTTPS
     SESSION_COOKIE_SECURE = True

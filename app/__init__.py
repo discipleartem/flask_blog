@@ -1,6 +1,8 @@
 import os
 from flask import Flask
 from flask_login import LoginManager
+from config import ProductionConfig, DevelopmentConfig
+
 
 # Create login_manager as a global variable
 login_manager = LoginManager()
@@ -16,9 +18,9 @@ def create_app(prod_config=True):
         pass
 
     if prod_config:
-        app.config.from_object('config.ProductionConfig')
+        app.config.from_object(ProductionConfig)
     else:
-        app.config.from_object('config.DevelopmentConfig')
+        app.config.from_object(DevelopmentConfig)
 
     # Initialize login manager
     login_manager.init_app(app)
@@ -46,5 +48,9 @@ def create_app(prod_config=True):
     app.register_blueprint(auth_bp)
     app.register_blueprint(article_bp)
     app.register_blueprint(comment_bp)
+
+    # Регистрируем блюпринты
+    from webhook_handler import webhook
+    app.register_blueprint(webhook)
 
     return app
