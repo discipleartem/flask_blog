@@ -42,19 +42,28 @@ jobs:
         PA_API_TOKEN: ${{ secrets.PA_API_TOKEN }}
         PA_USERNAME: ${{ secrets.PA_USERNAME }}
       run: |
-        # Создаем новую консоль
-        CONSOLE_ID=$(curl -X POST \
+        # Создаем новую консоль и сохраняем ответ во временный файл
+        curl -s -X POST \
           -H "Authorization: Token $PA_API_TOKEN" \
           -H "Content-Type: application/json" \
           -d '{"executable":"bash", "working_directory":"/home/'$PA_USERNAME'"}' \
-          "https://www.pythonanywhere.com/api/v0/user/$PA_USERNAME/consoles/" | jq -r '.id')
+          "https://www.pythonanywhere.com/api/v0/user/$PA_USERNAME/consoles/" > response.json
+        
+        # Извлекаем ID консоли с помощью grep и sed
+        CONSOLE_ID=$(grep -o '"id":[^,}]*' response.json | sed 's/"id"://')
+        rm response.json
+        
+        echo "Created console with ID: $CONSOLE_ID"
         
         # Функция для отправки команды в консоль
         send_command() {
-          curl -X POST \
+          echo "Executing command: $1"
+          curl -s -X POST \
             -H "Authorization: Token $PA_API_TOKEN" \
             --data-urlencode "input=$1"$'\n' \
             "https://www.pythonanywhere.com/api/v0/user/$PA_USERNAME/consoles/$CONSOLE_ID/send_input/"
+          # Добавляем небольшую задержку между командами
+          sleep 2
         }
         
         # Выполняем команды обновления репозитория
@@ -62,10 +71,15 @@ jobs:
         send_command "git fetch origin"
         send_command "git reset --hard origin/main"
         
+        # Даем время на завершение выполнения команд
+        sleep 5
+        
         # Закрываем консоль
-        curl -X DELETE \
+        curl -s -X DELETE \
           -H "Authorization: Token $PA_API_TOKEN" \
           "https://www.pythonanywhere.com/api/v0/user/$PA_USERNAME/consoles/$CONSOLE_ID/"
+        
+        echo "Repository update completed"
 
     - name: Reload webapp
       uses: jensvog/pythonanywhere-webapp-reload-action@v1
