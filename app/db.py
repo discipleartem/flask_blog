@@ -1,3 +1,4 @@
+import datetime
 import os
 import sqlite3
 from flask import g, current_app
@@ -24,7 +25,7 @@ def close_db(_=None):
 def check_table_exists(db, table_name):
     """Check if a table exists in the database"""
     return db.execute("""
-        SELECT 1 FROM sqlite_master 
+        SELECT 1 FROM sqlite_master
         WHERE type='table' AND name=?
     """, (table_name,)).fetchone() is not None
 
@@ -44,8 +45,8 @@ def init_db():
     try:
         # Check if any tables exist (excluding system tables)
         tables = db.execute("""
-            SELECT name FROM sqlite_master 
-            WHERE type='table' 
+            SELECT name FROM sqlite_master
+            WHERE type='table'
             AND name NOT IN ('sqlite_sequence')
         """).fetchall()
 
@@ -62,7 +63,7 @@ def init_db():
         if os.path.exists(migrations_dir):
             pending_migrations = []
             for file in sorted(os.listdir(migrations_dir)):
-                if file.endswith('.sql'):
+                if file.endswith('.sql') and not is_migration_applied(db, file):
                     pending_migrations.append(file)
 
             if pending_migrations:
@@ -75,3 +76,18 @@ def init_db():
     except sqlite3.Error as e:
         db.rollback()
         raise Exception(f"Database initialization failed: {e}")
+
+
+def is_migration_applied(db, filename):
+    """Check if a migration has been applied"""
+    result = db.execute("""
+        SELECT 1 FROM migrations WHERE filename = ?
+    """, (filename,)).fetchone()
+    return result is not None
+
+def record_migration(db, filename):
+    """Record a migration as applied"""
+    db.execute("""
+        INSERT INTO migrations (filename, applied_at) VALUES (?, ?)
+    """, (filename, datetime.datetime.now()))
+    db.commit()

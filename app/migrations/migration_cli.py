@@ -1,59 +1,49 @@
-# app/migrations/migration_cli.py
-import click
 import os
+import click
 from flask import current_app
 from flask.cli import with_appcontext
-from ..db import get_db, check_column_exists
+from app.db import get_db, record_migration
 
 @click.group()
 def migrations_cli():
-    """Database migration commands."""
+    """Migration commands."""
     pass
 
 @migrations_cli.command('migrate')
 @with_appcontext
-def migrate_command():
-    """Apply database migrations"""
+def migrate():
+    """Apply pending migrations."""
     db = get_db()
     migrations_dir = os.path.join(current_app.root_path, 'migrations')
+    schema_path = os.path.join(os.path.dirname(current_app.root_path), 'schema.sql')
 
-    db.execute("""
-        CREATE TABLE IF NOT EXISTS migrations (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT UNIQUE NOT NULL,
-            applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    """)
-    db.commit()
+    if os.path.exists(migrations_dir):
+        pending_migrations = []
+        for file in sorted(os.listdir(migrations_dir)):
+            if file.endswith('.sql') and not is_migration_applied(db, file):
+                pending_migrations.append(file)
 
-    for migration_file in sorted(os.listdir(migrations_dir)):
-        if not migration_file.endswith('.sql'):
-            continue
+        if pending_migrations:
+            for migration in pending_migrations:
+                migration_path = os.path.join(migrations_dir, migration)
+                with open(migration_path, 'r', encoding='utf-8') as f:
+                    migration_sql = f.read()
+                    db.executescript(migration_sql)
+                record_migration(db, migration)
+                print(f"Applied migration: {migration}")
 
-        if db.execute('SELECT 1 FROM migrations WHERE name = ?', (migration_file,)).fetchone():
-            continue
+                # Append the migration SQL to schema.sql
+                with open(schema_path, 'a', encoding='utf-8') as schema_file:
+                    schema_file.write(f"\n-- Applied migration: {migration}\n")
+                    schema_file.write(migration_sql)
+        else:
+            print("No pending migrations found.")
+    else:
+        print("Migrations directory not found.")
 
-        with open(os.path.join(migrations_dir, migration_file), 'r') as f:
-            migration_sql = f.read()
-
-            if 'articles' in migration_file and 'updated_at' in migration_sql:
-                if check_column_exists(db, 'articles', 'updated_at'):
-                    print(f"Skipping {migration_file}: column already exists")
-                    continue
-
-        try:
-            db.executescript(migration_sql)
-            db.execute('INSERT INTO migrations (name) VALUES (?)', (migration_file,))
-            db.commit()
-            print(f"Applied: {migration_file}")
-
-            # Update schema.sql file
-            schema_path = os.path.join(current_app.root_path, '..', 'schema.sql')
-            with open(schema_path, 'a', encoding='utf-8') as schema_file:
-                schema_file.write(f"\n-- Applied migration: {migration_file}\n")
-                schema_file.write(migration_sql)
-                print(f"Updated schema.sql with {migration_file}")
-
-        except Exception as e:
-            db.rollback()
-            print(f"Failed to apply {migration_file}: {e}")
+def is_migration_applied(db, filename):
+    """Check if a migration has been applied."""
+    result = db.execute("""
+        SELECT 1 FROM migrations WHERE filename = ?
+    """, (filename,)).fetchone()
+    return result is not None
