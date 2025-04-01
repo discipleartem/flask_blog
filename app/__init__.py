@@ -5,29 +5,20 @@ from flask_login import LoginManager
 # Create login_manager as a global variable
 login_manager = LoginManager()
 
-def create_app(test_config=None):
+def create_app(prod_config=True):
     # Create Flask app instance
     app = Flask(__name__, instance_relative_config=True)
-
-    # проверяем, что директория instance существует
-    try:
-        os.makedirs(app.instance_path)
-    except OSError:
-        pass
-
-
-    if test_config is None:
-        # Load config.py if not testing
-        app.config.from_object('config.ProductionConfig')
-    else:
-        # Load test config if passed in
-        app.config.from_object('config.DevelopmentConfig')
 
     # Ensure instance folder exists
     try:
         os.makedirs(app.instance_path)
     except OSError:
         pass
+
+    if prod_config:
+        app.config.from_object('config.ProductionConfig')
+    else:
+        app.config.from_object('config.DevelopmentConfig')
 
     # Initialize login manager
     login_manager.init_app(app)
@@ -38,6 +29,10 @@ def create_app(test_config=None):
 
     # Register database callbacks
     app.teardown_appcontext(db.close_db)
+
+    # Register CLI commands - moved here
+    from app.migrations.migration_cli import migrations_cli
+    app.cli.add_command(migrations_cli)
 
     # Initialize database tables
     with app.app_context():

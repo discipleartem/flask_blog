@@ -25,6 +25,7 @@ jobs:
 
     - name: Run tests
       run: |
+        export SECRET_KEY=${{ secrets.SECRET_KEY }}
         pytest
 
 # автоматизация deploy на PythonAnywhere
