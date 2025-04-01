@@ -8,14 +8,21 @@ webhook = Blueprint('webhook', __name__)
 
 @webhook.route('/webhook', methods=['POST'])
 def handle_webhook():
+    # Логируем получение запроса
+    current_app.logger.info('Received webhook call')
+
     # Проверяем, что это push событие
     event = request.headers.get('X-GitHub-Event')
+    current_app.logger.info(f'GitHub Event: {event}')
     if event != 'push':
+        current_app.logger.info('Event is not push, ignoring')
         return 'OK', 200
 
     # Проверяем подпись от GitHub
     signature = request.headers.get('X-Hub-Signature-256')
+    current_app.logger.info(f'Signature: {signature}')
     if not signature:
+        current_app.logger.error('Signature missing')
         abort(403)
 
     # Получаем секретный ключ из конфигурации
@@ -30,13 +37,18 @@ def handle_webhook():
         request.data,
         hashlib.sha256
     ).hexdigest()
+    current_app.logger.info(f'Expected Signature: {expected_signature}')
 
     if not hmac.compare_digest(signature, expected_signature):
+        current_app.logger.error('Signature mismatch')
         abort(403)
 
     # Проверяем, что push был в main ветку
     payload = request.get_json()
-    if payload.get('ref') != 'refs/heads/main':
+    ref = payload.get('ref')
+    current_app.logger.info(f'Push reference: {ref}')
+    if ref != 'refs/heads/main':
+        current_app.logger.info('Push is not to main branch, ignoring')
         return 'Not main branch', 200
 
     try:
