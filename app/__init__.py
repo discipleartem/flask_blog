@@ -50,7 +50,7 @@ def create_app(prod_config=True):
     app.register_blueprint(article_bp)
     app.register_blueprint(comment_bp)
 
-    # Регистрируем блюпринты
+    # Регистрируем blueprint
     from webhook_handler import webhook
     app.register_blueprint(webhook)
 
