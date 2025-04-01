@@ -7,3 +7,5 @@ app = create_app(prod_config=True)
 app.register_blueprint(webhook)
 if __name__ == '__main__':
     app.run()
+
+# проверка веб хука
