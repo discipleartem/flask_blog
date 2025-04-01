@@ -54,11 +54,11 @@ jobs:
         PA_API_TOKEN: ${{ secrets.PA_API_TOKEN }}
         PA_USERNAME: ${{ secrets.PA_USERNAME }}
       run: |
-        curl -X POST "https://www.pythonanywhere.com/api/v0/user/${PA_USERNAME}/consoles/" \
+        response=$(curl -X POST "https://www.pythonanywhere.com/api/v0/user/${PA_USERNAME}/consoles/" \
         -H "Authorization: Token ${PA_API_TOKEN}" \
-        -d "executable=/bin/bash" > response.json
-        cat response.json
-        echo "::set-output name=console_id::$(jq -r .id response.json)"
+        -d "executable=/bin/bash")
+        console_id=$(echo $response | jq -r .id)
+        echo "::set-output name=console_id::$console_id"
 
     - name: Update repository on PythonAnywhere
       env:
@@ -68,7 +68,7 @@ jobs:
       run: |
         curl -X POST "https://www.pythonanywhere.com/api/v0/user/${PA_USERNAME}/consoles/${CONSOLE_ID}/send_input/" \
         -H "Authorization: Token ${PA_API_TOKEN}" \
-        -d "input=cd ~/home/${PA_USERNAME}/flask_blog && git pull origin main && exit"
+        -d "input=cd ~/your_project_directory && git pull origin main && exit"
         
 
     - name: Reload webapp
