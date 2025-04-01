@@ -57,7 +57,7 @@ def create_app(prod_config=True):
     # Set up logging
     if not app.debug: # если не в режиме отладки
         pa_username = os.getenv('PA_USERNAME')
-        file_handler = RotatingFileHandler(f"/var/log/{pa_username}.pythonanywhere.com.server.log", maxBytes=10240, backupCount=10)
+        file_handler = RotatingFileHandler('logs/flask_blog.log', maxBytes=10240, backupCount=10)
         file_handler.setLevel(logging.INFO)
         formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]')
         file_handler.setFormatter(formatter)

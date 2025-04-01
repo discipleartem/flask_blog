@@ -56,7 +56,7 @@ ehthumbs.db
 Thumbs.db
 
 # Log files
-*.log
+#*.log
 
 # Local development settings
 .env.local
