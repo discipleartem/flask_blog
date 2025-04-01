@@ -50,9 +50,9 @@ jobs:
 
     - name: Update files to PythonAnywhere
       run: |
-        sshpass -p "${{ secrets.PA_SSH_PASSWORD }}" \
-        ssh -o StrictHostKeyChecking=no ${{ secrets.PA_USERNAME }}@ssh.pythonanywhere.com \
-        "cd ~/home/${{ secrets.PA_USERNAME }}/flask_blog && git pull origin main"
+        curl -X POST "https://www.pythonanywhere.com/api/v0/user/${PA_USERNAME}/consoles/" \
+        -H "Authorization: Token ${PA_API_TOKEN}" \
+        -d "command=cd ~/home/${PA_USERNAME}/flask_blog && git pull origin main"
         
 
     - name: Reload webapp
