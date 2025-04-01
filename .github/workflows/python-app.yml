@@ -50,9 +50,9 @@ jobs:
 
     - name: Update files to PythonAnywhere
       run: |
-        curl -X POST "https://www.pythonanywhere.com/api/v0/user/${PA_USERNAME}/consoles/" \
+        curl -X POST "https://www.pythonanywhere.com/api/v0/user/${PA_USERNAME}/consoles/$(uuidgen)/send_input/" \
         -H "Authorization: Token ${PA_API_TOKEN}" \
-        -d "command=cd ~/home/${PA_USERNAME}/flask_blog && git pull origin main"
+        -d "input=cd ~/home/${PA_USERNAME}/flask_blog && git pull origin main && exit"
         
 
     - name: Reload webapp
