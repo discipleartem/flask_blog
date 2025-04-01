@@ -32,31 +32,54 @@ jobs:
     needs: build
     runs-on: ubuntu-22.04
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-
-    - name: Update repository on PythonAnywhere
+    - name: Update repository via PythonAnywhere Console API
       env:
         PA_API_TOKEN: ${{ secrets.PA_API_TOKEN }}
         PA_USERNAME: ${{ secrets.PA_USERNAME }}
       run: |
-        # Используем API для запуска команды через task API
-        echo "Starting repository update..."
-        
-        curl -X POST \
-          -H "Authorization: Token $PA_API_TOKEN" \
+        echo "Creating new console..."
+        # Создаем новую консоль
+        RESPONSE=$(curl -X POST \
+          -H "Authorization: Token ${PA_API_TOKEN}" \
           -H "Content-Type: application/json" \
-          -d '{
-            "command": "cd ~/flask_blog && git fetch origin && git reset --hard origin/main",
-            "enabled": true,
-            "interval": "daily"
-          }' \
-          "https://www.pythonanywhere.com/api/v0/user/$PA_USERNAME/tasks/"
+          -d '{"executable": "bash"}' \
+          "https://www.pythonanywhere.com/api/v0/user/${PA_USERNAME}/consoles/")
         
-        echo "Waiting for task to complete..."
-        sleep 10
+        # Извлекаем ID консоли из ответа
+        CONSOLE_ID=$(echo $RESPONSE | grep -o '"id":[^,}]*' | cut -d':' -f2)
+        echo "Console ID: $CONSOLE_ID"
+        
+        echo "Updating repository..."
+        # Отправляем команды в консоль
+        # Переходим в директорию проекта
+        curl -X POST \
+          -H "Authorization: Token ${PA_API_TOKEN}" \
+          -H "Content-Type: application/json" \
+          -d '{"input": "cd ~/flask_blog\n"}' \
+          "https://www.pythonanywhere.com/api/v0/user/${PA_USERNAME}/consoles/${CONSOLE_ID}/send_input/"
+        
+        # Выполняем git fetch
+        curl -X POST \
+          -H "Authorization: Token ${PA_API_TOKEN}" \
+          -H "Content-Type: application/json" \
+          -d '{"input": "git fetch origin\n"}' \
+          "https://www.pythonanywhere.com/api/v0/user/${PA_USERNAME}/consoles/${CONSOLE_ID}/send_input/"
+        
+        # Выполняем git reset
+        curl -X POST \
+          -H "Authorization: Token ${PA_API_TOKEN}" \
+          -H "Content-Type: application/json" \
+          -d '{"input": "git reset --hard origin/main\n"}' \
+          "https://www.pythonanywhere.com/api/v0/user/${PA_USERNAME}/consoles/${CONSOLE_ID}/send_input/"
+        
+        # Даем время на выполнение команд
+        sleep 5
+        
+        echo "Cleaning up..."
+        # Закрываем консоль
+        curl -X DELETE \
+          -H "Authorization: Token ${PA_API_TOKEN}" \
+          "https://www.pythonanywhere.com/api/v0/user/${PA_USERNAME}/consoles/${CONSOLE_ID}/"
         
         echo "Repository update completed"
 
