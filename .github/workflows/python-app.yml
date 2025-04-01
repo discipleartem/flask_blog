@@ -50,6 +50,7 @@ jobs:
 
     - name: Update files to PythonAnywhere
       run: |
+        cd /home/${{ secrets.PA_USERNAME }}/flask_blog/
         git checkout main
         git pull origin main
 
