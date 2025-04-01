@@ -49,10 +49,11 @@ jobs:
         pip install pythonanywhere --upgrade
 
     - name: Update files to PythonAnywhere
-      working-directory: /home/${{ secrets.PA_USERNAME }}/flask_blog/
       run: |
-        git checkout main
-        git pull origin main
+        git config --global pull.rebase false
+        git fetch origin
+        git reset --hard origin/main
+      working-directory: /home/${{ secrets.PA_USERNAME }}/flask_blog/
 
     - name: Reload webapp
       uses: jensvog/pythonanywhere-webapp-reload-action@v1
