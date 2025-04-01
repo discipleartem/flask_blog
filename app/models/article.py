@@ -3,12 +3,14 @@ from datetime import datetime
 
 class Article:
     """Model for working with articles in the database"""
-    def __init__(self, id, title, content, user_id, created_at, author=None):
+    def __init__(self, id, title, content, user_id,
+                 created_at, updated_at=None, author=None):
         self.id = id
         self.title = title
         self.content = content
         self.user_id = user_id
         self.created_at = created_at
+        self.updated_at = updated_at
         self.author = author
 
     @staticmethod
@@ -60,6 +62,7 @@ class Article:
         db.commit()
         self.title = title
         self.content = content
+        self.updated_at = datetime.now()
 
     def delete(self):
         """Delete article"""
