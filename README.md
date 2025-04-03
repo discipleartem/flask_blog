@@ -40,7 +40,7 @@ project/
 │   │   ├── auth_routes.py          # Авторизация и регистрация
 │   │   └── comment_routes.py       # Обработка комментариев
 │   │
-│   ├── tests
+│   ├── tests/                     # Тесты приложения
 │   ├── __init__.py
 │   ├── conftest.py
 │   ├── unit                        # Модульные тесты
@@ -85,14 +85,13 @@ project/
 │
 ├── config.py                       # Конфигурация
 ├── requirements.txt                # Зависимости проекта
-├── run.py                         # Точка входа
+├── app.py                         # Точка входа
 ├── README.md                      # Документация
 └── schema.sql                     # Схема базы данных
 ```
 
 Install dependencies:
-
-```pip install -r requirements.txt```
+``` pip install -r requirements.txt```
 
 For migration of the database, use the following command:
 ```flask migrations-cli migrate```
