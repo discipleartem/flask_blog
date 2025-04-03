@@ -54,13 +54,16 @@ def create_app(prod_config=True):
     from webhook_handler import webhook
     app.register_blueprint(webhook)
 
+
+
     # Set up logging
-    if not app.debug: # если не в режиме отладки
-        pa_username = os.getenv('PA_USERNAME')
-        file_handler = RotatingFileHandler('logs/flask_blog.log', maxBytes=10240, backupCount=10)
-        file_handler.setLevel(logging.INFO)
-        formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]')
-        file_handler.setFormatter(formatter)
-        app.logger.addHandler(file_handler)
+    log_dir = os.path.join(app.instance_path, 'logs')
+    os.makedirs(log_dir, exist_ok=True)
+
+    file_handler = RotatingFileHandler(os.path.join(log_dir, 'flask_blog.log'), maxBytes=10240, backupCount=10)
+    file_handler.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]')
+    file_handler.setFormatter(formatter)
+    app.logger.addHandler(file_handler)
 
     return app
