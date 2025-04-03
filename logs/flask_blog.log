@@ -1,0 +1,38 @@
+2025-04-02 15:29:26,966 ERROR: Exception on /auth/register [GET] [in C:\Users\d_mur\Desktop\flask_blog\.venv\Lib\site-packages\flask\app.py:875]
+Traceback (most recent call last):
+  File "C:\Users\d_mur\Desktop\flask_blog\.venv\Lib\site-packages\flask\app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\d_mur\Desktop\flask_blog\.venv\Lib\site-packages\flask\app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\d_mur\Desktop\flask_blog\.venv\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\d_mur\Desktop\flask_blog\.venv\Lib\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\d_mur\Desktop\flask_blog\app\routes\auth_routes.py", line 52, in register
+    form = RegistrationForm()
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\d_mur\Desktop\flask_blog\.venv\Lib\site-packages\wtforms\form.py", line 209, in __call__
+    return type.__call__(cls, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\d_mur\Desktop\flask_blog\.venv\Lib\site-packages\flask_wtf\form.py", line 73, in __init__
+    super().__init__(formdata=formdata, **kwargs)
+  File "C:\Users\d_mur\Desktop\flask_blog\.venv\Lib\site-packages\wtforms\form.py", line 287, in __init__
+    self.process(formdata, obj, data=data, **kwargs)
+  File "C:\Users\d_mur\Desktop\flask_blog\.venv\Lib\site-packages\wtforms\form.py", line 128, in process
+    field.process(formdata, data, extra_filters=field_extra_filters)
+  File "C:\Users\d_mur\Desktop\flask_blog\.venv\Lib\site-packages\wtforms\csrf\core.py", line 44, in process
+    self.current_token = self.csrf_impl.generate_csrf_token(self)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\d_mur\Desktop\flask_blog\.venv\Lib\site-packages\flask_wtf\csrf.py", line 147, in generate_csrf_token
+    return generate_csrf(
+           ^^^^^^^^^^^^^^
+  File "C:\Users\d_mur\Desktop\flask_blog\.venv\Lib\site-packages\flask_wtf\csrf.py", line 36, in generate_csrf
+    secret_key = _get_config(
+                 ^^^^^^^^^^^^
+  File "C:\Users\d_mur\Desktop\flask_blog\.venv\Lib\site-packages\flask_wtf\csrf.py", line 136, in _get_config
+    raise RuntimeError(message)
+RuntimeError: A secret key is required to use CSRF.
