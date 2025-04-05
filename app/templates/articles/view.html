@@ -2,75 +2,111 @@
 
 {% block title %}{{ article.title }}{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/comments.css') }}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
-    <h1>{{ article.title }}</h1>
-    <p class="text-muted">Posted by {{ article.author }} on {{ article.created_at }}</p>
+    <article class="article-container mb-5">
+        <h1 class="mb-3">{{ article.title }}</h1>
+        <div class="d-flex align-items-center text-muted mb-4">
+            <i class="bi bi-person-circle me-2"></i> {{ article.author }}
+            <span class="mx-2">|</span>
+            <i class="bi bi-calendar3 me-2"></i> {{ article.created_at }}
+        </div>
 
-    <div class="article-content mb-4">
-        {{ article.content }}
-    </div>
+        <div class="article-content mb-5">
+            {{ article.content }}
+        </div>
+    </article>
 
-    <h3>Comments</h3>
-
-    <!-- New Comment Form -->
-    {% if current_user.is_authenticated %}
-    <div class="mb-4">
-        <h4>Add a Comment</h4>
-        <form method="POST" action="{{ url_for('comments.create_comment', article_id=article.id) }}">
-            {{ new_comment_form.csrf_token }}
-            <div class="mb-3">
-                {{ new_comment_form.content.label(class="form-label") }}
-                {{ new_comment_form.content(class="form-control") }}
-            </div>
-            <button type="submit" class="btn btn-primary">Add Comment</button>
-        </form>
-    </div>
-    {% endif %}
-
-    <!-- Comments List -->
+    <!-- Comments Section -->
     <div class="comments-section">
-        {% for comment in comments %}
-        <div class="comment card mb-3" id="comment-{{ comment.id }}">
-            <div class="card-body">
-                <!-- Если это комментарий, который надо редактировать, показываем форму редактирования -->
-                {% if request.args.get('edit_comment_id')|int == comment.id and current_user.id == comment.user_id and edit_comment_form %}
-                    <h5 class="card-title">Edit Comment</h5>
-                    <form method="POST" action="{{ url_for('comments.edit_comment', article_id=article.id, comment_id=comment.id) }}">
-                        {{ edit_comment_form.csrf_token }}
-                        <div class="mb-3">
-                            {{ edit_comment_form.content.label(class="form-label") }}
-                            {{ edit_comment_form.content(class="form-control") }}
-                        </div>
-                        <button type="submit" class="btn btn-primary">Update Comment</button>
-                        <a href="{{ url_for('articles.view_article', article_id=article.id) }}" class="btn btn-secondary">Cancel</a>
-                    </form>
-                <!-- Иначе показываем содержимое комментария -->
-                {% else %}
-                    <p class="card-text">{{ comment.content }}</p>
-                    <p class="card-subtitle text-muted">
-                        Posted by {{ comment.author }} on {{ comment.created_at }}
-                    </p>
+        <h3><i class="bi bi-chat-left-text"></i> Comments</h3>
 
-                    <!-- Кнопки управления комментарием -->
-                    {% if current_user.id == comment.user_id %}
-                    <div class="mt-2">
-                        <a href="{{ url_for('articles.view_article', article_id=article.id, edit_comment_id=comment.id) }}"
-                           class="btn btn-sm btn-outline-primary">Edit</a>
-
-                        <form class="d-inline" method="POST"
-                              action="{{ url_for('comments.delete_comment', article_id=article.id, comment_id=comment.id) }}">
-                            {{ new_comment_form.csrf_token }}
-                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
-                        </form>
-                    </div>
-                    {% endif %}
-                {% endif %}
-            </div>
+        <!-- New Comment Form -->
+        {% if current_user.is_authenticated %}
+        <div class="comment-form-container">
+            <h4>Add a Comment</h4>
+            <form method="POST" action="{{ url_for('comments.create_comment', article_id=article.id) }}">
+                {{ new_comment_form.csrf_token }}
+                <div class="mb-3">
+                    {{ new_comment_form.content.label(class="form-label") }}
+                    {{ new_comment_form.content(class="form-control", rows="3", placeholder="Share your thoughts...") }}
+                </div>
+                <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-send"></i> Post Comment
+                    </button>
+                </div>
+            </form>
         </div>
         {% else %}
-        <p>No comments yet.</p>
-        {% endfor %}
+        <div class="alert alert-light" role="alert">
+            <i class="bi bi-key"></i> Please <a href="{{ url_for('auth.login') }}" class="alert-link">login</a> to leave a comment
+        </div>
+        {% endif %}
+
+        <!-- Comments List -->
+        <div class="comments-list mt-4">
+            {% for comment in comments %}
+            <div class="comment-item card" id="comment-{{ comment.id }}">
+                <div class="card-body">
+                    <!-- If this comment is being edited, show the edit form -->
+                    {% if request.args.get('edit_comment_id')|int == comment.id and current_user.id == comment.user_id and edit_comment_form %}
+                        <h5 class="mb-3">Edit Comment</h5>
+                        <div class="edit-comment-form">
+                            <form method="POST" action="{{ url_for('comments.edit_comment', article_id=article.id, comment_id=comment.id) }}">
+                                {{ edit_comment_form.csrf_token }}
+                                <div class="mb-3">
+                                    {{ edit_comment_form.content.label(class="form-label") }}
+                                    {{ edit_comment_form.content(class="form-control", rows="3") }}
+                                </div>
+                                <div class="d-flex justify-content-end">
+                                    <a href="{{ url_for('articles.view_article', article_id=article.id) }}" class="btn btn-outline-secondary me-2">Cancel</a>
+                                    <button type="submit" class="btn btn-primary">Update Comment</button>
+                                </div>
+                            </form>
+                        </div>
+                    <!-- Otherwise show the comment content -->
+                    {% else %}
+                        <div class="comment-content">{{ comment.content }}</div>
+                        <div class="comment-meta">
+                            <div>
+                                <span class="comment-author">{{ comment.author }}</span> ·
+                                <span class="comment-time">{{ comment.created_at }}</span>
+                            </div>
+
+                            {% if current_user.id == comment.user_id %}
+                            <div class="comment-actions">
+                                <a href="{{ url_for('articles.view_article', article_id=article.id, edit_comment_id=comment.id) }}"
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-pencil-fill"></i> Edit
+                                </a>
+
+                                <form class="d-inline" method="POST"
+                                      action="{{ url_for('comments.delete_comment', article_id=article.id, comment_id=comment.id) }}">
+                                    {{ new_comment_form.csrf_token }}
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"
+                                            onclick="return confirm('Are you sure you want to delete this comment?')">
+                                        <i class="bi bi-trash-fill"></i> Delete
+                                    </button>
+                                </form>
+                            </div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <i class="bi bi-chat-square text-muted" style="font-size: 2rem;"></i>
+                <p class="text-muted mt-2">No comments yet. Be the first to share your thoughts!</p>
+            </div>
+            {% endfor %}
+        </div>
     </div>
 </div>
 {% endblock %}
