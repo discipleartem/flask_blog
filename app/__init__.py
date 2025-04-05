@@ -56,7 +56,7 @@ def create_app(prod_config=True):
 
 
 
-    # Set up logging
+    # Set up logging to a file /instance/logs/flask_blog.log
     log_dir = os.path.join(app.instance_path, 'logs')
     os.makedirs(log_dir, exist_ok=True)
 
