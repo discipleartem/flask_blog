@@ -1,53 +1,76 @@
 {% extends "base.html" %}
 
+{% block title %}{{ article.title }}{% endblock %}
+
 {% block content %}
-<div class="article-container">
+<div class="container mt-4">
     <h1>{{ article.title }}</h1>
-    <div class="article-meta">
-        <span>Author: {{ article.author }}</span>
-        <span>Date: {{ article.created_at }}</span>
-    </div>
-    <div class="article-content">
+    <p class="text-muted">Posted by {{ article.author }} on {{ article.created_at }}</p>
+
+    <div class="article-content mb-4">
         {{ article.content }}
     </div>
 
-    {% if current_user.id == article.user_id %}
-    <div class="article-actions">
-        <a href="{{ url_for('articles.edit_article', article_id=article.id) }}" class="btn btn-primary">Edit</a>
-        <form action="{{ url_for('articles.delete_article', article_id=article.id) }}" method="post" class="d-inline">
-            <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
+    <h3>Comments</h3>
+
+    <!-- New Comment Form -->
+    {% if current_user.is_authenticated %}
+    <div class="mb-4">
+        <h4>Add a Comment</h4>
+        <form method="POST" action="{{ url_for('comments.create_comment', article_id=article.id) }}">
+            {{ new_comment_form.csrf_token }}
+            <div class="mb-3">
+                {{ new_comment_form.content.label(class="form-label") }}
+                {{ new_comment_form.content(class="form-control") }}
+            </div>
+            <button type="submit" class="btn btn-primary">Add Comment</button>
         </form>
     </div>
     {% endif %}
 
-    <div class="comments-section mt-4">
-        <h3>Comments ({{ comments|length }})</h3>
-
-        {% if current_user.is_authenticated %}
-            {% include 'comments/_form.html' %}
-        {% else %}
-            <p class="text-muted">Please <a href="{{ url_for('auth.login') }}">login</a> to leave a comment</p>
-        {% endif %}
-
-        <div class="comments-list">
-            {% if comments %}
-                {% for comment in comments %}
-                <div class="comment-item card mb-2">
-                    <div class="card-body">
-                        <div class="comment-content">{{ comment.content }}</div>
-                        <div class="comment-meta text-muted">
-                            <small>
-                                {{ comment.author }} -
-                                {{ comment.created_at }}
-                            </small>
+    <!-- Comments List -->
+    <div class="comments-section">
+        {% for comment in comments %}
+        <div class="comment card mb-3" id="comment-{{ comment.id }}">
+            <div class="card-body">
+                <!-- Если это комментарий, который надо редактировать, показываем форму редактирования -->
+                {% if request.args.get('edit_comment_id')|int == comment.id and current_user.id == comment.user_id and edit_comment_form %}
+                    <h5 class="card-title">Edit Comment</h5>
+                    <form method="POST" action="{{ url_for('comments.edit_comment', article_id=article.id, comment_id=comment.id) }}">
+                        {{ edit_comment_form.csrf_token }}
+                        <div class="mb-3">
+                            {{ edit_comment_form.content.label(class="form-label") }}
+                            {{ edit_comment_form.content(class="form-control") }}
                         </div>
+                        <button type="submit" class="btn btn-primary">Update Comment</button>
+                        <a href="{{ url_for('articles.view_article', article_id=article.id) }}" class="btn btn-secondary">Cancel</a>
+                    </form>
+                <!-- Иначе показываем содержимое комментария -->
+                {% else %}
+                    <p class="card-text">{{ comment.content }}</p>
+                    <p class="card-subtitle text-muted">
+                        Posted by {{ comment.author }} on {{ comment.created_at }}
+                    </p>
+
+                    <!-- Кнопки управления комментарием -->
+                    {% if current_user.id == comment.user_id %}
+                    <div class="mt-2">
+                        <a href="{{ url_for('articles.view_article', article_id=article.id, edit_comment_id=comment.id) }}"
+                           class="btn btn-sm btn-outline-primary">Edit</a>
+
+                        <form class="d-inline" method="POST"
+                              action="{{ url_for('comments.delete_comment', article_id=article.id, comment_id=comment.id) }}">
+                            {{ new_comment_form.csrf_token }}
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                        </form>
                     </div>
-                </div>
-                {% endfor %}
-            {% else %}
-                <p class="text-muted">No comments yet</p>
-            {% endif %}
+                    {% endif %}
+                {% endif %}
+            </div>
         </div>
+        {% else %}
+        <p>No comments yet.</p>
+        {% endfor %}
     </div>
 </div>
 {% endblock %}

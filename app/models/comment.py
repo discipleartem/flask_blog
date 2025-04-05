@@ -26,6 +26,13 @@ class Comment:
         return [Comment(**dict(comment)) for comment in comments]
 
     @staticmethod
+    def get_by_id(article_id, comment_id):
+        """Получение комментария по ID"""
+        db = get_db()
+        comment = db.execute('SELECT * FROM comments WHERE id = ? AND article_id = ?', (comment_id, article_id)).fetchone()
+        return Comment(**dict(comment)) if comment else None
+
+    @staticmethod
     def create(content, article_id, user_id):
         """Создание нового комментария"""
         db = get_db()
@@ -35,6 +42,15 @@ class Comment:
         )
         db.commit()
         return cursor.lastrowid
+
+    def update(self, content):
+        """Обновление комментария"""
+        db = get_db()
+        db.execute(
+            'UPDATE comments SET content = ? WHERE id = ? AND article_id = ?',
+            (content, self.id, self.article_id)
+        )
+        db.commit()
 
     def delete(self):
         """Удаление комментария"""

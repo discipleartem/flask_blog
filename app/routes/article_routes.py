@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash
+from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 from werkzeug.exceptions import abort
 
@@ -21,18 +21,35 @@ def list_articles():
     articles = Article.get_all()
     return render_template('articles/list.html', articles=articles)
 
-@bp.route('/article/<int:article_id>')
+
+
+@bp.route('/article/<int:article_id>', methods=['GET'])
 def view_article(article_id):
-    """
-    Просмотр отдельной статьи
-    Также отображает форму комментариев и список существующих комментариев
-    """
     article = Article.get_by_id(article_id)
-    if article is None:
-        abort(404)  # Возвращаем 404, если статья не найдена
-    form = CommentForm()
+    if not article:
+        flash('Article not found.', 'danger')
+        return redirect(url_for('articles.list_articles'))
+
     comments = Comment.get_by_article_id(article_id)
-    return render_template('articles/view.html', article=article, comments=comments, form=form)
+    new_comment_form = CommentForm()  # Форма для нового комментария
+    edit_comment_form = None  # По умолчанию форма редактирования не нужна
+
+
+    # Если есть параметр edit_comment_id, значит пользователь хочет редактировать комментарий
+    edit_comment_id = request.args.get('edit_comment_id')
+    if edit_comment_id and current_user.is_authenticated:
+        edit_comment = Comment.get_by_id(article_id, int(edit_comment_id))
+        if edit_comment and edit_comment.user_id == current_user.id:
+            edit_comment_form = CommentForm()
+            edit_comment_form.content.data = edit_comment.content
+
+    return render_template('articles/view.html',
+                           article=article,
+                           comments=comments,
+                           new_comment_form=new_comment_form,
+                           edit_comment_form=edit_comment_form)
+
+
 
 @bp.route('/article/new', methods=['GET', 'POST'])
 @login_required  # Требуется аутентификация для создания статьи
@@ -44,6 +61,8 @@ def new_article():
         flash('Article created successfully!', 'success')
         return redirect(url_for('articles.list_articles'))
     return render_template('articles/form.html', form=form)
+
+
 
 @bp.route('/article/<int:article_id>/edit', methods=['GET', 'POST'])
 @login_required  # Требуется аутентификация для редактирования
@@ -66,6 +85,8 @@ def edit_article(article_id):
         flash('Article updated successfully!', 'success')
         return redirect(url_for('articles.view_article', article_id=article.id))
     return render_template('articles/form.html', form=form, article=article)
+
+
 
 @bp.route('/article/<int:article_id>/delete', methods=['POST'])
 @login_required  # Требуется аутентификация для удаления

@@ -1,8 +1,26 @@
-<form method="POST" action="{{ url_for('comments.manage_comments', article_id=article.id) }}">
-    {{ form.hidden_tag() }}
-    <div class="mb-3">
-        {{ form.content.label(class="form-label") }}
-        {{ form.content(class="form-control") }}
-    </div>
-    {{ form.submit(class="btn btn-primary") }}
+<form method="POST" action="{% if comment %}
+                                {{ url_for('comments.edit_comment', article_id=article.id, comment_id=comment.id) }}
+                            {% else %}
+                                {{ url_for('comments.create_comment', article_id=article.id) }}
+                            {% endif %}">
+    {% if edit_form and comment %}
+        {{ edit_form.csrf_token }}
+        <div class="mb-3">
+            {{ edit_form.content.label(class="form-label") }}
+            {{ edit_form.content(class="form-control") }}
+        </div>
+    {% else %}
+        {{ new_comment_form.csrf_token }}
+        <div class="mb-3">
+            {{ new_comment_form.content.label(class="form-label") }}
+            {{ new_comment_form.content(class="form-control") }}
+        </div>
+    {% endif %}
+
+    <button type="submit" class="btn btn-primary">
+        {% if comment %}Update Comment{% else %}Add Comment{% endif %}
+    </button>
+    {% if comment %}
+        <a href="{{ url_for('articles.view_article', article_id=article.id) }}" class="btn btn-secondary">Cancel</a>
+    {% endif %}
 </form>

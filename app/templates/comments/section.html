@@ -1,0 +1,32 @@
+<div class="comments-section mt-4">
+    <h3>Comments ({{ comments|length }})</h3>
+
+    {% if current_user.is_authenticated %}
+        {% with comment=None, new_comment_form=form %}
+            {% include 'comments/_form.html' with context %}
+        {% endwith %}
+    {% else %}
+        <p class="text-muted">Please <a href="{{ url_for('auth.login') }}">login</a> to leave a comment</p>
+    {% endif %}
+
+    <div class="comments-list">
+        {% if comments %}
+            {% for comment in comments %}
+                {% if request.args.get('edit_comment_id')|int == comment.id and current_user.id == comment.user_id %}
+                    <div class="comment-item card mb-2">
+                        <div class="card-body">
+                            <h5>Edit Comment</h5>
+                            {% with edit_form=form, comment=comment %}
+                                {% include 'comments/_form.html' with context %}
+                            {% endwith %}
+                        </div>
+                    </div>
+                {% else %}
+                    {% include 'comments/_comment.html' %}
+                {% endif %}
+            {% endfor %}
+        {% else %}
+            <p class="text-muted">No comments yet</p>
+        {% endif %}
+    </div>
+</div>

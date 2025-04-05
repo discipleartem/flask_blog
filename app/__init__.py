@@ -4,9 +4,12 @@ from flask_login import LoginManager
 from config import ProductionConfig, DevelopmentConfig
 import logging
 from logging.handlers import RotatingFileHandler
+from flask_wtf.csrf import CSRFProtect
 
 # Create login_manager as a global variable
 login_manager = LoginManager()
+
+csrf = CSRFProtect()
 
 def create_app(prod_config=True):
     # Create Flask app instance
@@ -41,6 +44,10 @@ def create_app(prod_config=True):
     with app.app_context():
         db.init_db()
 
+
+    # Инициализация расширений
+    csrf.init_app(app)
+
     # Register blueprints
     from app.routes.auth_routes import bp as auth_bp
     from app.routes.article_routes import bp as article_bp
@@ -65,5 +72,8 @@ def create_app(prod_config=True):
     formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]')
     file_handler.setFormatter(formatter)
     app.logger.addHandler(file_handler)
+
+
+
 
     return app
