@@ -1,15 +1,17 @@
+from datetime import datetime
 from app.db import get_db
 
 
 class Comment:
     """Модель для работы с комментариями в базе данных"""
-    def __init__(self, id, content, article_id, user_id, created_at, author=None):
+    def __init__(self, id, content, article_id, user_id, created_at, author=None, updated_at=None):
         self.id = id
         self.content = content
         self.article_id = article_id
         self.user_id = user_id
         self.created_at = created_at
         self.author = author
+        self.updated_at = updated_at
 
     @staticmethod
     def get_by_article_id(article_id):
@@ -46,11 +48,15 @@ class Comment:
     def update(self, content):
         """Обновление комментария"""
         db = get_db()
-        db.execute(
-            'UPDATE comments SET content = ? WHERE id = ? AND article_id = ?',
-            (content, self.id, self.article_id)
+        db.execute("""
+            UPDATE comments 
+            SET content = ?, updated_at = ?
+            WHERE id = ? AND article_id = ?""",
+            (content, datetime.now(), self.id, self.article_id)
         )
         db.commit()
+        self.content = content
+        self.updated_at = datetime.now()
 
     def delete(self):
         """Удаление комментария"""
