@@ -40,10 +40,9 @@ def create_app(prod_config=True):
     from app.migrations.migration_cli import migrations_cli
     app.cli.add_command(migrations_cli)
 
-    # Initialize database tables
+    # Initialize database tables - это будет вызывать проверку миграций при запуске сервера
     with app.app_context():
         db.init_db()
-
 
     # Инициализация расширений
     csrf.init_app(app)
