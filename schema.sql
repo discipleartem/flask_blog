@@ -30,5 +30,22 @@ CREATE TABLE migrations (
     applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Applied migration: add_updated_at_coloumn_to_articles_table_migration.sql
-ALTER TABLE articles ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+-- Миграция применена: add_updated_at_column_to_articles_table_migration.sql
+--==================================================
+-- Добавляем колонку updated_at без значения по умолчанию
+ALTER TABLE articles  ADD COLUMN updated_at TIMESTAMP;
+
+-- Обновляем существующие записи updated_at текущим временем
+UPDATE articles SET updated_at = CURRENT_TIMESTAMP;
+--==================================================
+ 
+
+-- Миграция применена: add_updated_at_column_to_comments_table_migration.sql
+--==================================================
+-- Добавляем колонку updated_at без значения по умолчанию
+ALTER TABLE comments ADD COLUMN updated_at TIMESTAMP;
+
+-- Обновляем существующие записи updated_at текущим временем
+UPDATE comments SET updated_at = CURRENT_TIMESTAMP;
+--==================================================
+ 

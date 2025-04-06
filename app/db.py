@@ -20,15 +20,12 @@ def close_db(_=None):
     if db is not None:
         db.close()
 
-
-
 def check_table_exists(db, table_name):
     """Check if a table exists in the database"""
     return db.execute("""
         SELECT 1 FROM sqlite_master
         WHERE type='table' AND name=?
     """, (table_name,)).fetchone() is not None
-
 
 def check_column_exists(db, table_name, column_name):
     """Check if a column exists in the table"""
@@ -38,27 +35,42 @@ def check_column_exists(db, table_name, column_name):
     except sqlite3.OperationalError:
         return False
 
-
 def init_db():
     """Initialize database if it doesn't exist"""
     db = get_db()
     try:
-        # Check if any tables exist (excluding system tables)
+        # Проверяем, есть ли вообще какие-либо таблицы в БД
         tables = db.execute("""
             SELECT name FROM sqlite_master
             WHERE type='table'
             AND name NOT IN ('sqlite_sequence')
         """).fetchall()
 
-        if not tables:
-            # Initialize new database from schema
+        is_new_db = len(tables) == 0
+
+        if is_new_db:
+            # Инициализируем новую базу данных из схемы
             schema_path = os.path.join(os.path.dirname(current_app.root_path), 'schema.sql')
             with open(schema_path, 'r', encoding='utf-8') as f:
                 db.executescript(f.read())
             db.commit()
-            print("Database initialized from schema")
+            print("База данных инициализирована из схемы")
 
-        # Check for pending migrations
+        # Только если таблица migrations еще не существует, создаем ее
+        # Это позволяет создать migrations при первом запуске и избежать ошибок,
+        # если таблицы нет (например, при переносе БД из старой версии приложения)
+        if not check_table_exists(db, 'migrations'):
+            db.execute("""
+                CREATE TABLE migrations (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    filename TEXT NOT NULL,
+                    applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+            db.commit()
+            print("Создана таблица для отслеживания миграций")
+
+        # Проверяем наличие ожидающих миграций
         migrations_dir = os.path.join(current_app.root_path, 'migrations')
         if os.path.exists(migrations_dir):
             pending_migrations = []
@@ -67,19 +79,24 @@ def init_db():
                     pending_migrations.append(file)
 
             if pending_migrations:
-                print("\nPending migrations found:")
+                print("\nНайдены ожидающие миграции:")
                 for migration in pending_migrations:
                     print(f"- {migration}")
-                print("\nTo apply migrations, run:")
-                print("flask migrations-cli migrate")
+                print("\nЧтобы применить миграции, выполните:")
+                print("flask migrations migrate")
 
     except sqlite3.Error as e:
         db.rollback()
-        raise Exception(f"Database initialization failed: {e}")
-
+        print(f"Ошибка инициализации базы данных: {e}")
+        # Не останавливаем приложение при ошибке
+        # raise Exception(f"Database initialization failed: {e}")
 
 def is_migration_applied(db, filename):
     """Check if a migration has been applied"""
+    # Таблица migrations должна существовать
+    if not check_table_exists(db, 'migrations'):
+        return False
+
     result = db.execute("""
         SELECT 1 FROM migrations WHERE filename = ?
     """, (filename,)).fetchone()

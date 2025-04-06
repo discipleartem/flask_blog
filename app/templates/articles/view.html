@@ -1,52 +1,65 @@
+<!-- app/templates/articles/view.html -->
 {% extends "base.html" %}
 
+{% block title %}{{ article.title }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/comments.css') }}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+{% endblock %}
+
 {% block content %}
-<div class="article-container">
-    <h1>{{ article.title }}</h1>
-    <div class="article-meta">
-        <span>Author: {{ article.author }}</span>
-        <span>Date: {{ article.created_at }}</span>
-    </div>
-    <div class="article-content">
-        {{ article.content }}
-    </div>
+<div class="container mt-4">
+    <article class="article-container mb-5">
+        <h1 class="mb-3">{{ article.title }}</h1>
+        <div class="d-flex align-items-center text-muted mb-4">
+            <i class="bi bi-person-circle me-2"></i> {{ article.author }}
+            <span class="mx-2">|</span>
+            <i class="bi bi-calendar3 me-2"></i> {{ article.created_at }}
+        </div>
 
-    {% if current_user.id == article.user_id %}
-    <div class="article-actions">
-        <a href="{{ url_for('articles.edit_article', article_id=article.id) }}" class="btn btn-primary">Edit</a>
-        <form action="{{ url_for('articles.delete_article', article_id=article.id) }}" method="post" class="d-inline">
-            <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
-        </form>
-    </div>
-    {% endif %}
+        <div class="article-content mb-5">
+            {{ article.content }}
+        </div>
+    </article>
 
-    <div class="comments-section mt-4">
-        <h3>Comments ({{ comments|length }})</h3>
+    <!-- Comments Section -->
+    <div class="comments-section">
+        <h3><i class="bi bi-chat-left-text"></i> Comments</h3>
 
+        <!-- New Comment Form -->
         {% if current_user.is_authenticated %}
-            {% include 'comments/_form.html' %}
+        <div class="comment-form-container">
+            <h4>Add a Comment</h4>
+            <form method="POST" action="{{ url_for('comments.create_comment', article_id=article.id) }}">
+                {{ new_comment_form.csrf_token }}
+                <div class="mb-3">
+                    {{ new_comment_form.content.label(class="form-label") }}
+                    {{ new_comment_form.content(class="form-control", rows="3", placeholder="Share your thoughts...") }}
+                </div>
+                <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-send"></i> Post Comment
+                    </button>
+                </div>
+            </form>
+        </div>
         {% else %}
-            <p class="text-muted">Please <a href="{{ url_for('auth.login') }}">login</a> to leave a comment</p>
+        <div class="alert alert-light" role="alert">
+            <i class="bi bi-key"></i> Please <a href="{{ url_for('auth.login') }}" class="alert-link">login</a> to leave a comment
+        </div>
         {% endif %}
 
-        <div class="comments-list">
-            {% if comments %}
-                {% for comment in comments %}
-                <div class="comment-item card mb-2">
-                    <div class="card-body">
-                        <div class="comment-content">{{ comment.content }}</div>
-                        <div class="comment-meta text-muted">
-                            <small>
-                                {{ comment.author }} -
-                                {{ comment.created_at }}
-                            </small>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
+        <!-- Comments List -->
+        <div class="comments-list mt-4">
+            {% for comment in comments %}
+            {% include 'comments/_comment.html' %}
             {% else %}
-                <p class="text-muted">No comments yet</p>
-            {% endif %}
+            <div class="text-center py-4">
+                <i class="bi bi-chat-square text-muted" style="font-size: 2rem;"></i>
+                <p class="text-muted mt-2">No comments yet. Be the first to share your thoughts!</p>
+            </div>
+            {% endfor %}
         </div>
     </div>
 </div>
