@@ -4,9 +4,12 @@ from flask_login import LoginManager
 from config import ProductionConfig, DevelopmentConfig
 import logging
 from logging.handlers import RotatingFileHandler
+from flask_wtf.csrf import CSRFProtect
 
 # Create login_manager as a global variable
 login_manager = LoginManager()
+
+csrf = CSRFProtect()
 
 def create_app(prod_config=True):
     # Create Flask app instance
@@ -37,9 +40,12 @@ def create_app(prod_config=True):
     from app.migrations.migration_cli import migrations_cli
     app.cli.add_command(migrations_cli)
 
-    # Initialize database tables
+    # Initialize database tables - это будет вызывать проверку миграций при запуске сервера
     with app.app_context():
         db.init_db()
+
+    # Инициализация расширений
+    csrf.init_app(app)
 
     # Register blueprints
     from app.routes.auth_routes import bp as auth_bp
@@ -56,7 +62,7 @@ def create_app(prod_config=True):
 
 
 
-    # Set up logging
+    # Set up logging to a file /instance/logs/flask_blog.log
     log_dir = os.path.join(app.instance_path, 'logs')
     os.makedirs(log_dir, exist_ok=True)
 
@@ -65,5 +71,8 @@ def create_app(prod_config=True):
     formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]')
     file_handler.setFormatter(formatter)
     app.logger.addHandler(file_handler)
+
+
+
 
     return app

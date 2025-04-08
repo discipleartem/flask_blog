@@ -1,11 +1,45 @@
-<div class="comment-item card mb-2">
+<!-- app/templates/comments/_comment.html -->
+<div class="comment-item card">
     <div class="card-body">
-        <div class="comment-content">{{ comment.content }}</div>
-        <div class="comment-meta text-muted">
-            <small>
-                {{ comment.author }} -
-                {{ comment.created_at }}
-            </small>
-        </div>
+        {% if request.args.get('edit_comment_id')|int == comment.id and current_user.id == comment.user_id and edit_comment_form %}
+            <form method="POST" action="{{ url_for('comments.edit_comment', article_id=article.id, comment_id=comment.id) }}">
+                {{ edit_comment_form.csrf_token }}
+                <div class="mb-3">
+                    {{ edit_comment_form.content.label(class="form-label") }}
+                    {{ edit_comment_form.content(class="form-control", rows="3") }}
+                </div>
+                <div class="d-flex justify-content-end">
+                    <a href="{{ url_for('articles.view_article', article_id=article.id) }}" class="btn btn-outline-secondary me-2">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Update Comment</button>
+                </div>
+            </form>
+        {% else %}
+            <div class="comment-content">{{ comment.content }}</div>
+            <div class="comment-meta">
+                <div>
+                    <span class="comment-author">by {{ comment.author }}</span> ·
+                    <p class="comment-time">created_at: {{ comment.created_at }}</p>
+                    <span class="comment-time">updated_at: {{ comment.updated_at }}</span>
+                </div>
+
+                {% if current_user.id == comment.user_id %}
+                <div class="comment-actions">
+                    <a href="{{ url_for('articles.view_article', article_id=article.id, edit_comment_id=comment.id) }}"
+                       class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-pencil-fill"></i> Edit
+                    </a>
+
+                    <form class="d-inline" method="POST"
+                          action="{{ url_for('comments.delete_comment', article_id=article.id, comment_id=comment.id) }}">
+                        {{ new_comment_form.csrf_token }}
+                        <button type="submit" class="btn btn-sm btn-outline-danger"
+                                onclick="return confirm('Are you sure you want to delete this comment?')">
+                            <i class="bi bi-trash-fill"></i> Delete
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+        {% endif %}
     </div>
 </div>
