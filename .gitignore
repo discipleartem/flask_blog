@@ -55,8 +55,8 @@ yarn-error.log*
 ehthumbs.db
 Thumbs.db
 
-# Log files
-#*.log
+ Log files
+*.log
 
 # Local development settings
 .env.local
@@ -64,3 +64,5 @@ Thumbs.db
 .env.test.local
 .env.production.local
 /.venv/
+/logs/
+~$README.md
