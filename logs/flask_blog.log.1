@@ -1,0 +1,135 @@
+2025-04-05 14:15:33,719 ERROR: Exception on /articles [GET] [in D:\gitRep\flask_blog\.venv\Lib\site-packages\flask\app.py:875]
+Traceback (most recent call last):
+  File "D:\gitRep\flask_blog\.venv\Lib\site-packages\flask\app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\gitRep\flask_blog\.venv\Lib\site-packages\flask\app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\gitRep\flask_blog\.venv\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\gitRep\flask_blog\.venv\Lib\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\gitRep\flask_blog\app\routes\article_routes.py", line 32, in list_articles
+    return render_template('articles/list.html',
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\gitRep\flask_blog\.venv\Lib\site-packages\flask\templating.py", line 150, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\gitRep\flask_blog\.venv\Lib\site-packages\flask\templating.py", line 131, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\gitRep\flask_blog\.venv\Lib\site-packages\jinja2\environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "D:\gitRep\flask_blog\.venv\Lib\site-packages\jinja2\environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "D:\gitRep\flask_blog\app\templates\articles\list.html", line 1, in top-level template code
+    {% extends "base.html" %}
+  File "D:\gitRep\flask_blog\app\templates\base.html", line 54, in top-level template code
+    {% block content %}{% endblock %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\gitRep\flask_blog\app\templates\articles\list.html", line 15, in block 'content'
+    {{ search_form.search_query(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\gitRep\flask_blog\.venv\Lib\site-packages\wtforms\fields\core.py", line 164, in __call__
+    return self.meta.render_field(self, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\gitRep\flask_blog\.venv\Lib\site-packages\wtforms\meta.py", line 64, in render_field
+    return field.widget(field, **render_kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\gitRep\flask_blog\.venv\Lib\site-packages\wtforms\widgets\core.py", line 178, in __call__
+    input_params = self.html_params(name=field.name, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: wtforms.widgets.core.html_params() got multiple values for keyword argument 'name'
+2025-04-05 14:15:45,616 ERROR: Exception on /articles [GET] [in D:\gitRep\flask_blog\.venv\Lib\site-packages\flask\app.py:875]
+Traceback (most recent call last):
+  File "D:\gitRep\flask_blog\.venv\Lib\site-packages\flask\app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\gitRep\flask_blog\.venv\Lib\site-packages\flask\app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\gitRep\flask_blog\.venv\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\gitRep\flask_blog\.venv\Lib\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\gitRep\flask_blog\app\routes\article_routes.py", line 32, in list_articles
+    return render_template('articles/list.html',
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\gitRep\flask_blog\.venv\Lib\site-packages\flask\templating.py", line 150, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\gitRep\flask_blog\.venv\Lib\site-packages\flask\templating.py", line 131, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\gitRep\flask_blog\.venv\Lib\site-packages\jinja2\environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "D:\gitRep\flask_blog\.venv\Lib\site-packages\jinja2\environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "D:\gitRep\flask_blog\app\templates\articles\list.html", line 1, in top-level template code
+    {% extends "base.html" %}
+  File "D:\gitRep\flask_blog\app\templates\base.html", line 54, in top-level template code
+    {% block content %}{% endblock %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\gitRep\flask_blog\app\templates\articles\list.html", line 15, in block 'content'
+    {{ search_form.search_query(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\gitRep\flask_blog\.venv\Lib\site-packages\wtforms\fields\core.py", line 164, in __call__
+    return self.meta.render_field(self, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\gitRep\flask_blog\.venv\Lib\site-packages\wtforms\meta.py", line 64, in render_field
+    return field.widget(field, **render_kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\gitRep\flask_blog\.venv\Lib\site-packages\wtforms\widgets\core.py", line 178, in __call__
+    input_params = self.html_params(name=field.name, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: wtforms.widgets.core.html_params() got multiple values for keyword argument 'name'
+2025-04-05 14:18:49,839 ERROR: Exception on /articles [GET] [in D:\gitRep\flask_blog\.venv\Lib\site-packages\flask\app.py:875]
+Traceback (most recent call last):
+  File "D:\gitRep\flask_blog\.venv\Lib\site-packages\flask\app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\gitRep\flask_blog\.venv\Lib\site-packages\flask\app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\gitRep\flask_blog\.venv\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\gitRep\flask_blog\.venv\Lib\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\gitRep\flask_blog\app\routes\article_routes.py", line 32, in list_articles
+    return render_template('articles/list.html',
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\gitRep\flask_blog\.venv\Lib\site-packages\flask\templating.py", line 150, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\gitRep\flask_blog\.venv\Lib\site-packages\flask\templating.py", line 131, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\gitRep\flask_blog\.venv\Lib\site-packages\jinja2\environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "D:\gitRep\flask_blog\.venv\Lib\site-packages\jinja2\environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "D:\gitRep\flask_blog\app\templates\articles\list.html", line 1, in top-level template code
+    {% extends "base.html" %}
+  File "D:\gitRep\flask_blog\app\templates\base.html", line 54, in top-level template code
+    {% block content %}{% endblock %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\gitRep\flask_blog\app\templates\articles\list.html", line 15, in block 'content'
+    {{ search_form.search_query(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\gitRep\flask_blog\.venv\Lib\site-packages\wtforms\fields\core.py", line 164, in __call__
+    return self.meta.render_field(self, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\gitRep\flask_blog\.venv\Lib\site-packages\wtforms\meta.py", line 64, in render_field
+    return field.widget(field, **render_kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\gitRep\flask_blog\.venv\Lib\site-packages\wtforms\widgets\core.py", line 178, in __call__
+    input_params = self.html_params(name=field.name, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: wtforms.widgets.core.html_params() got multiple values for keyword argument 'name'
