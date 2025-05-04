@@ -69,3 +69,33 @@ class Article:
         db = get_db()
         db.execute('DELETE FROM articles WHERE id = ?', (self.id,))
         db.commit()
+
+    @staticmethod
+    def search_by_title(search_query):
+        """Search articles by title"""
+        db = get_db()
+        search_pattern = f'%{search_query}%'
+        articles = db.execute('''
+            SELECT a.*, u.username as author 
+            FROM articles a 
+            JOIN users u ON a.user_id = u.id 
+            WHERE a.title LIKE ?
+            ORDER BY created_at DESC
+        ''', (search_pattern,)).fetchall()
+        result = [Article(**dict(article)) for article in articles]
+        return result
+
+    @staticmethod
+    def search_by_content(search_query):
+        """Search articles by content"""
+        db = get_db()
+        search_pattern = f'%{search_query}%'
+        articles = db.execute('''
+            SELECT a.*, u.username as author 
+            FROM articles a 
+            JOIN users u ON a.user_id = u.id 
+            WHERE a.content LIKE ?
+            ORDER BY created_at DESC
+        ''', (search_pattern,)).fetchall()
+        result = [Article(**dict(article)) for article in articles]
+        return result

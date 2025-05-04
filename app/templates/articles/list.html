@@ -6,30 +6,74 @@
         <h1>Articles</h1>
     </div>
 
+    <!-- Добавляем форму поиска -->
+    <div class="mb-4">
+        <form method="GET">
+            <div class="d-flex gap-2 mb-2">
+                {{ search_form.search_query(
+                class="form-control",
+                placeholder="Search articles...",
+                value=search_query
+                ) }}
+                {{ search_form.submit(class="btn btn-outline-primary") }}
+                {% if search_query %}
+                <a href="{{ url_for('articles.list_articles') }}" class="btn btn-outline-secondary">Clear</a>
+                {% endif %}
+            </div>
+
+            <!-- Заменяем кнопки на чекбоксы -->
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" name="search_by_title" id="search_by_title"
+                       {% if search_by== 'title' %} checked {% endif %}>
+                <label class="form-check-label" for="search_by_title">Search in Title</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" name="search_by_content" id="search_by_content"
+                       {% if search_by== 'content' %} checked {% endif %}>
+                <label class="form-check-label" for="search_by_content">Search in Content</label>
+            </div>
+        </form>
+    </div>
+
+    {% if search_query %}
+    <div class="mb-3">
+        <h5>Search results for: "{{ search_query }}"
+            {% if search_by %}(searching in {{ search_by }}){% endif %}
+        </h5>
+        {% if not articles %}
+        <p class="text-muted">No articles found matching your search.</p>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Остальной код для отображения статей остается без изменений -->
     {% for article in articles %}
-        <div class="card mb-3">
-            <div class="card-body">
-                <h5 class="card-title">{{ article.title }}</h5>
-                <p class="card-text">{{ article.content[:200] }}...</p>
-                <div class="d-flex justify-content-between align-items-center">
-                    <a href="{{ url_for('articles.view_article', article_id=article.id) }}"
-                       class="btn btn-info">Read More</a>
-                    {% if current_user.is_authenticated and current_user.id == article.user_id %}
-                        <div>
-                            <a href="{{ url_for('articles.edit_article', article_id=article.id) }}"
-                               class="btn btn-warning">Edit</a>
-                            <form action="{{ url_for('articles.delete_article', article_id=article.id) }}"
-                                  method="POST" class="d-inline">
-                                <button type="submit" class="btn btn-danger"
-                                        onclick="return confirm('Are you sure?')">Delete</button>
-                            </form>
-                        </div>
-                    {% endif %}
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title">{{ article.title }}</h5>
+            <p class="card-text">{{ article.content[:200] }}...</p>
+            <div class="d-flex justify-content-between align-items-center">
+                <a href="{{ url_for('articles.view_article', article_id=article.id) }}"
+                   class="btn btn-info">Read More</a>
+                {% if current_user.is_authenticated and current_user.id == article.user_id %}
+                <div>
+                    <a href="{{ url_for('articles.edit_article', article_id=article.id) }}"
+                       class="btn btn-warning">Edit</a>
+                    <form action="{{ url_for('articles.delete_article', article_id=article.id) }}"
+                          method="POST" class="d-inline">
+                        <button type="submit" class="btn btn-danger"
+                                onclick="return confirm('Are you sure?')">Delete
+                        </button>
+                    </form>
                 </div>
+                {% endif %}
             </div>
         </div>
+    </div>
     {% else %}
-        <p class="text-center">No articles found.</p>
+    {% if not search_query %}
+    <p class="text-center">No articles found.</p>
+    {% endif %}
     {% endfor %}
 </div>
 {% endblock %}

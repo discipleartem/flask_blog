@@ -1,9 +1,9 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import Blueprint, render_template, redirect, url_for, flash, request, g
 from flask_login import login_required, current_user
 from werkzeug.exceptions import abort
 
 from app.models.article import Article
-from app.forms.article_forms import ArticleForm
+from app.forms.article_forms import ArticleForm, SearchForm  # Добавляем импорт SearchForm
 from app.forms.comment_form import CommentForm
 from app.models.comment import Comment
 
@@ -15,11 +15,28 @@ def index():
     """Перенаправление с корневого маршрута на список статей"""
     return redirect(url_for('articles.list_articles'))
 
-@bp.route('/articles')
+
+# Добавление обработчика маршрута для поиска
+# Изменение функции list_articles
+@bp.route('/articles', methods=['GET'])
 def list_articles():
-    """Отображение списка всех статей"""
-    articles = Article.get_all()
-    return render_template('articles/list.html', articles=articles)
+    """Отображение списка всех статей с возможностью поиска"""
+    search_form = SearchForm()
+    search_query = request.args.get('search_query', '')     # изменено
+    
+    if search_query: # поиск по заголовку или содержанию
+        if request.args.get('search_by_title') == 'on':
+            articles = Article.search_by_title(search_query)
+
+        elif request.args.get('search_by_content') == 'on':
+            articles = Article.search_by_content(search_query)
+    else:
+        articles = Article.get_all()
+        
+    return render_template('articles/list.html', 
+                         articles=articles, 
+                         search_form=search_form,
+                         search_query=search_query)         # добавлено
 
 
 
