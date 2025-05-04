@@ -8,22 +8,38 @@
 
     <!-- Добавляем форму поиска -->
     <div class="mb-4">
-        <form method="GET" class="d-flex gap-2">
-            {{ search_form.search_query(
-                class="form-control",
-                placeholder="Search articles by title...",
-                value=search_query  
-            ) }}
-            {{ search_form.submit(class="btn btn-outline-primary") }}
-            {% if search_query %}
-                <a href="{{ url_for('articles.list_articles') }}" class="btn btn-outline-secondary">Clear</a>
-            {% endif %}
+        <form method="GET">
+            <div class="d-flex gap-2 mb-2">
+                {{ search_form.search_query(
+                    class="form-control",
+                    placeholder="Search articles...",
+                    value=search_query
+                ) }}
+                {{ search_form.submit(class="btn btn-outline-primary") }}
+                {% if search_query %}
+                    <a href="{{ url_for('articles.list_articles') }}" class="btn btn-outline-secondary">Clear</a>
+                {% endif %}
+            </div>
+
+            <!-- Заменяем кнопки на чекбоксы -->
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" name="search_by_title" id="search_by_title"
+                       {% if search_by == 'title' or not search_by %} checked {% endif %}>
+                <label class="form-check-label" for="search_by_title">Search in Title</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" name="search_by_content" id="search_by_content"
+                       {% if search_by == 'content' %} checked {% endif %}>
+                <label class="form-check-label" for="search_by_content">Search in Content</label>
+            </div>
         </form>
     </div>
 
     {% if search_query %}
         <div class="mb-3">
-            <h5>Search results for: "{{ search_query }}"</h5>
+            <h5>Search results for: "{{ search_query }}"
+                {% if search_by %}(searching in {{ search_by }}){% endif %}
+            </h5>
             {% if not articles %}
                 <p class="text-muted">No articles found matching your search.</p>
             {% endif %}
