@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import Blueprint, render_template, redirect, url_for, flash, request, g
 from flask_login import login_required, current_user
 from werkzeug.exceptions import abort
 
@@ -16,7 +16,7 @@ def index():
     return redirect(url_for('articles.list_articles'))
 
 
-# 3. Добавление обработчика маршрута для поиска
+# Добавление обработчика маршрута для поиска
 # Изменение функции list_articles
 @bp.route('/articles', methods=['GET'])
 def list_articles():
@@ -24,8 +24,12 @@ def list_articles():
     search_form = SearchForm()
     search_query = request.args.get('search_query', '')     # изменено
     
-    if search_query:
-        articles = Article.search_by_title(search_query)
+    if search_query: # поиск по заголовку или содержанию
+        if request.args.get('search_by_title') == 'on':
+            articles = Article.search_by_title(search_query)
+
+        elif request.args.get('search_by_content') == 'on':
+            articles = Article.search_by_content(search_query)
     else:
         articles = Article.get_all()
         
