@@ -8,7 +8,7 @@
 
     <!-- Добавляем форму поиска -->
     <div class="mb-4">
-        <form method="GET">
+        <form method="POST" action="{{ url_for('articles.index') }}">
             <div class="d-flex gap-2 mb-2">
                 {{ search_form.search_query(
                 class="form-control",
@@ -17,7 +17,7 @@
                 ) }}
                 {{ search_form.submit(class="btn btn-outline-primary") }}
                 {% if search_query %}
-                <a href="{{ url_for('articles.list_articles') }}" class="btn btn-outline-secondary">Clear</a>
+                <a href="{{ url_for('articles.index') }}" class="btn btn-outline-secondary">Clear</a>
                 {% endif %}
             </div>
 
