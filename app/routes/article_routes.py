@@ -1,4 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, g
+
+
 from flask_login import login_required, current_user
 from werkzeug.exceptions import abort
 
@@ -10,42 +12,38 @@ from app.models.comment import Comment
 # Создаем Blueprint для маршрутов, связанных со статьями
 bp = Blueprint('articles', __name__)
 
-@bp.route('/')
+@bp.route('/', methods=['GET', 'POST'])
 def index():
-    """Перенаправление с корневого маршрута на список статей"""
-    return redirect(url_for('articles.list_articles'))
-
-
-# Добавление обработчика маршрута для поиска
-# Изменение функции list_articles
-@bp.route('/articles', methods=['GET'])
-def list_articles():
-    """Отображение списка всех статей с возможностью поиска"""
+    """Отображение списка всех статей на главной странице"""
     search_form = SearchForm()
-    search_query = request.args.get('search_query', '')     # изменено
+    search_query = ''
     
-    if search_query: # поиск по заголовку или содержанию
-        if request.args.get('search_by_title') == 'on':
-            articles = Article.search_by_title(search_query)
-
-        elif request.args.get('search_by_content') == 'on':
-            articles = Article.search_by_content(search_query)
+    if request.method == 'POST':
+        search_query = request.form.get('search_query', '')
+        if search_query:
+            if request.form.get('search_by_title') == 'on':
+                articles = Article.search_by_title(search_query)
+            elif request.form.get('search_by_content') == 'on':
+                articles = Article.search_by_content(search_query)
+            else:
+                articles = Article.get_all()
+        else:
+            articles = Article.get_all()
     else:
         articles = Article.get_all()
         
     return render_template('articles/list.html', 
                          articles=articles, 
                          search_form=search_form,
-                         search_query=search_query)         # добавлено
+                         search_query=search_query)
 
 
-
-@bp.route('/article/<int:article_id>', methods=['GET'])
+@bp.route('/<int:article_id>', methods=['GET'])
 def view_article(article_id):
     article = Article.get_by_id(article_id)
     if not article:
         flash('Article not found.', 'danger')
-        return redirect(url_for('articles.list_articles'))
+        return redirect(url_for('articles.index'))
 
     comments = Comment.get_by_article_id(article_id)
     new_comment_form = CommentForm()  # Форма для нового комментария
@@ -68,33 +66,29 @@ def view_article(article_id):
 
 
 
-@bp.route('/article/new', methods=['GET', 'POST'])
-@login_required  # Требуется аутентификация для создания статьи
+@bp.route('/new', methods=['GET', 'POST'])
+@login_required
 def new_article():
     """Создание новой статьи"""
     form = ArticleForm()
     if form.validate_on_submit():
         Article.create(form.title.data, form.content.data, current_user.id)
         flash('Article created successfully!', 'success')
-        return redirect(url_for('articles.list_articles'))
+        return redirect(url_for('articles.index'))
     return render_template('articles/form.html', form=form)
 
 
 
-@bp.route('/article/<int:article_id>/edit', methods=['GET', 'POST'])
-@login_required  # Требуется аутентификация для редактирования
+@bp.route('/<int:article_id>/edit', methods=['GET', 'POST'])
+@login_required
 def edit_article(article_id):
-    """
-    Редактирование существующей статьи.
-    Проверяет права доступа перед редактированием
-    """
     article = Article.get_by_id(article_id)
     if not article:
         flash('Article not found', 'danger')
-        return redirect(url_for('articles.list_articles'))
+        return redirect(url_for('articles.index'))
     if article.user_id != current_user.id:
         flash('You are not authorized to edit this article', 'danger')
-        return redirect(url_for('articles.list_articles'))
+        return redirect(url_for('articles.index'))
 
     form = ArticleForm(obj=article)
     if form.validate_on_submit():
@@ -105,17 +99,13 @@ def edit_article(article_id):
 
 
 
-@bp.route('/article/<int:article_id>/delete', methods=['POST'])
-@login_required  # Требуется аутентификация для удаления
+@bp.route('/<int:article_id>/delete', methods=['POST'])
+@login_required
 def delete_article(article_id):
-    """
-    Удаление статьи.
-    Проверяет права доступа перед удалением
-    """
     article = Article.get_by_id(article_id)
     if article.user_id != current_user.id:
         flash('You are not authorized to delete this article', 'danger')
     else:
         article.delete()
         flash('Article deleted successfully!', 'success')
-    return redirect(url_for('articles.list_articles'))
+    return redirect(url_for('articles.index'))
