@@ -31,7 +31,7 @@ def load_logged_in_user():
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('articles.index'))
+        return redirect(url_for('articles.list_articles'))
 
     form = LoginForm()
     if form.validate_on_submit():
@@ -39,7 +39,7 @@ def login():
         if user and user.check_password(form.password.data):
             login_user(user)
             flash('Successfully logged in', 'success')
-            return redirect(url_for('articles.index'))
+            return redirect(url_for('articles.list_articles'))
         flash('Invalid username or password', 'danger')
 
     return render_template('auth/login.html', form=form)
@@ -77,4 +77,4 @@ def register():
 def logout():
     logout_user()
     flash('Successfully logged out', 'success')
-    return redirect(url_for('articles.index'))
+    return redirect(url_for('articles.list_articles'))
