@@ -95,3 +95,5 @@ Install dependencies:
 
 For migration of the database, use the following command:
 ```flask migrations-cli migrate```
+
+site: https://discipleartem.pythonanywhere.com
