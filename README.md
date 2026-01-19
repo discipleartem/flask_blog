@@ -1,10 +1,17 @@
 # Flask Blog
 
-Веб-приложение блога на Flask.
+Веб-приложение блога на Flask — многопользовательская платформа с возможностью публикации постов и обсуждений.
+
+## Технологический стек
+
+* **Backend:** Python 3.13, Flask 3.0.3
+* **Database:** SQLite (чистый SQL без ORM)
+* **Frontend:** Bootstrap 5 (Jinja2 templates)
+* **Инструменты:** Pytest (для тестирования)
 
 ## Требования
 
-- Python 3.13+
+* Python 3.13 или выше
 
 ## Установка
 
@@ -17,9 +24,10 @@
 2. Создайте виртуальное окружение и активируйте его:
    ```bash
    python -m venv .venv
-   source .venv/bin/activate  # Linux/macOS
-   # или
-   .venv\Scripts\activate     # Windows
+   # Для Linux/macOS:
+   source .venv/bin/activate
+   # Для Windows:
+   .venv\Scripts\activate
    ```
 
 3. Установите зависимости:
@@ -27,9 +35,15 @@
    pip install -r requirements.txt
    ```
 
-   Для разработки:
+   Для разработки (включая pytest):
    ```bash
    pip install -e ".[dev]"
    ```
 
-## Запуск
+## Инициализация базы данных
+
+Перед первым запуском необходимо создать таблицы в базе данных:
+
+```bash
+flask --app app init-db
+```
