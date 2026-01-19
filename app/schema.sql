@@ -1,12 +1,15 @@
-DROP TABLE IF EXISTS user;
-DROP TABLE IF EXISTS post;
 DROP TABLE IF EXISTS comment;
+DROP TABLE IF EXISTS post;
+DROP TABLE IF EXISTS user;
 
 CREATE TABLE user
 (
-    id       INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT UNIQUE NOT NULL,
-    password TEXT        NOT NULL
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    username      TEXT    NOT NULL,
+    discriminator INTEGER NOT NULL,
+    password      TEXT    NOT NULL,
+    -- Уникальная комбинация логина и дискриминатора
+    UNIQUE (username, discriminator)
 );
 
 CREATE TABLE post

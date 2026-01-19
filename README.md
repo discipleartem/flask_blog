@@ -9,6 +9,30 @@
 * **Frontend:** Bootstrap 5 (Jinja2 templates)
 * **Инструменты:** Pytest (для тестирования)
 
+## Структура проекта
+
+    flask_blog/
+    ├── app/
+    │   ├── static/                 # Статические файлы (CSS, JS, изображения)
+    │   ├── templates/
+    │   │   ├── auth/
+    │   │   │   ├── login.html      # Страница входа
+    │   │   │   └── register.html   # Страница регистрации
+    │   │   ├── base.html           # Базовый шаблон
+    │   │   └── index.html          # Главная страница
+    │   ├── __init__.py             # Фабрика приложения
+    │   ├── auth.py                 # Blueprint аутентификации
+    │   ├── config.py               # Конфигурация приложения
+    │   ├── db.py                   # Работа с базой данных
+    │   └── schema.sql              # SQL-схема базы данных
+    ├── docs/
+    │   └── BlogPlatformDevelopmentPlan.md  # План разработки
+    ├── instance/                   # Файлы экземпляра (БД)
+    ├── .gitignore
+    ├── pyproject.toml
+    ├── README.md
+    └── requirements.txt
+
 ## Требования
 
 * Python 3.13 или выше
@@ -16,34 +40,44 @@
 ## Установка
 
 1. Клонируйте репозиторий:
-   ```bash
-   git clone <repository-url>
-   cd flask_blog
-   ```
+
+        git clone <repository-url>
+        cd flask_blog
 
 2. Создайте виртуальное окружение и активируйте его:
-   ```bash
-   python -m venv .venv
-   # Для Linux/macOS:
-   source .venv/bin/activate
-   # Для Windows:
-   .venv\Scripts\activate
-   ```
+
+        python -m venv .venv
+        
+        # Для Linux/macOS:
+        source .venv/bin/activate
+        
+        # Для Windows:
+        .venv\Scripts\activate
 
 3. Установите зависимости:
-   ```bash
-   pip install -r requirements.txt
-   ```
+
+        pip install -r requirements.txt
 
    Для разработки (включая pytest):
-   ```bash
-   pip install -e ".[dev]"
-   ```
+
+        pip install -e ".[dev]"
 
 ## Инициализация базы данных
 
 Перед первым запуском необходимо создать таблицы в базе данных:
 
-```bash
-flask --app app init-db
-```
+    flask --app app init-db
+
+## Запуск приложения
+
+    flask --app app run --debug
+
+Приложение будет доступно по адресу: http://127.0.0.1:5000
+
+## Особенности аутентификации
+
+Система регистрации использует подход Discord:
+
+* Логин **не уникален** — можно выбрать любой, даже если он занят
+* Каждому пользователю присваивается уникальный тег (дискриминатор), например: `Username#1234`
+* Для входа используется полный логин с тегом: `Username#1234`
