@@ -1,0 +1,17 @@
+[project]
+name = "flask_blog"
+version = "0.1.0"
+description = "Flask Blog Application"
+requires-python = ">=3.13"
+dependencies = [
+    "Flask==3.0.3",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
