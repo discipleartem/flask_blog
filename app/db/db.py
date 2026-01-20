@@ -31,11 +31,13 @@ def close_db(_=None):
 
 def init_db():
     """Инициализирует базу данных, выполняя SQL-скрипт schema.sql."""
+    import os
     db = get_db()
 
-    # current_app.open_resource открывает файл относительно пакета app
-    with current_app.open_resource('schema.sql') as f:
-        db.executescript(f.read().decode('utf8'))
+    # Путь к schema.sql относительно db.py
+    schema_path = os.path.join(os.path.dirname(__file__), 'schema.sql')
+    with open(schema_path, 'r', encoding='utf-8') as f:
+        db.executescript(f.read())
 
 
 @click.command('init-db')

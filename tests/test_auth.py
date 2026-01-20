@@ -1,7 +1,7 @@
 # tests/test_auth.py
 
 from app.auth import hash_password, verify_password, generate_discriminator
-from app.db import get_db
+from app.db.db import get_db
 
 
 class TestPasswordHashing:
