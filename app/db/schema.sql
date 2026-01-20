@@ -9,8 +9,8 @@ CREATE TABLE user
     id            INTEGER PRIMARY KEY AUTOINCREMENT, -- Уникальный идентификатор пользователя
     username      TEXT    NOT NULL,                  -- Логин пользователя
     discriminator INTEGER NOT NULL,                  -- Дискриминатор (4-значный тег, как в Discord)
-    password      TEXT    NOT NULL,                  -- Хэш пароля с солью
-    -- Уникальная комбинация логина и дискриминатора
+    password TEXT NOT NULL,
+    salt     BLOB NOT NULL,
     UNIQUE (username, discriminator)
 );
 

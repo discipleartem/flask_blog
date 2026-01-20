@@ -23,10 +23,10 @@ def app():
         # Создаем тестового пользователя
         db = get_db()
         from app.auth import hash_password
-        hashed_pw, _ = hash_password('test_pass')
+        hashed_pw, salt = hash_password('test_pass')
         db.execute(
-            'INSERT INTO user (username, discriminator, password) VALUES (?, ?, ?)',
-            ('test_user', 1234, hashed_pw),
+            'INSERT INTO user (username, discriminator, password, salt) VALUES (?, ?, ?, ?)',
+            ('test_user', 1234, hashed_pw, salt),
         )
         db.commit()
 

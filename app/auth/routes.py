@@ -74,7 +74,9 @@ def login():
         ).fetchone()
 
         if user is None or not verify_password(user['password'], password, user['salt']):
-            flash('Неверный логин или пароль.', 'danger')
+            error = 'Неверный логин или пароль.'
+
+            flash(error, 'danger')
             return render_template('auth/login.html')
 
         session.clear()
