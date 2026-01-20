@@ -4,37 +4,57 @@ from typing import Optional
 from flask import Flask
 
 
-def create_app(test_config: Optional[dict] = None) -> Flask:
-    """Фабрика приложения Flask."""
-    # Создаем экземпляр приложения
-    app = Flask(__name__, instance_relative_config=True)
-
+def _configure_app(app: Flask, test_config: Optional[dict]) -> None:
+    """Конфигурирует приложение Flask."""
     # Дефолтные настройки
     app.config.from_mapping(
-        SECRET_KEY=os.environ.get('SECRET_KEY', 'default_value_if_not_found_SECRET_KEY'),
+        SECRET_KEY=os.environ.get('SECRET_KEY', 'dev-secret-key'),
         DATABASE=os.path.join(app.instance_path, 'flask_blog.sqlite'),
     )
 
     if test_config is None:
-        # Загружаем настройки из config.py
-        app.config.from_pyfile('config.py', silent=True)
+        # Загружаем настройки из объекта Config
+        app.config.from_object('config.Config')
     else:
-        # Загружаем тестовый конфиг, если он передан
         app.config.from_mapping(test_config)
 
-    # Убеждаемся, что папка instance существует для БД
+
+def _ensure_instance_folder(app: Flask) -> None:
+    """Создаёт папку instance, если она не существует."""
     os.makedirs(app.instance_path, exist_ok=True)
 
-    # Инициализация базы данных
-    from . import db
-    db.init_app(app)
 
-    # Регистрация Blueprint аутентификации
-    from . import auth
-    app.register_blueprint(auth.bp)
+def _register_extensions(app: Flask) -> None:
+    """Инициализирует расширения приложения."""
+    from app.db import init_app
+    init_app(app)
 
-    # Регистрация Blueprint главных маршрутов
-    from . import main
-    app.register_blueprint(main.bp)
+
+def _register_blueprints(app: Flask) -> None:
+    """Регистрирует blueprints приложения."""
+    from app.auth import bp as auth_bp
+    from app.main import bp as main_bp
+
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(main_bp)
+
+
+def create_app(test_config: Optional[dict] = None) -> Flask:
+    """
+    Фабрика приложения Flask.
+    
+    Args:
+        test_config: Словарь с тестовой конфигурацией.
+                     Если None, загружается продакшн-конфиг.
+    
+    Returns:
+        Сконфигурированный экземпляр Flask приложения.
+    """
+    app = Flask(__name__, instance_relative_config=True)
+
+    _configure_app(app, test_config)
+    _ensure_instance_folder(app)
+    _register_extensions(app)
+    _register_blueprints(app)
 
     return app

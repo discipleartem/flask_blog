@@ -5,7 +5,7 @@ import tempfile
 import pytest
 
 from app import create_app
-from app.db import get_db, init_db
+from app.db.db import get_db, init_db
 
 
 @pytest.fixture
