@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}Главная{% endblock %}
+
+{% block content %}
+    <div class="text-center">
+        <h1>Добро пожаловать в Flask Blog!</h1>
+        <p class="lead">Многопользовательская блог-платформа</p>
+        {% if g.user %}
+            <p>Привет, <strong>{{ g.user['username'] }}#{{ '%04d'|format(g.user['discriminator']) }}</strong>!</p>
+        {% else %}
+            <p><a href="{{ url_for('auth.register') }}" class="btn btn-primary">Зарегистрироваться</a></p>
+        {% endif %}
+    </div>
+{% endblock %}
