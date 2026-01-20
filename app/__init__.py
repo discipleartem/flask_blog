@@ -32,10 +32,11 @@ def _register_extensions(app: Flask) -> None:
 
 def _register_blueprints(app: Flask) -> None:
     """Регистрирует blueprints приложения."""
-    from app.auth import bp as auth_bp
-    from app.main import bp as main_bp
-
+    # Регистрация Blueprints
+    from app.auth.routes import bp as auth_bp
     app.register_blueprint(auth_bp)
+
+    from app.main.routes import bp as main_bp
     app.register_blueprint(main_bp)
 
 

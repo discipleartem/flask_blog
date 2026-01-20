@@ -30,14 +30,10 @@ def close_db(_=None):
 
 
 def init_db():
-    """Инициализирует базу данных, выполняя SQL-скрипт schema.sql."""
-    import os
     db = get_db()
-
-    # Путь к schema.sql относительно db.py
-    schema_path = os.path.join(os.path.dirname(__file__), 'schema.sql')
-    with open(schema_path, 'r', encoding='utf-8') as f:
-        db.executescript(f.read())
+    # Путь должен быть обновлен на app/db/schema.sql
+    with current_app.open_resource('db/schema.sql') as f:
+        db.executescript(f.read().decode('utf8'))
 
 
 @click.command('init-db')

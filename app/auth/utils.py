@@ -17,13 +17,10 @@ def hash_password(password: str, salt: bytes = None) -> tuple[str, bytes]:
     return (salt + hashed).hex(), salt
 
 
-def verify_password(stored_password_hex: str, provided_password: str) -> bool:
-    """Проверяет пароль, сравнивая его с сохраненным хэшем."""
-    stored_bytes = bytes.fromhex(stored_password_hex)
-    salt = stored_bytes[:16]
-    stored_hash = stored_bytes[16:]
-    new_hash = hashlib.pbkdf2_hmac('sha256', provided_password.encode('utf-8'), salt, 100000)
-    return new_hash == stored_hash
+def verify_password(stored_password, provided_password, salt):
+    """Проверяет пароль, повторно хэшируя его с сохраненной солью."""
+    new_hash, _ = hash_password(provided_password, salt)
+    return new_hash == stored_password
 
 
 def generate_discriminator(db, username: str) -> Optional[int]:

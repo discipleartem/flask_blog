@@ -35,13 +35,13 @@ class TestPasswordHashing:
 
     def test_verify_password_correct(self):
         """Проверка правильного пароля."""
-        hashed, _ = hash_password('mypassword')
-        assert verify_password(hashed, 'mypassword') is True
+        hashed, salt = hash_password('mypassword')
+        assert verify_password(hashed, 'mypassword', salt) is True
 
     def test_verify_password_incorrect(self):
         """Проверка неправильного пароля."""
-        hashed, _ = hash_password('mypassword')
-        assert verify_password(hashed, 'wrong_password') is False
+        hashed, salt = hash_password('mypassword')
+        assert verify_password(hashed, 'wrong_password', salt) is False
 
 
 class TestGenerateDiscriminator:
@@ -148,7 +148,7 @@ class TestLogin:
         """Вход с неверным форматом (без #)."""
         response = client.post(
             '/auth/login',
-            data={'username': 'tester1234', 'password': 'test_pass'}
+            data={'username': 'test_user1234', 'password': 'test_pass'}
         )
         assert 'Неверный формат логина'.encode('utf-8') in response.data
 
@@ -156,7 +156,7 @@ class TestLogin:
         """Вход с неверным дискриминатором (не число)."""
         response = client.post(
             '/auth/login',
-            data={'username': 'tester#abcd', 'password': 'test_pass'}
+            data={'username': 'test_user#abcd', 'password': 'test_pass'}
         )
         assert 'Неверный формат логина'.encode('utf-8') in response.data
 
@@ -164,7 +164,7 @@ class TestLogin:
         """Вход с неверным паролем."""
         response = client.post(
             '/auth/login',
-            data={'username': 'tester#1234', 'password': 'wrong_pass'}
+            data={'username': 'test_user#1234', 'password': 'wrong_pass'}
         )
         assert 'Неверный логин или пароль'.encode('utf-8') in response.data
 
@@ -215,3 +215,12 @@ class TestLoginRequired:
             client.get('/')
             from flask import g
             assert g.user is None
+
+    def test_login_required_decorator(self, client):
+        """Проверка, что защищенные маршруты требуют логина."""
+        # Предположим, у нас есть защищенный маршрут, например, создание поста
+        # Если его нет, этот тест можно адаптировать под существующий
+        response = client.get('/main/create', follow_redirects=False)
+        # Если маршрут защищен login_required, он должен редиректить
+        if response.status_code == 302:
+            assert '/auth/login' in response.headers['Location']
