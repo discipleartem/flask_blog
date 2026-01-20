@@ -24,6 +24,7 @@
     │   ├── auth.py                 # Blueprint аутентификации
     │   ├── config.py               # Конфигурация приложения
     │   ├── db.py                   # Работа с базой данных
+    │   ├── main.py                 # Blueprint главных маршрутов
     │   └── schema.sql              # SQL-схема базы данных
     ├── docs/
     │   └── BlogPlatformDevelopmentPlan.md  # План разработки

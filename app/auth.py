@@ -1,7 +1,9 @@
 import functools
 import hashlib
 import os
-import random
+import secrets
+import sqlite3  # Добавить этот импорт
+from typing import Optional
 
 from flask import (
     Blueprint, flash, g, redirect, render_template, request, session, url_for
@@ -32,7 +34,7 @@ def verify_password(stored_password_hex: str, provided_password: str) -> bool:
     return new_hash == stored_hash
 
 
-def generate_discriminator(db, username: str) -> int:
+def generate_discriminator(db, username: str) -> Optional[int]:
     """Генерирует уникальный дискриминатор для данного username."""
     # Получаем все занятые дискриминаторы для этого username
     existing = db.execute(
@@ -47,7 +49,7 @@ def generate_discriminator(db, username: str) -> int:
     if not available:
         return None  # Все дискриминаторы заняты для этого username
 
-    return random.choice(available)
+    return secrets.choice(available)  # Вместо random.choice
 
 
 @bp.route('/register', methods=('GET', 'POST'))
@@ -78,7 +80,7 @@ def register():
                         (username, discriminator, hashed_password),
                     )
                     db.commit()
-                except db.IntegrityError:
+                except sqlite3.IntegrityError:  # Используйте sqlite3.IntegrityError
                     error = f'Произошла ошибка при регистрации. Попробуйте еще раз.'
                 else:
                     flash(f'Регистрация успешна! Ваш логин: {username}#{discriminator:04d}', 'success')
@@ -95,40 +97,34 @@ def login():
         username_with_tag = request.form['username']
         password = request.form['password']
         db = get_db()
-        error = None
 
         # Парсим username#discriminator
-        if '#' in username_with_tag:
-            parts = username_with_tag.rsplit('#', 1)
-            username = parts[0]
-            try:
-                discriminator = int(parts[1])
-            except ValueError:
-                error = 'Неверный формат логина. Используйте: Логин#1234'
-                discriminator = None
-        else:
-            error = 'Неверный формат логина. Используйте: Логин#1234'
-            username = None
-            discriminator = None
+        if '#' not in username_with_tag:
+            flash('Неверный формат логина. Используйте: Логин#1234', 'danger')
+            return render_template('auth/login.html')
 
-        if error is None:
-            user = db.execute(
-                'SELECT * FROM user WHERE username = ? AND discriminator = ?',
-                (username, discriminator),
-            ).fetchone()
+        parts = username_with_tag.rsplit('#', 1)
+        username = parts[0]
 
-            if user is None:
-                error = 'Неверный логин или пароль.'
-            elif not verify_password(user['password'], password):
-                error = 'Неверный логин или пароль.'
+        try:
+            discriminator = int(parts[1])
+        except ValueError:
+            flash('Неверный формат логина. Используйте: Логин#1234', 'danger')
+            return render_template('auth/login.html')
 
-        if error is None:
-            session.clear()
-            session['user_id'] = user['id']
-            flash('Вы успешно вошли!', 'success')
-            return redirect(url_for('index'))
+        user = db.execute(
+            'SELECT * FROM user WHERE username = ? AND discriminator = ?',
+            (username, discriminator),
+        ).fetchone()
 
-        flash(error, 'danger')
+        if user is None or not verify_password(user['password'], password):
+            flash('Неверный логин или пароль.', 'danger')
+            return render_template('auth/login.html')
+
+        session.clear()
+        session['user_id'] = user['id']
+        flash('Вы успешно вошли!', 'success')
+        return redirect(url_for('main.index'))  # Было: url_for('index')
 
     return render_template('auth/login.html')
 
@@ -150,18 +146,18 @@ def load_logged_in_user():
 def logout():
     session.clear()
     flash('Вы вышли из системы.', 'info')
-    return redirect(url_for('index'))
+    return redirect(url_for('main.index'))  # Было: url_for('index')
 
 
 def login_required(view):
     """Декоратор для защиты маршрутов, требующих авторизации."""
 
     @functools.wraps(view)
-    def wrapped_view(**kwargs):
+    def wrapped_view(*args, **kwargs):
         if g.user is None:
             flash('Для этого действия необходимо войти в систему.', 'warning')
             return redirect(url_for('auth.login'))
 
-        return view(**kwargs)
+        return view(*args, **kwargs)
 
     return wrapped_view

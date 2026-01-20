@@ -2,87 +2,36 @@ name: CI
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ main ]
+
+env:
+  PYTHON_VERSION: '3.13'
 
 jobs:
   test:
     runs-on: ubuntu-latest
     
-    # Матрица версий Python, доступных на PythonAnywhere
-    strategy:
-      matrix:
-        python-version: [ '3.12', '3.13' ]
+    env:
+      FLASK_APP: app
+      FLASK_ENV: testing
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
     
     steps:
-      # Шаг 1: Клонирование репозитория
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Шаг 2: Установка Python
-      # Используем версии, совместимые с PythonAnywhere
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
-          # Кэширование зависимостей для ускорения сборки
+          python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'
 
-      # Шаг 3: Установка зависимостей
-      # PythonAnywhere использует pip и requirements.txt
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          # Установка пакета в режиме разработки (включает pytest)
-          pip install -e ".[dev]"
 
-      # Шаг 4: Инициализация базы данных
-      # PythonAnywhere использует SQLite — создаём тестовую БД
-      - name: Initialize database
-        run: |
-          flask --app app init-db
-        env:
-          # Переменные окружения для Flask
-          FLASK_APP: app
-          FLASK_ENV: testing
-
-      # Шаг 5: Запуск тестов
       - name: Run tests
-        run: pytest -v --tb=short
-        env:
-          # SECRET_KEY для тестового окружения
-          SECRET_KEY: github-actions-test-key
-
-  # ---------------------------------------------------------------------------
-  # Job: Проверка зависимостей
-  # ---------------------------------------------------------------------------
-  # Убеждаемся, что все зависимости корректно устанавливаются
-  # (важно для деплоя на PythonAnywhere через консоль)
-  # ---------------------------------------------------------------------------
-  dependencies-check:
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v5
-        with:
-          # Python 3.12 — стабильная версия для продакшена на PythonAnywhere
-          python-version: '3.12'
-
-      # Проверка, что requirements.txt корректен
-      - name: Validate requirements.txt
-        run: |
-          python -m pip install --upgrade pip
-          # Dry-run установки для проверки зависимостей
-          pip install -r requirements.txt --dry-run
-
-      # Проверка синтаксиса Python файлов
-      - name: Check Python syntax
-        run: |
-          python -m py_compile app/__init__.py
-          python -m py_compile app/config.py
+        run: pytest

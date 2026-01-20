@@ -41,7 +41,7 @@ class TestPasswordHashing:
     def test_verify_password_incorrect(self):
         """Проверка неправильного пароля."""
         hashed, _ = hash_password('mypassword')
-        assert verify_password(hashed, 'wrongpassword') is False
+        assert verify_password(hashed, 'wrong_password') is False
 
 
 class TestGenerateDiscriminator:
@@ -51,7 +51,7 @@ class TestGenerateDiscriminator:
         """Генерация дискриминатора для нового username."""
         with app.app_context():
             db = get_db()
-            discriminator = generate_discriminator(db, 'newuser')
+            discriminator = generate_discriminator(db, 'new_user')
             assert discriminator is not None
             assert 1 <= discriminator <= 9999
 
@@ -59,10 +59,13 @@ class TestGenerateDiscriminator:
         """Генерация дискриминатора для существующего username."""
         with app.app_context():
             db = get_db()
-            # testuser#1234 уже существует
-            discriminator = generate_discriminator(db, 'testuser')
-            assert discriminator is not None
-            assert discriminator != 1234  # Не должен совпадать с существующим
+            # test_user#1234 уже существует (создан в conftest.py)
+            # Проверяем многократно, что никогда не вернётся занятый дискриминатор
+            for _ in range(100):
+                discriminator = generate_discriminator(db, 'test_user')
+                assert discriminator is not None
+                assert discriminator != 1234  # Не должен совпадать с существующим
+                assert 1 <= discriminator <= 9999
 
 
 class TestRegister:
@@ -78,7 +81,7 @@ class TestRegister:
         """Успешная регистрация нового пользователя."""
         response = client.post(
             '/auth/register',
-            data={'username': 'newuser', 'password': 'newpass'},
+            data={'username': 'new_user', 'password': 'new_pass'},
             follow_redirects=True
         )
         assert response.status_code == 200
@@ -88,7 +91,7 @@ class TestRegister:
         with app.app_context():
             db = get_db()
             user = db.execute(
-                'SELECT * FROM user WHERE username = ?', ('newuser',)
+                'SELECT * FROM user WHERE username = ?', ('new_user',)
             ).fetchone()
             assert user is not None
 
@@ -104,7 +107,7 @@ class TestRegister:
         """Регистрация с пустым паролем."""
         response = client.post(
             '/auth/register',
-            data={'username': 'someuser', 'password': ''}
+            data={'username': 'some_user', 'password': ''}
         )
         assert 'Требуется пароль'.encode('utf-8') in response.data
 
@@ -112,7 +115,7 @@ class TestRegister:
         """Регистрация со слишком коротким паролем."""
         response = client.post(
             '/auth/register',
-            data={'username': 'someuser', 'password': '123'}
+            data={'username': 'some_user', 'password': '123'}
         )
         assert 'не менее 4 символов'.encode('utf-8') in response.data
 
@@ -145,7 +148,7 @@ class TestLogin:
         """Вход с неверным форматом (без #)."""
         response = client.post(
             '/auth/login',
-            data={'username': 'testuser1234', 'password': 'testpass'}
+            data={'username': 'tester1234', 'password': 'test_pass'}
         )
         assert 'Неверный формат логина'.encode('utf-8') in response.data
 
@@ -153,7 +156,7 @@ class TestLogin:
         """Вход с неверным дискриминатором (не число)."""
         response = client.post(
             '/auth/login',
-            data={'username': 'testuser#abcd', 'password': 'testpass'}
+            data={'username': 'tester#abcd', 'password': 'test_pass'}
         )
         assert 'Неверный формат логина'.encode('utf-8') in response.data
 
@@ -161,7 +164,7 @@ class TestLogin:
         """Вход с неверным паролем."""
         response = client.post(
             '/auth/login',
-            data={'username': 'testuser#1234', 'password': 'wrongpass'}
+            data={'username': 'tester#1234', 'password': 'wrong_pass'}
         )
         assert 'Неверный логин или пароль'.encode('utf-8') in response.data
 
@@ -169,7 +172,7 @@ class TestLogin:
         """Вход с несуществующим пользователем."""
         response = client.post(
             '/auth/login',
-            data={'username': 'nouser#0000', 'password': 'anypass'}
+            data={'username': 'no_user#0000', 'password': 'any_pass'}
         )
         assert 'Неверный логин или пароль'.encode('utf-8') in response.data
 
@@ -204,10 +207,10 @@ class TestLoginRequired:
             client.get('/')
             from flask import g
             assert g.user is not None
-            assert g.user['username'] == 'testuser'
+            assert g.user['username'] == 'test_user'
 
     def test_load_logged_in_user_anonymous(self, client, app):
-        """Для незалогиненного пользователя g.user = None."""
+        """Для не залогиненного пользователя g.user = None."""
         with client:
             client.get('/')
             from flask import g

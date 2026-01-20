@@ -23,10 +23,10 @@ def app():
         # Создаем тестового пользователя
         db = get_db()
         from app.auth import hash_password
-        hashed_pw, _ = hash_password('testpass')
+        hashed_pw, _ = hash_password('test_pass')
         db.execute(
             'INSERT INTO user (username, discriminator, password) VALUES (?, ?, ?)',
-            ('testuser', 1234, hashed_pw),
+            ('test_user', 1234, hashed_pw),
         )
         db.commit()
 
@@ -54,7 +54,7 @@ class AuthActions:
     def __init__(self, client):
         self._client = client
 
-    def login(self, username='testuser#1234', password='testpass', follow_redirects=False):
+    def login(self, username='test_user#1234', password='test_pass', follow_redirects=False):
         return self._client.post(
             '/auth/login',
             data={'username': username, 'password': password},
