@@ -40,10 +40,12 @@ def hash_password(password: str, salt: bytes = None) -> tuple[str, bytes]:
     return (salt + hashed).hex(), salt
 
 
+
 def verify_password(stored_password: str, provided_password: str, salt: bytes) -> bool:
     """Проверяет пароль, повторно хэшируя его с сохраненной солью."""
     new_hash_hex, _ = hash_password(provided_password, salt)
     return new_hash_hex == stored_password
+
 
 
 def generate_discriminator(db_conn, username: str) -> Optional[int]:
