@@ -30,7 +30,8 @@ def generate_discriminator(db, username: str) -> Optional[int]:
     ).fetchall()
 
     taken = {row['discriminator'] for row in existing}
-    available = [d for d in range(1, 10000) if d not in taken]
+    available = [d for d in range(1, 10000) if
+                 d not in taken]  # list comprehension генерирует список чисел от 1 до 9999, исключая те, которые уже заняты
 
     if not available:
         return None
