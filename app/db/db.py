@@ -37,8 +37,8 @@ def close_db(_=None):
 
 def init_db():
     db = get_db()
-
-    with current_app.open_resource('app/db/schema.sql') as f:
+    # current_app уже содержит ссылку на папку app/
+    with current_app.open_resource('db/schema.sql') as f:
         db.executescript(f.read().decode('utf8'))
 
 
