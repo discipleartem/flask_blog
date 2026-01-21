@@ -3,6 +3,7 @@ import os
 
 class Config:
     # Секретный ключ для сессий и защиты форм
+    # SECRET_KEY переменная из .env файла
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'you-will-never-guess'
 
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))

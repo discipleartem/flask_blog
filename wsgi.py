@@ -1,10 +1,11 @@
 # wsgi.py — точка входа для PythonAnywhere
 # Путь в настройках PA: /home/<username>/flask_blog/wsgi.py
-
+import os
 import sys
 
 # Укажите ваше реальное имя пользователя PythonAnywhere
-PYTHONANYWHERE_USERNAME = "discipleartem"  # ← Замените на реальное!
+# PYTHONANYWARE_USERNAME переменная из .env файла
+PYTHONANYWHERE_USERNAME = os.environ.get('PYTHONANYWARE_USERNAME')  # ← Замените на реальное!
 
 project_home = f"/home/{PYTHONANYWHERE_USERNAME}/flask_blog"
 if project_home not in sys.path:
