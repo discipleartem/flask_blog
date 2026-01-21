@@ -149,6 +149,25 @@
 - CRUD для постов (Blueprint blog)
 - Система комментариев
 
+## Contributors
+
+Мы приветствуем вклад в развитие проекта! Чтобы предложить изменения:
+
+1. **Fork** репозитория.
+2. **Создайте ветку** для своей фичи (`git checkout -b feature/AmazingFeature`).
+3. **Закоммитьте** изменения (`git commit -m 'Add some AmazingFeature'`).
+4. **Push** в ветку (`git push origin feature/AmazingFeature`).
+5. Откройте **Pull Request**.
+
+Пожалуйста, убедитесь, что ваши тесты проходят (`pytest`) и вы следуете стилю кода проекта.
+
+## Контакты
+
+Если у вас есть вопросы или предложения, вы можете связаться с нами:
+
+- [Telegram сообщество](https://t.me/python_nov)
+- [Discord](https://discord.com/users/disciple_artem)
+
 ## Лицензия
 
 MIT
