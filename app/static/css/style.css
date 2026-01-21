@@ -1,0 +1,77 @@
+/* Стили для переключателя темы */
+.theme-switch-wrapper {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+}
+
+#themeSwitch {
+    cursor: pointer;
+    width: 3em;
+    height: 1.5em;
+}
+
+.form-check-label {
+    cursor: pointer;
+    user-select: none;
+    margin-left: 0.5rem;
+}
+
+/* Цвет иконки в зависимости от темы (опционально) */
+[data-bs-theme="dark"] #theme-icon {
+    color: #ffca28; /* Желтый для солнышка */
+}
+
+[data-bs-theme="light"] #theme-icon {
+    color: #5c6bc0; /* Синий для луны */
+}
+
+/* Настройки для светлой темы (по умолчанию) */
+:root {
+    --header-bg: #212529; /* Стандартный bg-dark от Bootstrap */
+    --footer-bg: #f8f9fa;
+}
+
+/* Настройки для темной темы */
+[data-bs-theme="dark"] {
+    --header-bg: #2b3035; /* Чуть светлее, чем основной фон body (#212529) */
+    --footer-bg: #2b3035;
+    --body-bg: #212529;
+}
+
+/* Применяем переменные к навигации */
+.navbar {
+    background-color: var(--header-bg) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-left: 1rem; /* Добавляет небольшой аккуратный отступ слева */
+    padding-right: 1rem; /* И справа */
+}
+
+/* Если у вас будет футер, добавим стили и для него */
+footer {
+    background-color: var(--footer-bg);
+    padding: 2rem 0;
+    margin-top: 3rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ... существующий код ... */
+
+/* Прижимаем футер к низу */
+html, body {
+    height: 100%;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1 0 auto; /* Занимает всё доступное пространство */
+}
+
+footer {
+    flex-shrink: 0; /* Не позволяет футеру сжиматься */
+    background-color: var(--footer-bg);
+}
