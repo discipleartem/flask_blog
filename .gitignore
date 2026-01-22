@@ -43,3 +43,6 @@ htmlcov/
 
 # mypy
 .mypy_cache/
+
+# Windsurf IDE
+.windsurf/

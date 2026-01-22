@@ -6,11 +6,11 @@ DROP TABLE IF EXISTS user;
 -- Таблица пользователей
 CREATE TABLE user
 (
-    id            INTEGER PRIMARY KEY AUTOINCREMENT, -- Уникальный идентификатор пользователя
-    username      TEXT    NOT NULL,                  -- Логин пользователя
-    discriminator INTEGER NOT NULL,                  -- Дискриминатор (4-значный тег, как в Discord)
-    password TEXT NOT NULL,
-    salt     BLOB NOT NULL,
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    username      TEXT    NOT NULL,
+    password      TEXT    NOT NULL,
+    discriminator INTEGER NOT NULL,
+    salt          BLOB    NOT NULL,
     UNIQUE (username, discriminator)
 );
 

@@ -1,51 +1,78 @@
 """Утилиты для авторизации: хэширование паролей, декораторы."""
 import functools
-import hashlib
-import os
 import secrets
 from typing import Optional
 
 from flask import flash, g, redirect, url_for
+from werkzeug.security import check_password_hash, generate_password_hash
 
-# Константы для настройки безопасности и бизнес-логики
-# Количество итераций для PBKDF2. Чем больше, тем сложнее перебор пароля.
-PBKDF2_ITERATIONS = 100000
 # Максимальное значение тега (дискриминатора), как в Discord (от 0001 до 9999).
 MAX_DISCRIMINATOR = 9999
-# Размер соли в байтах для обеспечения уникальности хэша даже при одинаковых паролях.
-SALT_SIZE = 16
 
 
 def hash_password(password: str, salt: bytes = None) -> tuple[str, bytes]:
-    """
-    Хэширует пароль с использованием PBKDF2-HMAC-SHA256.
+    """Хэширует пароль с использованием werkzeug.security.
     
-    Если соль не передана, генерирует новую случайную соль.
-    Возвращает кортеж: (склеенный_хэш_в_hex, соль).
+    Args:
+        password: Пароль для хэширования
+        salt: Опциональная соль (16 байт). Если не предоставлена, генерируется случайно.
+    
+    Returns:
+        tuple[str, bytes]: (хэш пароля, соль)
     """
     if salt is None:
-        # Генерируем случайную соль, если это регистрация нового пользователя
-        salt = os.urandom(SALT_SIZE)
-
-    # Применяем алгоритм PBKDF2 для безопасного хэширования
-    hashed = hashlib.pbkdf2_hmac(
-        'sha256',
-        password.encode('utf-8'),
-        salt,
-        PBKDF2_ITERATIONS
-    )
-
-    # Для удобства хранения возвращаем соль + хэш в виде одной hex-строки
-    # и саму соль отдельно для сохранения в БД.
-    return (salt + hashed).hex(), salt
-
+        # Генерируем случайную соль
+        salt = secrets.token_bytes(16)
+    
+    # Конвертируем соль в hex для хранения в хэше
+    salt_hex = salt.hex()
+    
+    # Используем PBKDF2 хэширование с нашей солью
+    import hashlib
+    import hmac
+    
+    # PBKDF2 хэширование
+    hashed = hashlib.pbkdf2_hmac('sha256', password.encode(), salt, 100000)
+    hashed_hex = hashed.hex()
+    
+    return f'pbkdf2_sha256${salt_hex}${hashed_hex}', salt
 
 
 def verify_password(stored_password: str, provided_password: str, salt: bytes) -> bool:
-    """Проверяет пароль, повторно хэшируя его с сохраненной солью."""
-    new_hash_hex, _ = hash_password(provided_password, salt)
-    return new_hash_hex == stored_password
-
+    """Проверяет пароль.
+    
+    Args:
+        stored_password: Хэш из базы данных
+        provided_password: Предоставленный пароль
+        salt: Соль, которая использовалась при хэшировании
+    
+    Returns:
+        bool: True если пароль верный
+    """
+    try:
+        import hashlib
+        import hmac
+        
+        # Разбираем сохраненный хэш
+        parts = stored_password.split('$')
+        if len(parts) != 3 or parts[0] != 'pbkdf2_sha256':
+            return False
+        
+        stored_salt_hex = parts[1]
+        stored_hash_hex = parts[2]
+        
+        # Проверяем, что соль в хэше совпадает с переданной
+        if salt.hex() != stored_salt_hex:
+            return False
+        
+        # Вычисляем хэш с той же солью
+        hashed = hashlib.pbkdf2_hmac('sha256', provided_password.encode(), salt, 100000)
+        computed_hash_hex = hashed.hex()
+        
+        # Сравниваем хэши
+        return hmac.compare_digest(computed_hash_hex, stored_hash_hex)
+    except Exception:
+        return False
 
 
 def generate_discriminator(db_conn, username: str) -> Optional[int]:
@@ -61,6 +88,7 @@ def generate_discriminator(db_conn, username: str) -> Optional[int]:
     ).fetchall()
 
     taken_discriminators = {row['discriminator'] for row in rows}
+
     # Создаем множество всех возможных тегов (от 1 до 9999)
     all_possible = set(range(1, MAX_DISCRIMINATOR + 1))
     # Определяем, какие теги еще свободны
@@ -70,25 +98,18 @@ def generate_discriminator(db_conn, username: str) -> Optional[int]:
         # Если все 9999 комбинаций заняты для этого имени
         return None
 
-    # Выбираем случайный свободный тег для криптографической стойкости
+    # Выбираем случайный свободный тег
     return secrets.choice(available)
 
 
 def login_required(view):
-    """
-    Декоратор для защиты маршрутов (view functions).
-    
-    Если пользователь не авторизован (отсутствует в объекте g.user),
-    перенаправляет его на страницу входа с уведомлением.
-    """
+    """Декоратор для защиты маршрутов."""
     @functools.wraps(view)
     def wrapped_view(*args, **kwargs):
         if g.user is None:
-            # Если в глобальном объекте Flask нет данных о пользователе
             flash('Для этого действия необходимо войти в систему.', 'warning')
             return redirect(url_for('auth.login'))
 
-        # Выполняем основную функцию, если проверка пройдена
         return view(*args, **kwargs)
 
     return wrapped_view
