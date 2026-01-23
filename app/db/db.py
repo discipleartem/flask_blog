@@ -7,9 +7,18 @@
 """
 
 import sqlite3  # работа с SQLite
+import warnings  # подавление предупреждений
 
 import click
 from flask import g, current_app
+
+# Подавляем предупреждение об устаревшем конвертере временных меток Python 3.12+
+warnings.filterwarnings(
+    'ignore',
+    category=DeprecationWarning,
+    module='sqlite3',
+    message='.*default timestamp converter.*'
+)
 
 
 def get_db():

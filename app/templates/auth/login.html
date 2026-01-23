@@ -12,12 +12,13 @@
                         <div class="mb-3">
                             <label for="username" class="form-label">Логин</label>
                             <input type="text" class="form-control" id="username" name="username"
-                                   placeholder="Логин#1234" required>
-                            <div class="form-text">Введите логин с тегом, например: MyUser#0042</div>
+                                   placeholder="Логин#1234" required autocomplete="username"
+                                   value="{{ prefilled_username }}">
+                            <div class="form-text">Введите логин с тегом, например: MyUser#0042. Для admin достаточно ввести только "admin"</div>
                         </div>
                         <div class="mb-3">
                             <label for="password" class="form-label">Пароль</label>
-                            <input type="password" class="form-control" id="password" name="password" required>
+                            <input type="password" class="form-control" id="password" name="password" required autocomplete="current-password">
                         </div>
                         <div class="d-grid">
                             <button type="submit" class="btn btn-primary">Войти</button>

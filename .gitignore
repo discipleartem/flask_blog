@@ -21,6 +21,7 @@ dist/
 .vscode/
 *.swp
 *.swo
+.snapshots/
 
 # Environment variables
 .env
