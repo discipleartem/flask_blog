@@ -5,7 +5,7 @@
 # Переменные
 PYTHON = python3
 PIP = pip3
-PYTEST = pytest
+PYTEST = .venv/bin/pytest
 FLASK = flask
 APP_MODULE = wsgi:app
 
@@ -50,7 +50,7 @@ test: ## Запустить все тесты
 
 test-clean: ## Запустить тесты с чистым выводом (только passed/failed)
 	@echo "$(BLUE)Запуск тестов (чистый вывод)...$(NC)"
-	@.venv/bin/pytest -c pytest-clean.ini --tb=no -q 2>/dev/null | tail -1 | grep -q "passed" && echo "$(GREEN)✅ Все тесты пройдены!$(NC)" || echo "$(RED)❌ Есть проблемы с тестами$(NC)"
+	@$(PYTEST) --tb=no -q --disable-warnings --no-cov 2>/dev/null | tail -1 | grep -q "passed" && echo "$(GREEN)✅ Все тесты пройдены!$(NC)" || echo "$(RED)❌ Есть проблемы с тестами$(NC)"
 
 test-cov: ## Запустить тесты с покрытием кода
 	@echo "$(BLUE)Запуск тестов с покрытием кода...$(NC)"
