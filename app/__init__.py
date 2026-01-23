@@ -44,6 +44,15 @@ def create_app(test_config=None):
     # Гарантируем существование папки instance/ (там будет БД и локальный конфиг).
     os.makedirs(app.instance_path, exist_ok=True)
 
+    # Добавляем кастомные фильтры для шаблонов
+    @app.template_filter('nl2br')
+    def nl2br_filter(text):
+        """Преобразует переносы строк в HTML теги <br>."""
+        if text is None:
+            return ''
+        import markupsafe
+        return markupsafe.Markup(text.replace('\n', '<br>\n'))
+
     # Импорты внутри функции предотвращают циклические ссылки при импорте пакетов.
     from app import db
     db.init_app(app)

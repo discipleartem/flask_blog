@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ post.title }}{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-lg-8">
+            <article class="card shadow-sm">
+                <div class="card-body">
+                    <header class="mb-4">
+                        <h1 class="card-title">{{ post.title }}</h1>
+                        <div class="text-muted">
+                            <small>
+                                Автор: <strong>{{ post.author_display_name }}</strong> | 
+                                Дата: {{ post.created.strftime('%d.%m.%Y %H:%M') if post.created else 'Неизвестно' }}
+                            </small>
+                        </div>
+                    </header>
+                    
+                    <div class="post-content">
+                        <p class="card-text">{{ post.content|nl2br }}</p>
+                    </div>
+                    
+                    {% if g.user and post.author_id == g.user['id'] %}
+                        <footer class="mt-4 pt-3 border-top">
+                            <div class="d-flex gap-2">
+                                <a href="{{ url_for('main.edit_post', post_id=post.id) }}" class="btn btn-outline-primary btn-sm">Редактировать</a>
+                                
+                                <form method="post" action="{{ url_for('main.delete_post', post_id=post.id) }}" 
+                                      onsubmit="return confirm('Вы уверены, что хотите удалить этот пост?')" class="d-inline">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">Удалить</button>
+                                </form>
+                            </div>
+                        </footer>
+                    {% endif %}
+                </div>
+            </article>
+            
+            <div class="mt-3">
+                <a href="{{ url_for('main.index') }}" class="btn btn-secondary">← Назад к списку постов</a>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Действия</h5>
+                    {% if g.user %}
+                        {% if post.author_id == g.user['id'] %}
+                            <a href="{{ url_for('main.edit_post', post_id=post.id) }}" class="btn btn-outline-primary btn-block mb-2 w-100">Редактировать</a>
+                            <form method="post" action="{{ url_for('main.delete_post', post_id=post.id) }}" 
+                                  onsubmit="return confirm('Вы уверены, что хотите удалить этот пост?')">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-outline-danger btn-block mb-2 w-100">Удалить</button>
+                            </form>
+                        {% endif %}
+                        <a href="{{ url_for('main.create_post') }}" class="btn btn-primary btn-block mb-2 w-100">Создать пост</a>
+                    {% else %}
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary btn-block mb-2 w-100">Войти</a>
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-block mb-2 w-100">Регистрация</a>
+                    {% endif %}
+                    <hr>
+                    <p class="mb-0">
+                        <small class="text-muted">
+                            Автор: <strong>{{ post.author_display_name }}</strong><br>
+                            Дата: {{ post.created.strftime('%d.%m.%Y %H:%M') if post.created else 'Неизвестно' }}
+                        </small>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

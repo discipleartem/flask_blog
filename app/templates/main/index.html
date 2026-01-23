@@ -3,15 +3,55 @@
 {% block title %}Главная{% endblock %}
 
 {% block content %}
-    <div class="text-center">
-        <h1>Добро пожаловать в Flask Blog!</h1>
-        <p class="lead">Многопользовательская блог-платформа</p>
-
-        {% if g.user %}
-            <p>Привет, <strong>{{ g.user['username'] }}#{{ '%04d'|format(g.user['discriminator']|default(0)) }}</strong>!
-            </p>
-        {% else %}
-            <p><a href="{{ url_for('auth.register') }}" class="btn btn-primary">Зарегистрироваться</a></p>
-        {% endif %}
+    <div class="row">
+        <div class="col-lg-8">
+            <h1>Все посты блога</h1>
+            
+            {% if posts %}
+                {% for post in posts %}
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <a href="{{ url_for('main.view_post', post_id=post.id) }}" class="text-decoration-none">
+                                    {{ post.title }}
+                                </a>
+                            </h5>
+                            <p class="card-text text-muted">
+                                Автор: {{ post.author_display_name }} | 
+                                Дата: {{ post.created.strftime('%d.%m.%Y %H:%M') if post.created else 'Неизвестно' }}
+                            </p>
+                            <p class="card-text">{{ post.content[:200] }}{% if post.content|length > 200 %}...{% endif %}</p>
+                            <a href="{{ url_for('main.view_post', post_id=post.id) }}" class="btn btn-primary btn-sm">Читать далее</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center py-5">
+                    <h3>Постов пока нет</h3>
+                    <p class="text-muted">Будьте первым, кто создаст пост!</p>
+                    {% if g.user %}
+                        <a href="{{ url_for('main.create_post') }}" class="btn btn-primary">Создать пост</a>
+                    {% else %}
+                        <p><a href="{{ url_for('auth.login') }}" class="btn btn-primary">Войдите</a> или <a href="{{ url_for('auth.register') }}" class="btn btn-outline-primary">зарегистрируйтесь</a>, чтобы создать пост.</p>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Меню</h5>
+                    {% if g.user %}
+                        <a href="{{ url_for('main.create_post') }}" class="btn btn-primary btn-block mb-2 w-100">Создать пост</a>
+                        <hr>
+                        <p class="mb-0">Привет, <strong>{{ g.user['username'] }}#{{ '%04d'|format(g.user['discriminator']|default(0)) }}</strong>!</p>
+                    {% else %}
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary btn-block mb-2 w-100">Войти</a>
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-block mb-2 w-100">Регистрация</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
     </div>
 {% endblock %}

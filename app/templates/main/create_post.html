@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Создать пост{% endblock %}
+
+{% block content %}
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h2 class="card-title mb-4">Создать новый пост</h2>
+                    
+                    <form method="post">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Заголовок</label>
+                            <input type="text" class="form-control" id="title" name="title" 
+                                   value="{{ form.title.data or '' }}" required>
+                            {% if form.title.errors %}
+                                <div class="text-danger mt-1">
+                                    {% for error in form.title.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="content" class="form-label">Содержание</label>
+                            <textarea class="form-control" id="content" name="content" rows="10" required>{{ form.content.data or '' }}</textarea>
+                            {% if form.content.errors %}
+                                <div class="text-danger mt-1">
+                                    {% for error in form.content.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('main.index') }}" class="btn btn-secondary">Отмена</a>
+                            <button type="submit" class="btn btn-primary">Создать пост</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
