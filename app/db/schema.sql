@@ -21,7 +21,7 @@ CREATE TABLE post
     author_id INTEGER   NOT NULL,                                  -- ID автора (внешний ключ на user)
     created   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,        -- Дата и время создания
     title     TEXT      NOT NULL,                                  -- Заголовок поста
-    body      TEXT      NOT NULL,                                  -- Содержимое поста
+    content   TEXT      NOT NULL,                                  -- Содержимое поста
     FOREIGN KEY (author_id) REFERENCES user (id) ON DELETE CASCADE -- Удаление постов при удалении пользователя
 );
 
@@ -32,7 +32,7 @@ CREATE TABLE comment
     author_id INTEGER   NOT NULL,                                   -- ID автора комментария
     post_id   INTEGER   NOT NULL,                                   -- ID поста, к которому оставлен комментарий
     created   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,         -- Дата и время создания
-    body      TEXT      NOT NULL,                                   -- Текст комментария
+    content   TEXT      NOT NULL,                                   -- Текст комментария
     FOREIGN KEY (author_id) REFERENCES user (id) ON DELETE CASCADE, -- Удаление комментариев при удалении пользователя
     FOREIGN KEY (post_id) REFERENCES post (id) ON DELETE CASCADE    -- Удаление комментариев при удалении поста
 );

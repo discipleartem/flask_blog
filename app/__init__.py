@@ -1,4 +1,5 @@
 import os
+from dotenv import load_dotenv
 
 from flask import Flask
 
@@ -17,6 +18,9 @@ def create_app(test_config=None):
     Returns:
         Flask: готовое к запуску приложение.
     """
+    # Загружаем переменные из .env файла
+    load_dotenv()
+    
     # instance_relative_config=True означает, что конфиг и файлы instance
     # лежат вне пакета app/ (удобно для секретов и локальных настроек).
     app = Flask(__name__, instance_relative_config=True)
@@ -29,9 +33,10 @@ def create_app(test_config=None):
     )
 
     # Загружаем конфигурацию:
-    # - обычный режим: из instance/config.py (если файл существует)
+    # - обычный режим: из config.py и instance/config.py (если файл существует)
     # - тестовый режим: из test_config
     if test_config is None:
+        app.config.from_object('config.Config')
         app.config.from_pyfile('config.py', silent=True)
     else:
         app.config.from_mapping(test_config)
