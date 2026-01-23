@@ -53,6 +53,13 @@ def create_app(test_config=None):
         import markupsafe
         return markupsafe.Markup(text.replace('\n', '<br>\n'))
 
+    # Добавляем CSRF токен в контекст всех шаблонов
+    @app.context_processor
+    def inject_csrf_token():
+        """Добавляет CSRF токен в контекст всех шаблонов."""
+        from app.forms.csrf import generate_csrf_token
+        return {'csrf_token': generate_csrf_token}
+
     # Импорты внутри функции предотвращают циклические ссылки при импорте пакетов.
     from app import db
     db.init_app(app)
@@ -62,7 +69,7 @@ def create_app(test_config=None):
     app.register_blueprint(auth_bp)
 
     # Главные страницы: /
-    from app.main import bp as main_bp
+    from app.main.routes import bp as main_bp
     app.register_blueprint(main_bp)
 
     return app

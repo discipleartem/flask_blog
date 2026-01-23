@@ -14,6 +14,7 @@ from flask import flash, g, redirect, render_template, request, session, url_for
 from app.auth import bp
 from app.auth.utils import generate_discriminator, hash_password, verify_password
 from app.db import get_db
+from app.forms import RegistrationForm, LoginForm
 
 
 @bp.route('/register', methods=('GET', 'POST'))
@@ -27,25 +28,18 @@ def register():
 
     При успехе создаём запись в таблице user и предлагаем войти.
     """
-    if request.method == 'POST':
-        # .strip() убирает случайные пробелы вокруг имени
-        username = request.form['username'].strip()
-        password = request.form['password']
+    form = RegistrationForm(request.form)
+    
+    if request.method == 'POST' and form.validate():
+        username = form.username.data.strip()
+        password = form.password.data
         db = get_db()
         error = None
 
-        # Базовые проверки ввода
-        if not username:
-            error = 'Требуется логин'
-        elif not password:
-            error = 'Требуется пароль'
-        elif len(password) < 4:
-            error = 'Пароль должен содержать не менее 4 символов'
-        elif '#' in username:
-            # Символ '#' зарезервирован под разделитель тега (discriminator)
+        # Дополнительные проверки, которые не покрыты валидаторами формы
+        if '#' in username:
             error = 'Имя пользователя не должно содержать символ #.'
         elif username.lower() == 'admin':
-            # Имя admin зарезервировано для специального пользователя
             error = 'Имя admin зарезервировано системой'
 
         if error is None:
@@ -74,8 +68,14 @@ def register():
 
         if error:
             flash(error, 'danger')
+    
+    # Если форма не валидна, показываем ошибки формы
+    elif request.method == 'POST':
+        for field_name, field_errors in form.errors.items():
+            for error in field_errors:
+                flash(error, 'danger')
 
-    return render_template('auth/register.html')
+    return render_template('auth/register.html', form=form)
 
 
 @bp.route('/login', methods=('GET', 'POST'))
@@ -90,7 +90,10 @@ def login():
     # Получаем username из параметров URL для автозаполнения после регистрации
     prefilled_username = request.args.get('username', '')
     
-    if request.method == 'POST':
+    # Создаем форму для всех запросов
+    form = LoginForm(request.form)
+    
+    if request.method == 'POST' and form.validate():
         raw_username = request.form['username'].strip()
         password = request.form['password']
         db = get_db()
@@ -159,8 +162,14 @@ def login():
             return redirect(url_for('main.index'))
 
         flash(error, 'danger')
+    
+    # Если форма не валидна, показываем ошибки формы
+    elif request.method == 'POST':
+        for field_name, field_errors in form.errors.items():
+            for error in field_errors:
+                flash(error, 'danger')
 
-    return render_template('auth/login.html', prefilled_username=prefilled_username)
+    return render_template('auth/login.html', form=form, prefilled_username=prefilled_username)
 
 
 @bp.before_app_request

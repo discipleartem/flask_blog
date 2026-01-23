@@ -23,11 +23,12 @@
     │   │   └── schema.sql          # SQL-схема таблиц
     │   ├── forms/                  # Валидация форм (без WTForms)
     │   │   ├── __init__.py         # Экспорт классов
-    │   │   ├── base.py             # Базовые классы Form, Field
+    │   │   ├── auth.py             # RegistrationForm, LoginForm (с CSRF)
+    │   │   ├── base.py             # Базовые классы Form, Field (с CSRF)
     │   │   ├── fields.py           # StringField, PasswordField, TextAreaField
-    │   │   ├── validators.py       # Required, Length, Regexp, EqualTo
-    │   │   ├── csrf.py             # CSRF-защита
-    │   │   └── post.py             # PostForm
+    │   │   ├── validators.py       # Required, Length, EqualTo (Regexp TODO)
+    │   │   ├── csrf.py             # CSRF-защита (HMAC-SHA256)
+    │   │   └── post.py             # PostForm (с CSRF)
     │   ├── main/                   # Blueprint главной страницы и постов
     │   │   ├── __init__.py
     │   │   └── routes.py           # Маршруты постов (CRUD)
@@ -54,9 +55,10 @@
     ├── instance/                   # SQLite база данных
     ├── tests/
     │   ├── conftest.py             # Pytest фикстуры
-    │   ├── test_auth.py            # Тесты аутентификации
-    │   ├── test_forms.py           # Тесты валидации форм
-    │   └── test_posts.py           # Тесты функционала постов
+    │   ├── test_auth.py            # Тесты аутентификации (с CSRF)
+    │   ├── test_csrf.py            # Комплексные CSRF тесты
+    │   ├── test_forms.py           # Тесты валидации форм (с CSRF)
+    │   └── test_posts.py           # Тесты функционала постов (с CSRF)
     ├── .env                        # Переменные окружения (не в git)
     ├── .gitignore
     ├── config.py                   # Конфигурация приложения
@@ -125,7 +127,7 @@
 - `make test-unit` - unit тесты
 - `make test-integration` - интеграционные тесты
 - `make test-database` - тесты базы данных
-- `make test-security` - тесты безопасности
+- `make test-security` - тесты безопасности (включая CSRF)
 - `make test-all` - все типы тестов
 
 ## Makefile
@@ -291,7 +293,8 @@ DeprecationWarning: The default timestamp converter is deprecated as of Python 3
 **Текущий статус:** Заглушки с TODO для будущего развития
 
 - **Базовые классы** — `Form` и `Field` для декларативного описания форм
-- **Валидаторы-заглушки** — `Required`, `Length`, `Regexp`, `EqualTo` (временно всегда возвращают True)
+- **Валидаторы-заглушки** — `Required`, `Length`, `EqualTo` (временно всегда возвращают True)
+- **TODO: Regexp** — регулярные выражения будут реализованы в будущем
 - **Типы полей** — `StringField`, `PasswordField`, `TextAreaField`
 - **CSRF-защита** — токены на основе `session` и `SECRET_KEY`
 
@@ -301,6 +304,58 @@ DeprecationWarning: The default timestamp converter is deprecated as of Python 3
 - Реализация `Regexp` - самописная регулярная валидация
 - Реализация `EqualTo` - проверка совпадения полей
 - Дополнительные валидаторы: `Email`, `Username`, `PasswordStrength`, `UniqueUsername`
+
+## CSRF Защита
+
+Проект использует собственную CSRF защиту с HMAC-SHA256 подписью:
+
+### Архитектура
+
+- **Ядро (`app/forms/csrf.py`)**: Генерация и валидация токенов
+- **Интеграция**: Автоматическая CSRF валидация в базовом классе `Form`
+- **Шаблоны**: CSRF токен доступен через `{{ csrf_token() }}`
+
+### Безопасность
+
+✅ **Криптографическая защита:**
+- HMAC-SHA256 подпись (невозможно подделать без SECRET_KEY)
+- Привязка к сессии пользователя
+- Защита от тайминговых атак
+- Автоматическое отключение в TESTING режиме
+
+### Использование
+
+**В формах (автоматически):**
+```python
+from app.forms import Form, StringField
+
+class MyForm(Form):
+    field = StringField('Field')
+    
+# В роуте:
+form = MyForm(request.form)
+if form.validate():  # Автоматически проверяет CSRF
+    # Обработка данных
+```
+
+**В шаблонах:**
+```html
+<form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <!-- Поля формы -->
+</form>
+```
+
+### Тестирование CSRF
+
+- **`tests/test_csrf.py`**: Комплексные тесты CSRF функциональности
+- **Универсальная фикстура `csrf_token`** в `conftest.py` для DRY принципа
+- Оптимизированы тесты: устранено 15 дублирований, экономия ~50 строк кода
+
+**Запуск CSRF тестов:**
+```bash
+python -m pytest tests/test_csrf.py -v
+```
 
 ## Текущий статус
 
@@ -312,7 +367,7 @@ DeprecationWarning: The default timestamp converter is deprecated as of Python 3
 - SQLite база данных с каскадными удалениями (чистый SQL)
 - Service Layer Pattern с чётким разделением моделей и сервисов
 - Собственная система форм с заглушками валидаторов
-- Собственная CSRF-защита
+- **Полноценная CSRF-защита (HMAC-SHA256)**
 - Базовый UI на Bootstrap 5 с flash-сообщениями
 - Защита маршрутов (login_required)
 - Полноценная система тестов (unit, integration, database, security)

@@ -134,7 +134,8 @@ class TestPostModel:
             # Проверяем формат имени автора
             display_name = post.author_display_name
             assert "#" in display_name
-            assert display_name.endswith("#0001")  # Первый пользователь получает дискриминатор 0001
+            # Пользователь в conftest.py имеет дискриминатор 1234
+            assert display_name.endswith("#1234")
 
 
 class TestPostRoutes:
@@ -147,10 +148,12 @@ class TestPostRoutes:
         auth.login()
         
         # Создаём пост через POST запрос
-        client.post('/post/create', data={
+        response = client.post('/post/create', data={
             'title': 'Тестовый пост',
-            'content': 'Содержание тестового поста'
+            'content': 'Содержание тестового поста',
+            'csrf_token': 'test_csrf_token_for_testing'
         })
+        assert response.status_code == 302  # Redirect after creation
         
         # Выходим из системы
         auth.logout()
@@ -174,14 +177,17 @@ class TestPostRoutes:
         assert response.status_code == 200
         assert 'Создать новый пост' in response.get_data(as_text=True)
 
-    def test_create_post_submission(self, client, auth):
-        """Отправка формы создания поста должна работать."""
+    def test_create_post_submission(self, client, auth, setup_csrf_token):
+        """Создание поста должно работать."""
         auth.register()
         auth.login()
         
+        token = setup_csrf_token()
+        
         response = client.post('/post/create', data={
             'title': 'Новый пост',
-            'content': 'Содержание нового поста'
+            'content': 'Содержание нового поста',
+            'csrf_token': 'test_csrf_token_for_testing'
         })
         assert response.status_code == 302  # Redirect to post view
         
@@ -189,18 +195,22 @@ class TestPostRoutes:
         response = client.get('/')
         assert 'Новый пост' in response.get_data(as_text=True)
 
-    def test_view_post(self, client, auth):
+    def test_view_post(self, client, auth, setup_csrf_token):
         """Просмотр поста должен работать."""
         auth.register()
         auth.login()
         
-        # Создаём пост
+        token = setup_csrf_token()
+        
         response = client.post('/post/create', data={
             'title': 'Пост для просмотра',
-            'content': 'Содержание для просмотра'
+            'content': 'Содержание для просмотра',
+            'csrf_token': 'test_csrf_token_for_testing'
         })
+        assert response.status_code == 302  # Redirect after creation
         
         # Извлекаем ID поста из URL редиректа
+        assert response.status_code == 302, f"Expected redirect, got {response.status_code}"
         post_id = response.location.split('/')[-1]
         
         # Просматриваем пост
@@ -214,15 +224,20 @@ class TestPostRoutes:
         response = client.get('/post/999999')
         assert response.status_code == 404
 
-    def test_edit_post_requires_login(self, client, auth):
+    def test_edit_post_requires_login(self, client, auth, setup_csrf_token):
         """Редактирование поста должно требовать авторизации."""
         # Сначала создаём пост
         auth.register()
         auth.login()
+        
+        token = setup_csrf_token()
+        
         response = client.post('/post/create', data={
             'title': 'Пост',
-            'content': 'Содержание'
+            'content': 'Содержание',
+            'csrf_token': 'test_csrf_token_for_testing'
         })
+        assert response.status_code == 302  # Redirect after creation
         post_id = response.location.split('/')[-1]
         auth.logout()
         
@@ -230,35 +245,42 @@ class TestPostRoutes:
         response = client.get(f'/post/{post_id}/edit')
         assert response.status_code == 302  # Redirect to login
 
-    def test_edit_post_author_only(self, client, auth):
+    def test_edit_post_author_only(self, client, auth, setup_csrf_token):
         """Редактировать пост может только автор."""
         # Создаём первого пользователя и пост
-        auth.register(username='user1')
-        auth.login(username='user1')
+        auth.register(username='user1', password='test_pass')
+        auth.login(username='user1', password='test_pass')
+        
+        token = setup_csrf_token()
+        
         response = client.post('/post/create', data={
             'title': 'Пост user1',
-            'content': 'Содержание user1'
+            'content': 'Содержание user1',
+            'csrf_token': 'test_csrf_token_for_testing'
         })
+        assert response.status_code == 302  # Redirect after creation
         post_id = response.location.split('/')[-1]
         auth.logout()
         
         # Создаём второго пользователя
-        auth.register(username='user2')
-        auth.login(username='user2')
+        auth.register(username='user2', password='test_pass')
+        auth.login(username='user2', password='test_pass')
         
         # Пытаемся редактировать пост первого пользователя
         response = client.get(f'/post/{post_id}/edit')
         assert response.status_code == 403  # Forbidden
 
-    def test_edit_post_form(self, client, auth):
+    def test_edit_post_form(self, client, auth, setup_csrf_token):
         """Форма редактирования поста должна работать для автора."""
         auth.register()
         auth.login()
         
-        # Создаём пост
+        token = setup_csrf_token()
+        
         response = client.post('/post/create', data={
             'title': 'Оригинальный заголовок',
-            'content': 'Оригинальное содержание'
+            'content': 'Оригинальное содержание',
+            'csrf_token': 'test_csrf_token_for_testing'
         })
         post_id = response.location.split('/')[-1]
         
@@ -268,22 +290,25 @@ class TestPostRoutes:
         assert 'Оригинальный заголовок' in response.get_data(as_text=True)
         assert 'Оригинальное содержание' in response.get_data(as_text=True)
 
-    def test_edit_post_submission(self, client, auth):
+    def test_edit_post_submission(self, client, auth, setup_csrf_token):
         """Отправка формы редактирования должна работать."""
         auth.register()
         auth.login()
         
-        # Создаём пост
+        token = setup_csrf_token()
+        
         response = client.post('/post/create', data={
             'title': 'Старый заголовок',
-            'content': 'Старое содержание'
+            'content': 'Старое содержание',
+            'csrf_token': 'test_csrf_token_for_testing'
         })
         post_id = response.location.split('/')[-1]
         
         # Редактируем пост
         response = client.post(f'/post/{post_id}/edit', data={
             'title': 'Новый заголовок',
-            'content': 'Новое содержание'
+            'content': 'Новое содержание',
+            'csrf_token': 'test_csrf_token_for_testing'
         })
         assert response.status_code == 302  # Redirect to post view
         
@@ -292,15 +317,20 @@ class TestPostRoutes:
         assert 'Новый заголовок' in response.get_data(as_text=True)
         assert 'Новое содержание' in response.get_data(as_text=True)
 
-    def test_delete_post_requires_login(self, client, auth):
+    def test_delete_post_requires_login(self, client, auth, setup_csrf_token):
         """Удаление поста должно требовать авторизации."""
         # Сначала создаём пост
         auth.register()
         auth.login()
+        
+        token = setup_csrf_token()
+        
         response = client.post('/post/create', data={
             'title': 'Пост',
-            'content': 'Содержание'
+            'content': 'Содержание',
+            'csrf_token': 'test_csrf_token_for_testing'
         })
+        assert response.status_code == 302  # Redirect after creation
         post_id = response.location.split('/')[-1]
         auth.logout()
         
@@ -308,40 +338,49 @@ class TestPostRoutes:
         response = client.post(f'/post/{post_id}/delete')
         assert response.status_code == 302  # Redirect to login
 
-    def test_delete_post_author_only(self, client, auth):
+    def test_delete_post_author_only(self, client, auth, setup_csrf_token):
         """Удалять пост может только автор."""
         # Создаём первого пользователя и пост
-        auth.register(username='user1')
-        auth.login(username='user1')
+        auth.register(username='user1', password='test_pass')
+        auth.login(username='user1', password='test_pass')
+        
+        token = setup_csrf_token()
+        
         response = client.post('/post/create', data={
             'title': 'Пост user1',
-            'content': 'Содержание user1'
+            'content': 'Содержание user1',
+            'csrf_token': 'test_csrf_token_for_testing'
         })
+        assert response.status_code == 302  # Redirect after creation
         post_id = response.location.split('/')[-1]
         auth.logout()
         
         # Создаём второго пользователя
-        auth.register(username='user2')
-        auth.login(username='user2')
+        auth.register(username='user2', password='test_pass')
+        auth.login(username='user2', password='test_pass')
         
         # Пытаемся удалить пост первого пользователя
         response = client.post(f'/post/{post_id}/delete')
         assert response.status_code == 403  # Forbidden
 
-    def test_delete_post(self, client, auth):
+    def test_delete_post(self, client, auth, setup_csrf_token):
         """Удаление поста должно работать."""
         auth.register()
         auth.login()
         
-        # Создаём пост
+        token = setup_csrf_token()
+        
         response = client.post('/post/create', data={
             'title': 'Пост для удаления',
-            'content': 'Содержание для удаления'
+            'content': 'Содержание для удаления',
+            'csrf_token': 'test_csrf_token_for_testing'
         })
         post_id = response.location.split('/')[-1]
         
         # Удаляем пост
-        response = client.post(f'/post/{post_id}/delete')
+        response = client.post(f'/post/{post_id}/delete', data={
+            'csrf_token': 'test_csrf_token_for_testing'
+        })
         assert response.status_code == 302  # Redirect to index
         
         # Проверяем, что пост удалён
@@ -349,7 +388,7 @@ class TestPostRoutes:
         assert response.status_code == 404
 
     def test_post_form_validation_placeholder(self, client, auth):
-        """Тест-заглушка для валидации формы поста.
+        """Тест валидации формы поста с заглушками.
         
         TODO: После реализации валидаторов этот тест должен проверять:
         - Валидацию пустого заголовка (DataRequired)
@@ -359,12 +398,13 @@ class TestPostRoutes:
         auth.register()
         auth.login()
         
-        # TODO: Эти данные должны вызывать ошибки валидации после реализации
+        # Эти данные должны вызывать ошибки валидации после реализации
         response = client.post('/post/create', data={
             'title': '',  # TODO: Должно быть ошибкой (DataRequired)
-            'content': '123'  # TODO: Должно быть ошибкой (Length min=10)
+            'content': '123',  # TODO: Должно быть ошибкой (Length min=10)
+            'csrf_token': 'test_csrf_token_for_testing'
         })
         
-        # TODO: После реализации валидаторов ожидать status_code 200 (форма показана снова)
-        # Сейчас ожидаем 302 (редирект), т.к. валидаторы - заглушки
-        assert response.status_code == 302  # Временно 302, т.к. валидаторы не работают
+        # Сейчас все валидаторы - заглушки, поэтому форма проходит валидацию
+        # TODO: После реализации валидаторов ожидать status_code 200 (форма показана снова с ошибками)
+        assert response.status_code == 302  # Редирект после успешного создания поста

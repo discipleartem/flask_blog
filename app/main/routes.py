@@ -31,6 +31,12 @@ def create_post():
         flash('Пост успешно создан!', 'success')
         return redirect(url_for('main.view_post', post_id=post.id))
     
+    # Если форма не валидна, показываем ошибки
+    elif request.method == 'POST':
+        for field_name, field_errors in form.errors.items():
+            for error in field_errors:
+                flash(error, 'danger')
+    
     return render_template('main/create_post.html', form=form)
 
 
@@ -66,6 +72,12 @@ def edit_post(post_id):
         form.title.data = post.title
         form.content.data = post.content
     
+    # Если форма не валидна при POST, показываем ошибки
+    elif request.method == 'POST':
+        for field_name, field_errors in form.errors.items():
+            for error in field_errors:
+                flash(error, 'danger')
+    
     return render_template('main/edit_post.html', form=form, post=post)
 
 
@@ -79,6 +91,14 @@ def delete_post(post_id):
     
     if not post.is_author(g.user['id']):
         abort(403, description="Вы можете удалять только свои посты")
+    
+    # Проверяем CSRF токен
+    form = PostForm(request.form)
+    if not form.validate():
+        for field_name, field_errors in form.errors.items():
+            for error in field_errors:
+                flash(error, 'danger')
+        return redirect(url_for('main.view_post', post_id=post_id))
     
     PostService.delete(post_id)
     flash('Пост успешно удалён!', 'success')

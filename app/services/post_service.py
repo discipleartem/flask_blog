@@ -63,7 +63,7 @@ class PostService:
             author_id=row['author_id'],
             title=row['title'],
             content=row['content'],
-            created=datetime.fromisoformat(row['created']) if row['created'] else None,
+            created=row['created'] if row['created'] else None,
             author_username=row['username'],
             author_discriminator=row['discriminator']
         )
@@ -91,7 +91,7 @@ class PostService:
                 author_id=row['author_id'],
                 title=row['title'],
                 content=row['content'],
-                created=datetime.fromisoformat(row['created']) if row['created'] else None,
+                created=row['created'] if row['created'] else None,
                 author_username=row['username'],
                 author_discriminator=row['discriminator']
             ))
