@@ -3,8 +3,8 @@
 {% block title %}Главная{% endblock %}
 
 {% block content %}
-    <div class="row">
-        <div class="col-lg-8">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 text-center">
             <h1>Все посты блога</h1>
             
             {% if posts %}
@@ -36,22 +36,6 @@
                     {% endif %}
                 </div>
             {% endif %}
-        </div>
-        
-        <div class="col-lg-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Меню</h5>
-                    {% if g.user %}
-                        <a href="{{ url_for('main.create_post') }}" class="btn btn-primary btn-block mb-2 w-100">Создать пост</a>
-                        <hr>
-                        <p class="mb-0">Привет, <strong>{{ g.user['username'] }}#{{ '%04d'|format(g.user['discriminator']|default(0)) }}</strong>!</p>
-                    {% else %}
-                        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary btn-block mb-2 w-100">Войти</a>
-                        <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-block mb-2 w-100">Регистрация</a>
-                    {% endif %}
-                </div>
-            </div>
         </div>
     </div>
 {% endblock %}
