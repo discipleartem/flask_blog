@@ -46,7 +46,7 @@ install-dev: ## Установить зависимости для разраб�
 
 test: ## Запустить все тесты
 	@echo "$(BLUE)Запуск всех тестов...$(NC)"
-	@.venv/bin/pytest --tb=no -q --disable-warnings 2>/dev/null | grep -E "passed|failed|skipped" || echo "Tests completed"
+	$(PYTEST)
 
 test-clean: ## Запустить тесты с чистым выводом (только passed/failed)
 	@echo "$(BLUE)Запуск тестов (чистый вывод)...$(NC)"
