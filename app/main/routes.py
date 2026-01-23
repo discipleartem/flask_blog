@@ -2,7 +2,8 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, abort, g
 
 from app.auth.utils import login_required
-from app.db import Post
+from app.services import PostService
+from app.models import Post
 from app.forms import PostForm
 
 bp = Blueprint('main', __name__)
@@ -11,7 +12,7 @@ bp = Blueprint('main', __name__)
 @bp.route('/')
 def index():
     """Главная страница блога - список всех постов."""
-    posts = Post.get_all()
+    posts = PostService.get_all()
     return render_template('main/index.html', posts=posts)
 
 
@@ -22,7 +23,7 @@ def create_post():
     form = PostForm(request.form)
     
     if request.method == 'POST' and form.validate():
-        post = Post.create(
+        post = PostService.create(
             author_id=g.user['id'],
             title=form.title.data,
             content=form.content.data
@@ -36,7 +37,7 @@ def create_post():
 @bp.route('/post/<int:post_id>')
 def view_post(post_id):
     """Просмотр отдельного поста."""
-    post = Post.find_by_id(post_id)
+    post = PostService.find_by_id(post_id)
     if post is None:
         abort(404, description="Пост не найден")
     
@@ -47,7 +48,7 @@ def view_post(post_id):
 @login_required
 def edit_post(post_id):
     """Редактирование поста (только для автора)."""
-    post = Post.find_by_id(post_id)
+    post = PostService.find_by_id(post_id)
     if post is None:
         abort(404, description="Пост не найден")
     
@@ -57,9 +58,9 @@ def edit_post(post_id):
     form = PostForm(request.form)
     
     if request.method == 'POST' and form.validate():
-        post.update(form.title.data, form.content.data)
+        PostService.update(post_id, form.title.data, form.content.data)
         flash('Пост успешно обновлён!', 'success')
-        return redirect(url_for('main.view_post', post_id=post.id))
+        return redirect(url_for('main.view_post', post_id=post_id))
     elif request.method == 'GET':
         # Заполняем форму текущими данными поста
         form.title.data = post.title
@@ -72,13 +73,13 @@ def edit_post(post_id):
 @login_required
 def delete_post(post_id):
     """Удаление поста (только для автора)."""
-    post = Post.find_by_id(post_id)
+    post = PostService.find_by_id(post_id)
     if post is None:
         abort(404, description="Пост не найден")
     
     if not post.is_author(g.user['id']):
         abort(403, description="Вы можете удалять только свои посты")
     
-    post.delete()
+    PostService.delete(post_id)
     flash('Пост успешно удалён!', 'success')
     return redirect(url_for('main.index'))

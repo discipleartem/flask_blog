@@ -1,31 +1,20 @@
-"""Модели данных для работы с постами и комментариями."""
+"""Сервис для работы с постами блога."""
 from datetime import datetime
-from typing import Optional, List, Dict, Any
+from typing import Optional, List
 
-from .db import get_db
+from app.db.db import get_db
+from app.models.post import Post
 
 
-class Post:
-    """Модель для работы с постами блога."""
+class PostService:
+    """Сервисный слой для работы с постами.
     
-    def __init__(self, id: Optional[int] = None, author_id: Optional[int] = None,
-                 title: str = '', content: str = '', created: Optional[datetime] = None,
-                 author_username: str = '', author_discriminator: int = 0):
-        self.id = id
-        self.author_id = author_id
-        self.title = title
-        self.content = content
-        self.created = created
-        self.author_username = author_username
-        self.author_discriminator = author_discriminator
+    Вся логика работы с базой данных инкапсулирована здесь.
+    Модель Post содержит только данные и базовую бизнес-логику.
+    """
     
-    @property
-    def author_display_name(self) -> str:
-        """Возвращает отображаемое имя автора с дискриминатором."""
-        return f"{self.author_username}#{self.author_discriminator:04d}"
-    
-    @classmethod
-    def create(cls, author_id: int, title: str, content: str) -> 'Post':
+    @staticmethod
+    def create(author_id: int, title: str, content: str) -> Post:
         """Создаёт новый пост.
         
         Args:
@@ -34,7 +23,7 @@ class Post:
             content: Содержание поста
             
         Returns:
-            Post: созданный пост
+            Post: созданный пост с полной информацией
         """
         db = get_db()
         cursor = db.execute(
@@ -44,12 +33,11 @@ class Post:
         db.commit()
         
         # Получаем созданный пост с информацией об авторе
-        post = cls.find_by_id(cursor.lastrowid)
-        return post
+        return PostService.find_by_id(cursor.lastrowid)
     
-    @classmethod
-    def find_by_id(cls, post_id: int) -> Optional['Post']:
-        """Находит пост по ID.
+    @staticmethod
+    def find_by_id(post_id: int) -> Optional[Post]:
+        """Находит пост по ID с информацией об авторе.
         
         Args:
             post_id: ID поста
@@ -70,7 +58,7 @@ class Post:
         if row is None:
             return None
             
-        return cls(
+        return Post(
             id=row['id'],
             author_id=row['author_id'],
             title=row['title'],
@@ -80,8 +68,8 @@ class Post:
             author_discriminator=row['discriminator']
         )
     
-    @classmethod
-    def get_all(cls) -> List['Post']:
+    @staticmethod
+    def get_all() -> List[Post]:
         """Возвращает список всех постов с информацией об авторах.
         
         Returns:
@@ -98,7 +86,7 @@ class Post:
         
         posts = []
         for row in rows:
-            posts.append(cls(
+            posts.append(Post(
                 id=row['id'],
                 author_id=row['author_id'],
                 title=row['title'],
@@ -110,54 +98,53 @@ class Post:
         
         return posts
     
-    def update(self, title: str, content: str) -> None:
+    @staticmethod
+    def update(post_id: int, title: str, content: str) -> bool:
         """Обновляет заголовок и содержание поста.
         
         Args:
+            post_id: ID поста
             title: Новый заголовок
             content: Новое содержание
+            
+        Returns:
+            bool: True если обновление успешно
         """
         db = get_db()
-        db.execute(
+        cursor = db.execute(
             'UPDATE post SET title = ?, content = ? WHERE id = ?',
-            (title, content, self.id)
+            (title, content, post_id)
         )
         db.commit()
         
-        # Обновляем атрибуты объекта
-        self.title = title
-        self.content = content
+        return cursor.rowcount > 0
     
-    def delete(self) -> None:
-        """Удаляет пост."""
-        db = get_db()
-        db.execute('DELETE FROM post WHERE id = ?', (self.id,))
-        db.commit()
-    
-    def is_author(self, user_id: int) -> bool:
-        """Проверяет, является ли пользователь автором поста.
+    @staticmethod
+    def delete(post_id: int) -> bool:
+        """Удаляет пост.
         
         Args:
-            user_id: ID пользователя
+            post_id: ID поста
             
         Returns:
-            bool: True если пользователь автор поста
+            bool: True если удаление успешно
         """
-        return self.author_id == user_id
-    
-    def to_dict(self) -> Dict[str, Any]:
-        """Преобразует пост в словарь для шаблонов.
+        db = get_db()
+        cursor = db.execute('DELETE FROM post WHERE id = ?', (post_id,))
+        db.commit()
         
+        return cursor.rowcount > 0
+    
+    @staticmethod
+    def exists(post_id: int) -> bool:
+        """Проверяет существование поста.
+        
+        Args:
+            post_id: ID поста
+            
         Returns:
-            Dict[str, Any]: словарь с данными поста
+            bool: True если пост существует
         """
-        return {
-            'id': self.id,
-            'author_id': self.author_id,
-            'title': self.title,
-            'content': self.content,
-            'created': self.created,
-            'author_username': self.author_username,
-            'author_discriminator': self.author_discriminator,
-            'author_display_name': self.author_display_name
-        }
+        db = get_db()
+        row = db.execute('SELECT 1 FROM post WHERE id = ?', (post_id,)).fetchone()
+        return row is not None

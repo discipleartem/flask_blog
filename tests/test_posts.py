@@ -2,7 +2,8 @@
 import pytest
 from flask import session
 
-from app.db import Post
+from app.models import Post
+from app.services import PostService
 
 
 class TestPostModel:
@@ -16,7 +17,7 @@ class TestPostModel:
         
         # Создаём пост через модель
         with app.app_context():
-            post = Post.create(
+            post = PostService.create(
                 author_id=1,  # ID первого пользователя
                 title="Тестовый пост",
                 content="Это содержание тестового поста."
@@ -35,14 +36,14 @@ class TestPostModel:
         
         with app.app_context():
             # Создаём пост
-            created_post = Post.create(
+            created_post = PostService.create(
                 author_id=1,
                 title="Тестовый пост",
                 content="Содержание"
             )
             
             # Ищем пост по ID
-            found_post = Post.find_by_id(created_post.id)
+            found_post = PostService.find_by_id(created_post.id)
             
             assert found_post is not None
             assert found_post.id == created_post.id
@@ -54,7 +55,7 @@ class TestPostModel:
     def test_find_nonexistent_post(self, app):
         """Поиск несуществующего поста должен вернуть None."""
         with app.app_context():
-            post = Post.find_by_id(999999)
+            post = PostService.find_by_id(999999)
             assert post is None
 
     def test_get_all_posts(self, app, auth):
@@ -64,11 +65,11 @@ class TestPostModel:
         
         with app.app_context():
             # Создаём несколько постов
-            post1 = Post.create(author_id=1, title="Пост 1", content="Содержание 1")
-            post2 = Post.create(author_id=1, title="Пост 2", content="Содержание 2")
+            post1 = PostService.create(author_id=1, title="Пост 1", content="Содержание 1")
+            post2 = PostService.create(author_id=1, title="Пост 2", content="Содержание 2")
             
             # Получаем все посты
-            all_posts = Post.get_all()
+            all_posts = PostService.get_all()
             
             assert len(all_posts) >= 2
             # Посты должны быть отсортированы по дате создания (новые первые)
@@ -81,14 +82,15 @@ class TestPostModel:
         
         with app.app_context():
             # Создаём пост
-            post = Post.create(author_id=1, title="Старый заголовок", content="Старое содержание")
+            post = PostService.create(author_id=1, title="Старый заголовок", content="Старое содержание")
             
             # Обновляем пост
-            post.update("Новый заголовок", "Новое содержание")
+            PostService.update(post.id, "Новый заголовок", "Новое содержание")
             
             # Проверяем изменения
-            assert post.title == "Новый заголовок"
-            assert post.content == "Новое содержание"
+            updated_post = PostService.find_by_id(post.id)
+            assert updated_post.title == "Новый заголовок"
+            assert updated_post.content == "Новое содержание"
 
     def test_delete_post(self, app, auth):
         """Удаление поста должно работать."""
@@ -97,14 +99,14 @@ class TestPostModel:
         
         with app.app_context():
             # Создаём пост
-            post = Post.create(author_id=1, title="Пост для удаления", content="Содержание")
+            post = PostService.create(author_id=1, title="Пост для удаления", content="Содержание")
             post_id = post.id
             
             # Удаляем пост
-            post.delete()
+            PostService.delete(post_id)
             
             # Проверяем, что пост удалён
-            deleted_post = Post.find_by_id(post_id)
+            deleted_post = PostService.find_by_id(post_id)
             assert deleted_post is None
 
     def test_is_author(self, app, auth):
@@ -114,7 +116,7 @@ class TestPostModel:
         
         with app.app_context():
             # Создаём пост от пользователя с ID=1
-            post = Post.create(author_id=1, title="Пост", content="Содержание")
+            post = PostService.create(author_id=1, title="Пост", content="Содержание")
             
             # Проверяем авторство
             assert post.is_author(1) is True
@@ -127,7 +129,7 @@ class TestPostModel:
         
         with app.app_context():
             # Создаём пост
-            post = Post.create(author_id=1, title="Пост", content="Содержание")
+            post = PostService.create(author_id=1, title="Пост", content="Содержание")
             
             # Проверяем формат имени автора
             display_name = post.author_display_name
