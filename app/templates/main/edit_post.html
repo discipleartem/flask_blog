@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
 
-{% block title %}Редактировать пост{% endblock %}
+{% block title %}Редактировать статью{% endblock %}
 
 {% block content %}
     <div class="row justify-content-center">
         <div class="col-lg-8">
             <div class="card shadow-sm">
                 <div class="card-body">
-                    <h2 class="card-title mb-4">Редактировать пост</h2>
+                    <h2 class="card-title mb-4">Редактировать статью</h2>
                     
                     <form method="post">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

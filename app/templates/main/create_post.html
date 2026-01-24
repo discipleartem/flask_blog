@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
 
-{% block title %}Создать пост{% endblock %}
+{% block title %}Создать статью{% endblock %}
 
 {% block content %}
     <div class="row justify-content-center">
         <div class="col-lg-8">
             <div class="card shadow-sm">
                 <div class="card-body">
-                    <h2 class="card-title mb-4">Создать новый пост</h2>
+                    <h2 class="card-title mb-4">Создать новую статью</h2>
                     
                     <form method="post">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -39,7 +39,7 @@
                         
                         <div class="d-flex justify-content-between">
                             <a href="{{ url_for('main.index') }}" class="btn btn-secondary">Отмена</a>
-                            <button type="submit" class="btn btn-primary">Создать пост</button>
+                            <button type="submit" class="btn btn-primary">Создать статью</button>
                         </div>
                     </form>
                 </div>
