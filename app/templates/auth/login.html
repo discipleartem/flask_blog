@@ -3,63 +3,120 @@
 {% block title %}Вход{% endblock %}
 
 {% block content %}
-    <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-4">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h2 class="card-title text-center mb-4">Вход</h2>
-                    
-                    {% if form.errors %}
-                        <div class="alert alert-danger">
-                            <ul class="mb-0">
-                                {% for field_name, field_errors in form.errors.items() %}
-                                    {% for error in field_errors %}
-                                        <li>{{ error }}</li>
-                                    {% endfor %}
+<!-- Форма входа в систему -->
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <!-- Заголовок формы -->
+                <h2 class="card-title text-center mb-4">Вход</h2>
+                
+                <!-- Блок отображения ошибок формы -->
+                {% if form.errors %}
+                    <div class="alert alert-danger" role="alert">
+                        <h5 class="alert-heading">Ошибка валидации:</h5>
+                        <ul class="mb-0">
+                            {% for field_name, field_errors in form.errors.items() %}
+                                {% for error in field_errors %}
+                                    <li>{{ error }}</li>
                                 {% endfor %}
-                            </ul>
-                        </div>
-                    {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+                
+                <!-- Блок отображения общих ошибок -->
+                {% if error %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ error }}
+                    </div>
+                {% endif %}
+                
+                <!-- Основная форма входа -->
+                <form method="post" autocomplete="on" novalidate>
+                    <!-- CSRF токен -->
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     
-                    {% if error %}
-                        <div class="alert alert-danger">{{ error }}</div>
-                    {% endif %}
+                    <!-- Поле ввода логина с кнопкой обновления -->
+                    <div class="mb-3">
+                        <label for="login_username" class="form-label">Логин</label>
+                        <div class="input-group">
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                id="login_username" 
+                                name="username"
+                                placeholder="Логин#1234" 
+                                required 
+                                autocomplete="username"
+                                value="{{ prefilled_base_username or form.username.data or '' }}"
+                                aria-describedby="username-help"
+                            >
+                            <button 
+                                class="btn btn-outline-secondary" 
+                                type="button" 
+                                id="update_username_button" 
+                                title="Обновить логин с дискриминатором"
+                                aria-label="Обновить логин"
+                            >
+                                <i class="fas fa-sync-alt" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Скрытое поле для полного логина с дискриминатором -->
+                        <input 
+                            type="hidden" 
+                            id="full_username" 
+                            name="full_username" 
+                            value="{{ prefilled_username or '' }}"
+                        >
+                        
+                        <!-- Текст подсказки -->
+                        <div id="username-help" class="form-text">
+                            Введите логин с тегом, например: MyUser#0042. 
+                            Для admin достаточно ввести только "admin"
+                        </div>
+                    </div>
                     
-                    <form method="post" autocomplete="on">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        
-                        <div class="mb-3">
-                            <label for="login_username" class="form-label">Логин</label>
-                            <div class="input-group">
-                                <input type="text" class="form-control" id="login_username" name="username"
-                                       placeholder="Логин#1234" required autocomplete="username"
-                                       value="{{ prefilled_base_username or form.username.data or '' }}">
-                                <button class="btn btn-outline-secondary" type="button" id="update_username_button" title="Обновить логин с дискриминатором">
-                                    <i class="fas fa-sync-alt"></i>
-                                </button>
-                            </div>
-                            <input type="hidden" id="full_username" name="full_username" value="{{ prefilled_username or '' }}">
-                            <div class="form-text">Введите логин с тегом, например: MyUser#0042. Для admin достаточно ввести только "admin"</div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Пароль</label>
-                            <input type="password" class="form-control" id="password" name="password" required autocomplete="current-password">
-                        </div>
-                        
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary">Войти</button>
-                        </div>
-                    </form>
+                    <!-- Поле ввода пароля -->
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Пароль</label>
+                        <input 
+                            type="password" 
+                            class="form-control" 
+                            id="password" 
+                            name="password" 
+                            required 
+                            autocomplete="current-password"
+                            aria-describedby="password-help"
+                        >
+                    </div>
                     
-                    <hr>
-                    <p class="text-center mb-0">
-                        Нет аккаунта? <a href="{{ url_for('auth.register') }}">Зарегистрируйтесь</a>
+                    <!-- Кнопка отправки формы -->
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            Войти
+                        </button>
+                    </div>
+                </form>
+                
+                <!-- Разделитель -->
+                <hr class="my-4">
+                
+                <!-- Ссылка на регистрацию -->
+                <div class="text-center">
+                    <p class="mb-0">
+                        Нет аккаунта? 
+                        <a href="{{ url_for('auth.register') }}" class="text-decoration-none">
+                            Зарегистрируйтесь
+                        </a>
                     </p>
                 </div>
             </div>
         </div>
     </div>
-    
-    <script src="{{ url_for('static', filename='js/login-discriminator-update.js') }}"></script>
+</div>
+
+<!-- Подключение JavaScript для управления формой -->
+<script src="{{ url_for('static', filename='js/login-discriminator-update.js') }}" defer></script>
 {% endblock %}
