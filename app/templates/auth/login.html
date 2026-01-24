@@ -30,20 +30,23 @@
                         
                         <div class="mb-3">
                             <label for="login_username" class="form-label">Логин</label>
-                            <input type="text" class="form-control" id="login_username" name="login_username"
+                            <input type="text" class="form-control" id="login_username" name="username"
                                    placeholder="Логин#1234" required autocomplete="username"
-                                   value="{{ prefilled_username or form.username.data or '' }}">
+                                   value="{{ prefilled_base_username or form.username.data or '' }}">
+                            <input type="hidden" id="full_username" name="full_username" value="{{ prefilled_username or '' }}">
                             <div class="form-text">Введите логин с тегом, например: MyUser#0042. Для admin достаточно ввести только "admin"</div>
                         </div>
+                        
                         <div class="mb-3">
                             <label for="password" class="form-label">Пароль</label>
-                            <input type="password" class="form-control" id="password" name="login_password" required autocomplete="current-password">
+                            <input type="password" class="form-control" id="password" name="password" required autocomplete="current-password">
                         </div>
                         
                         <div class="d-grid">
                             <button type="submit" class="btn btn-primary">Войти</button>
                         </div>
                     </form>
+                    
                     <hr>
                     <p class="text-center mb-0">
                         Нет аккаунта? <a href="{{ url_for('auth.register') }}">Зарегистрируйтесь</a>
@@ -52,4 +55,6 @@
             </div>
         </div>
     </div>
+    
+    <script src="{{ url_for('static', filename='js/login-discriminator-update.js') }}"></script>
 {% endblock %}
