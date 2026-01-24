@@ -1,5 +1,5 @@
 """Формы для аутентификации пользователей."""
-from . import Form, StringField, PasswordField, DataRequired, Length, EqualTo
+from . import Form, StringField, PasswordField, DataRequired, Length
 # TODO: Regexp будет реализован в будущем для валидации формата данных
 
 
@@ -23,14 +23,6 @@ class RegistrationForm(Form):
             Length(min=4, max=128, message='Пароль должен быть от 4 до 128 символов')
         ]
     )
-    
-    password2 = PasswordField(
-        'Подтверждение пароля',
-        validators=[
-            DataRequired(message='Подтверждение пароля обязательно'),
-            EqualTo('password', message='Пароли должны совпадать')
-        ]
-    )
 
 
 class LoginForm(Form):
@@ -50,3 +42,12 @@ class LoginForm(Form):
             DataRequired(message='Пароль обязателен')
         ]
     )
+    
+    def __init__(self, formdata=None, **kwargs):
+        super().__init__(formdata, **kwargs)
+        # Если форма отправлена с login_username, используем его как username
+        if formdata and 'login_username' in formdata:
+            self.username.data = formdata['login_username']
+        # Если форма отправлена с login_password, используем его как password
+        if formdata and 'login_password' in formdata:
+            self.password.data = formdata['login_password']

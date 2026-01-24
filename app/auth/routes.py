@@ -31,40 +31,74 @@ def register():
     form = RegistrationForm(request.form)
     
     if request.method == 'POST' and form.validate():
-        username = form.username.data.strip()
+        # Проверяем, есть ли скрытое поле с полным логином (отправлен JavaScript)
+        full_username = request.form.get('full_username', '').strip()
         password = form.password.data
         db = get_db()
         error = None
 
-        # Дополнительные проверки, которые не покрыты валидаторами формы
-        if '#' in username:
-            error = 'Имя пользователя не должно содержать символ #.'
-        elif username.lower() == 'admin':
-            error = 'Имя admin зарезервировано системой'
-
-        if error is None:
-            # Генерация уникального дискриминатора (1..9999) для одинаковых username
-            new_tag = generate_discriminator(db, username)
-
-            if new_tag is None:
-                # Случай, когда для username заняты все теги
-                error = f"К сожалению, имя {username} перегружено. Попробуйте другое."
+        if full_username and "#" in full_username:
+            # JavaScript отправил полный логин
+            parts = full_username.rsplit("#", 1)
+            username, tag_str = parts[0], parts[1]
+            
+            if len(tag_str) != 4 or not tag_str.isdigit():
+                error = 'Неверный формат тега'
             else:
                 try:
-                    # Пароль храним только в виде хэша с солью
-                    hashed_pw, salt = hash_password(password)
-                    db.execute(
-                        "INSERT INTO user (username, password, discriminator, salt) VALUES (?, ?, ?, ?)",
-                        (username, hashed_pw, new_tag, salt),
-                    )
-                    db.commit()
-                    flash(f'Добро пожаловать {username}#{new_tag:04d}', 'success')
-                    # Передаем данные нового пользователя в форму входа
+                    tag = int(tag_str)
+                    # Проверяем, что тег в допустимом диапазоне
+                    if tag < 1 or tag > 9999:
+                        error = 'Тег должен быть от 0001 до 9999'
+                    else:
+                        # Проверяем, что такой логин еще не занят
+                        existing_user = db.execute(
+                            'SELECT id FROM user WHERE username = ? AND discriminator = ?',
+                            (username, tag)
+                        ).fetchone()
+                        
+                        if existing_user:
+                            error = f'Логин {full_username} уже занят'
+                        
+                except ValueError:
+                    error = 'Неверный формат тега'
+        else:
+            # Оригинальная логика - генерируем дискриминатор
+            username = form.username.data.strip()
+            if username.lower() == 'admin':
+                error = 'Имя admin зарезервировано системой'
+            else:
+                # Генерация уникального дискриминатора (1..9999) для одинаковых username
+                new_tag = generate_discriminator(db, username)
+
+                if new_tag is None:
+                    error = f"К сожалению, имя {username} перегружено. Попробуйте другое."
+                else:
                     full_username = f"{username}#{new_tag:04d}"
-                    return redirect(url_for("auth.login", username=full_username))
-                except sqlite3.IntegrityError:
-                    # На случай уникальных ограничений в схеме БД
-                    error = "Ошибка при регистрации. Возможно, имя занято."
+                    tag = new_tag
+
+        if error is None:
+            try:
+                # Пароль храним только в виде хэша с солью
+                hashed_pw, salt = hash_password(password)
+                cursor = db.execute(
+                    "INSERT INTO user (username, password, discriminator, salt) VALUES (?, ?, ?, ?)",
+                    (username, hashed_pw, tag, salt),
+                )
+                db.commit()
+                
+                # Получаем ID созданного пользователя для автоматического входа
+                user_id = cursor.lastrowid
+                
+                # Устанавливаем сессию для автоматического входа
+                session.clear()
+                session['user_id'] = user_id
+                session.permanent = True
+                
+                flash(f'Добро пожаловать {full_username}!', 'success')
+                return redirect(url_for("main.index"))
+            except sqlite3.IntegrityError:
+                error = "Ошибка при регистрации. Возможно, имя занято."
 
         if error:
             flash(error, 'danger')
@@ -90,12 +124,11 @@ def login():
     # Получаем username из параметров URL для автозаполнения после регистрации
     prefilled_username = request.args.get('username', '')
     
-    # Создаем форму для всех запросов
     form = LoginForm(request.form)
     
     if request.method == 'POST' and form.validate():
-        raw_username = request.form['username'].strip()
-        password = request.form['password']
+        raw_username = request.form.get('login_username', '').strip() or request.form.get('username', '').strip()
+        password = request.form.get('login_password', '') or request.form.get('password', '')
         db = get_db()
         error = None
 

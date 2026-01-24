@@ -4,7 +4,7 @@
 import pytest
 from flask import Flask
 
-from app.forms import Form, StringField, PasswordField, DataRequired, Length, EqualTo, Email, Username, PasswordStrength, UniqueUsername, Slug, NumberRange, URL
+from app.forms import Form, StringField, PasswordField, DataRequired, Length, Email, Username, PasswordStrength, UniqueUsername, Slug, NumberRange, URL
 # TODO: Regexp будет реализован в будущем
 from app.forms.csrf import generate_csrf_token, validate_csrf_token
 
@@ -21,7 +21,6 @@ def app():
 class MockForm(Form):
     name = StringField('Name', validators=[DataRequired(), Length(min=3, max=10)])
     password = PasswordField('Password', validators=[DataRequired()])
-    confirm = PasswordField('Confirm', validators=[DataRequired(), EqualTo('password', message='Mismatch')])
     # TODO: username с Regexp будет добавлен при реализации
     username = StringField('Username', validators=[DataRequired()])  # TODO: + Regexp(r'^\w+$', message='Invalid')
 
@@ -37,7 +36,6 @@ def test_form_validation_success(app):
         data = {
             'name': 'Admin',
             'password': 'secret_password',
-            'confirm': 'secret_password',
             'username': 'user_123',
             'csrf_token': token
         }
@@ -55,7 +53,6 @@ def test_form_validation_placeholder(app):
         data = {
             'name': 'ValidName',  # Корректное имя (DataRequired, Length 3-10)
             'password': 'valid_pass',  # Корректный пароль (DataRequired)
-            'confirm': 'valid_pass',  # Совпадает с паролем (EqualTo)
             'username': 'validuser',  # Корректный username (DataRequired)  # TODO: + Length min=3, Regexp
             'csrf_token': token
         }
@@ -83,13 +80,11 @@ def test_form_field_access(app):
         # Проверка существования полей
         assert hasattr(form, 'name')
         assert hasattr(form, 'password')
-        assert hasattr(form, 'confirm')
         assert hasattr(form, 'username')
         
         # Проверка типов полей
         assert isinstance(form.name, StringField)
         assert isinstance(form.password, PasswordField)
-        assert isinstance(form.confirm, PasswordField)
         assert isinstance(form.username, StringField)
 
 
@@ -106,7 +101,6 @@ def test_form_error_handling(app):
         data = {
             'name': '',  # TODO: DataRequired error (когда будет реализовано)
             'password': '12',  # TODO: Слишком короткий (меньше 3 символов)
-            'confirm': '456',  # TODO: EqualTo error
             'username': 'user!@#',  # TODO: Regexp error (когда будет реализовано)
             'csrf_token': token
         }
@@ -124,7 +118,6 @@ def test_form_without_csrf(app):
         data = {
             'name': 'ValidName',
             'password': 'validpassword',
-            'confirm': 'validpassword',
             'username': 'validuser'
         }
         form = MockForm(data)
@@ -142,7 +135,6 @@ def test_form_with_extra_fields(app):
         data = {
             'name': 'ValidName',
             'password': 'validpassword',
-            'confirm': 'validpassword',
             'username': 'validuser',
             'csrf_token': token,
             'extra_field': 'extra_value'  # Дополнительное поле
@@ -178,12 +170,6 @@ def test_validators_standalone():
     # assert r("valid123") == (True, None)
     # assert r("invalid!@#") == (True, None)  # TODO: должно быть (False, message)
 
-    # EqualTo - заглушка всегда возвращает True
-    mock_form = type('MockForm', (), {'field1': type('MockField', (), {'data': 'value'})})()
-    eq = EqualTo('field1')
-    assert eq("value", mock_form) == (True, None)
-    assert eq("different", mock_form) == (True, None)  # TODO: должно быть (False, message)
-
 
 def test_validator_stubs_always_return_true():
     """Тест что все валидаторы-заглушки всегда возвращают (True, None)."""
@@ -191,7 +177,6 @@ def test_validator_stubs_always_return_true():
         DataRequired(),
         Length(min=3, max=10),
         # TODO: Regexp(r'test'),  # будет реализован в будущем
-        EqualTo('test'),
         # TODO валидаторы
         Email(),
         Username(),
@@ -207,10 +192,7 @@ def test_validator_stubs_always_return_true():
     for validator in validators_to_test:
         for value in test_values:
             try:
-                if validator.__class__.__name__ in ['EqualTo', 'UniqueUsername']:
-                    result = validator(value, None)
-                else:
-                    result = validator(value)
+                result = validator(value)
                 
                 assert result == (True, None), f"{validator.__class__.__name__}({value}) = {result}, expected (True, None)"
             except Exception as e:

@@ -85,7 +85,6 @@ class TestRegister:
             data={
                 'username': 'new_user', 
                 'password': 'new_pass',
-                'password2': 'new_pass',  # Добавлено подтверждение пароля
                 'csrf_token': csrf_token
             },
             follow_redirects=True
@@ -111,7 +110,6 @@ class TestRegister:
             data={
                 'username': '', 
                 'password': 'password123',
-                'password2': 'password123',
                 'csrf_token': csrf_token
             }
         )
@@ -128,7 +126,6 @@ class TestRegister:
             data={
                 'username': 'some_user', 
                 'password': '',
-                'password2': '',
                 'csrf_token': csrf_token
             }
         )
@@ -145,7 +142,6 @@ class TestRegister:
             data={
                 'username': 'some_user', 
                 'password': '123',
-                'password2': '123',
                 'csrf_token': csrf_token
             }
         )
