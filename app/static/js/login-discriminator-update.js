@@ -1,42 +1,76 @@
-// Обновление поля логина на полный с дискриминатором после автозаполнения пароля
+// Обновление поля логина на полный с дискриминатором по кнопке
 document.addEventListener('DOMContentLoaded', function() {
     const usernameInput = document.getElementById('login_username');
     const passwordInput = document.getElementById('password');
     const fullUsernameHidden = document.getElementById('full_username');
+    const updateButton = document.getElementById('update_username_button');
 
-    if (!usernameInput || !passwordInput || !fullUsernameHidden) {
+    if (!usernameInput || !passwordInput || !fullUsernameHidden || !updateButton) {
         return;
     }
 
     // Функция обновления логина
-    function updateUsername() {
-        if (!fullUsernameHidden.value || usernameInput.value === fullUsernameHidden.value) {
-            return;
+    function updateUsername(isUserAction = false) {
+        const currentUsername = usernameInput.value.trim();
+        const fullUsername = fullUsernameHidden.value.trim();
+        
+        // Обновляем только если это явное действие пользователя
+        if (isUserAction && fullUsername) {
+            usernameInput.value = fullUsername;
+            
+            const helpText = usernameInput.parentElement.parentElement.querySelector('.form-text');
+            if (helpText) {
+                helpText.textContent = 'Логин обновлён: ' + fullUsername;
+                helpText.style.color = '#28a745';
+            }
+            
+            return true;
         }
         
-        usernameInput.value = fullUsernameHidden.value;
-        
-        const helpText = usernameInput.parentElement.querySelector('.form-text');
-        if (helpText) {
-            helpText.textContent = `Логин обновлён: ${fullUsernameHidden.value}`;
-            helpText.style.color = '#28a745';
-            helpText.style.cursor = 'pointer';
-            helpText.title = 'Нажмите, чтобы исправить логин';
-            
-            // Делаем подсказку кликабельной
-            helpText.addEventListener('click', function() {
-                usernameInput.value = fullUsernameHidden.value;
-                helpText.textContent = 'Логин исправлен для сохранения в браузере';
-                helpText.style.color = '#007bff';
-                
-                // Фокус на поле логина, чтобы браузер распознал изменение
-                usernameInput.focus();
-                setTimeout(() => usernameInput.blur(), 100);
-            });
+        return false;
+    }
+
+    // Показываем/скрываем кнопку в зависимости от наличия полного логина
+    function toggleUpdateButton() {
+        if (fullUsernameHidden.value.trim()) {
+            updateButton.style.display = 'block';
+        } else {
+            updateButton.style.display = 'none';
         }
     }
 
-    // Проверяем после загрузки и при изменении пароля
-    setTimeout(updateUsername, 500);
-    passwordInput.addEventListener('input', updateUsername);
+    // Обработчик кнопки обновления
+    updateButton.addEventListener('click', function() {
+        // Добавляем анимацию вращения
+        const icon = this.querySelector('i');
+        icon.classList.add('fa-spin');
+        
+        const updated = updateUsername(true);
+        
+        if (updated) {
+            // Фокус на поле логина, чтобы браузер распознал изменение
+            usernameInput.focus();
+            setTimeout(() => usernameInput.blur(), 100);
+        }
+        
+        // Убираем анимацию через 500мс
+        setTimeout(() => {
+            icon.classList.remove('fa-spin');
+        }, 500);
+    });
+
+    // Очищаем скрытое поле только если пользователь ввёл другой логин
+    usernameInput.addEventListener('input', function() {
+        const currentUsername = usernameInput.value.trim();
+        const fullUsername = fullUsernameHidden.value.trim();
+        
+        // Очищаем только если поле не пустое и введённый логин отличается от сохранённого
+        if (currentUsername && fullUsername && currentUsername !== fullUsername) {
+            fullUsernameHidden.value = '';
+            toggleUpdateButton();
+        }
+    });
+
+    // Проверяем при загрузке
+    setTimeout(toggleUpdateButton, 100);
 });

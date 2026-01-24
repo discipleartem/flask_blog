@@ -30,9 +30,14 @@
                         
                         <div class="mb-3">
                             <label for="login_username" class="form-label">Логин</label>
-                            <input type="text" class="form-control" id="login_username" name="username"
-                                   placeholder="Логин#1234" required autocomplete="username"
-                                   value="{{ prefilled_base_username or form.username.data or '' }}">
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="login_username" name="username"
+                                       placeholder="Логин#1234" required autocomplete="username"
+                                       value="{{ prefilled_base_username or form.username.data or '' }}">
+                                <button class="btn btn-outline-secondary" type="button" id="update_username_button" title="Обновить логин с дискриминатором">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                            </div>
                             <input type="hidden" id="full_username" name="full_username" value="{{ prefilled_username or '' }}">
                             <div class="form-text">Введите логин с тегом, например: MyUser#0042. Для admin достаточно ввести только "admin"</div>
                         </div>
