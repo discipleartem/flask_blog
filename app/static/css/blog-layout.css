@@ -1,0 +1,160 @@
+/* Кастомные стили для горизонтального layout блога */
+
+/* Градиент фон */
+.bg-gradient-to-br {
+    background: linear-gradient(to bottom right, #f8fafc, #f1f5f9);
+}
+
+/* Градиент для карточек изображений */
+.bg-gradient-to-br.from-blue-500.to-purple-600 {
+    background: linear-gradient(135deg, #3b82f6 0%, #9333ea 100%);
+}
+
+/* Отступы между карточками */
+.space-y-6 > * + * {
+    margin-top: 1.5rem;
+}
+
+/* Стили для текста */
+.text-gray-900 {
+    color: #111827 !important;
+}
+
+.text-gray-600 {
+    color: #4b5563 !important;
+}
+
+.text-gray-500 {
+    color: #6b7280 !important;
+}
+
+/* Стили для карточек статей в светлой теме */
+.bg-white {
+    padding: 1.5rem !important;
+    border-radius: 1rem !important;
+}
+
+/* Стили для hover эффектов */
+.group:hover .group-hover\:scale-105 {
+    transform: scale(1.05);
+}
+
+.transition-transform {
+    transition-property: transform;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 300ms;
+}
+
+/* Стили для кнопок */
+.hover\:gap-3:hover {
+    gap: 0.75rem !important;
+}
+
+.transition-all {
+    transition-property: all;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 300ms;
+}
+
+/* Стили для иконок */
+.w-4 {
+    width: 1rem;
+}
+
+.h-4 {
+    height: 1rem;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .p-md-8 {
+        padding: 2rem;
+    }
+    
+    .md\:w-2\/5 {
+        width: 100% !important;
+    }
+    
+    .md\:w-3\/5 {
+        width: 100% !important;
+    }
+    
+    .md\:h-full {
+        height: auto !important;
+    }
+}
+
+/* Стили для темной темы */
+[data-bs-theme="dark"] .bg-gradient-to-br {
+    background: #1a1a1a;
+}
+
+[data-bs-theme="dark"] .bg-white {
+    background-color: #0d1117 !important;
+    padding: 1.5rem !important;
+    border-radius: 1rem !important;
+}
+
+[data-bs-theme="dark"] .text-gray-900 {
+    color: #f7fafc !important;
+}
+
+[data-bs-theme="dark"] .text-gray-600 {
+    color: #e2e8f0 !important;
+}
+
+[data-bs-theme="dark"] .text-gray-500 {
+    color: #cbd5e0 !important;
+}
+
+[data-bs-theme="dark"] .border-top {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-bs-theme="dark"] .card {
+    background-color: #0d1117 !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+    border-radius: 1rem !important;
+}
+
+/* Стили для карточек в светлой теме */
+.card {
+    border-radius: 1rem !important;
+}
+
+/* Исправление для отступов */
+.pt-5 {
+    padding-top: 1rem !important;
+}
+
+.mb-5 {
+    margin-bottom: 1rem !important;
+}
+
+[data-bs-theme="dark"] .text-dark {
+    color: #f7fafc !important;
+}
+
+[data-bs-theme="dark"] .text-muted {
+    color: #cbd5e0 !important;
+}
+
+[data-bs-theme="dark"] .form-control {
+    background-color: #374151 !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    color: #f7fafc !important;
+}
+
+[data-bs-theme="dark"] .form-control:focus {
+    background-color: #374151 !important;
+    border-color: #60a5fa !important;
+    color: #f7fafc !important;
+}
+
+[data-bs-theme="dark"] .form-label {
+    color: #e2e8f0 !important;
+}
+
+[data-bs-theme="dark"] .form-text {
+    color: #9ca3af !important;
+}

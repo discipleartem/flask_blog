@@ -34,9 +34,13 @@
 
 /* Настройки для темной темы */
 [data-bs-theme="dark"] {
-    --header-bg: #2b3035; /* Чуть светлее, чем основной фон body (#212529) */
-    --footer-bg: #2b3035;
-    --body-bg: #212529;
+    --header-bg: #0d1117; /* Чёрный оттенок для header */
+    --footer-bg: #0d1117; /* Чёрный оттенок для footer */
+    --body-bg: #1a1a1a; /* Основной фон */
+}
+
+[data-bs-theme="dark"] body {
+    background-color: var(--body-bg) !important;
 }
 
 /* Применяем переменные к навигации */

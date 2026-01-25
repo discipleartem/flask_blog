@@ -3,86 +3,100 @@
 {% block title %}Главная{% endblock %}
 
 {% block content %}
-    <div class="container-fluid">
-        <div class="row justify-content-center">
-            <div class="col-12">
-                <div class="text-center mb-5">
-                    <h1 class="display-5 fw-bold">Все статьи блога</h1>
-                    <p class="lead text-muted">Откройте для себя интересные истории и идеи</p>
-                </div>
-                
-                {% if posts %}
-                    <div class="row g-4">
-                        {% for post in posts %}
-                            <div class="col-lg-4 col-md-6">
-                                <div class="card h-100 border-0 shadow-lg">
-                                    <div class="card-body p-4">
-                                        <div class="d-flex align-items-center mb-3">
-                                            <div class="bg-primary bg-opacity-10 rounded-circle p-3 me-3">
-                                                <i class="fas fa-user text-primary fs-5"></i>
-                                            </div>
-                                            <div>
-                                                <div class="fw-semibold text-dark">
-                                                    {{ post.author_display_name }}
-                                                </div>
-                                                <div class="text-muted small">
-                                                    {{ post.created.strftime('%d.%m.%Y %H:%M') if post.created else 'Неизвестно' }}
-                                                </div>
-                                            </div>
+    <div class="min-h-screen bg-gradient-to-br from-gray-50 to-slate-100 p-4 p-md-8">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-12">
+                <h1 class="display-4 fw-bold text-gray-900 mb-3">
+                    Блог
+                </h1>
+                <p class="lead text-gray-600">
+                    Последние статьи и новости из мира технологий
+                </p>
+            </div>
+
+            {% if posts %}
+                <div class="space-y-6">
+                    {% for post in posts %}
+                        <article class="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300">
+                            <!-- Контент статьи -->
+                            <div class="p-8">
+                                <div>
+                                    <h3 class="h2 fw-bold mb-3">
+                                        <a href="{{ url_for('main.view_post', post_id=post.id) }}" 
+                                           class="text-decoration-none text-gray-900 hover:text-blue-600 transition-colors">
+                                            {{ post.title }}
+                                        </a>
+                                    </h3>
+                                    <p class="text-gray-600 mb-4 fs-5">
+                                        {{ post.content[:200] }}{% if post.content|length > 200 %}...{% endif %}
+                                    </p>
+                                </div>
+                                
+                                <div>
+                                    <!-- Метаданные статьи -->
+                                    <div class="d-flex align-items-center text-sm text-gray-500 mb-5 flex-wrap gap-y-2">
+                                        <div class="d-flex align-items-center me-4">
+                                            <i class="fas fa-user w-4 h-4 me-1.5"></i>
+                                            <span>{{ post.author_display_name }}</span>
                                         </div>
-                                        
-                                        <h3 class="card-title h4 mb-3">
-                                            <a href="{{ url_for('main.view_post', post_id=post.id) }}" 
-                                               class="text-decoration-none text-dark">
-                                                {{ post.title }}
-                                            </a>
-                                        </h3>
-                                        
-                                        <p class="card-text text-muted mb-4">
-                                            {{ post.content[:180] }}{% if post.content|length > 180 %}...{% endif %}
-                                        </p>
-                                        
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <a href="{{ url_for('main.view_post', post_id=post.id) }}" 
-                                               class="btn btn-outline-primary">
-                                                Читать далее
-                                            </a>
-                                            <span class="badge bg-secondary">
-                                                {{ post.content|length // 100 }} мин
-                                            </span>
+                                        <div class="d-flex align-items-center me-4">
+                                            <i class="fas fa-calendar w-4 h-4 me-1.5"></i>
+                                            <span>{{ post.created.strftime('%d %B %Y') if post.created else 'Неизвестно' }}</span>
                                         </div>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-clock w-4 h-4 me-1.5"></i>
+                                            <span>{{ post.content|length // 100 }} мин чтения</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Кнопки действий -->
+                                    <div class="d-flex align-items-center justify-content-between pt-5 border-top">
+                                        <div class="d-flex align-items-center gap-4 text-gray-500">
+                                            <button class="btn btn-link p-0 text-decoration-none d-flex align-items-center gap-2 hover:text-danger transition-colors">
+                                                <i class="fas fa-heart"></i>
+                                                <span class="fw-medium">0</span>
+                                            </button>
+                                            <button class="btn btn-link p-0 text-decoration-none d-flex align-items-center gap-2 hover:text-primary transition-colors">
+                                                <i class="fas fa-comment"></i>
+                                                <span class="fw-medium">0</span>
+                                            </button>
+                                        </div>
+                                        <a href="{{ url_for('main.view_post', post_id=post.id) }}" 
+                                           class="btn btn-primary px-6 py-2.5 rounded-lg hover:bg-blue-700 transition-colors font-medium text-decoration-none">
+                                            Подробнее
+                                        </a>
                                     </div>
                                 </div>
                             </div>
-                        {% endfor %}
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <div class="mb-4">
+                        <i class="fas fa-file-alt text-muted" style="font-size: 4rem;"></i>
                     </div>
-                {% else %}
-                    <div class="text-center py-5">
-                        <div class="mb-4">
-                            <i class="fas fa-file-alt text-muted" style="font-size: 4rem;"></i>
-                        </div>
-                        <h3 class="mb-3">Статей пока нет</h3>
-                        <p class="text-muted mb-4">Будьте первым, кто создаст интересную статью!</p>
-                        {% if g.user %}
-                            <a href="{{ url_for('main.create_post') }}" class="btn btn-primary btn-lg">
-                                <i class="fas fa-plus me-2"></i>Создать статью
-                            </a>
-                        {% else %}
-                            <div>
-                                <p class="mb-3">Войдите или зарегистрируйтесь, чтобы создать статью</p>
-                                <div class="d-flex justify-content-center gap-3">
-                                    <a href="{{ url_for('auth.login') }}" class="btn btn-primary">
-                                        <i class="fas fa-sign-in-alt me-2"></i>Войти
-                                    </a>
-                                    <a href="{{ url_for('auth.register') }}" class="btn btn-outline-primary">
-                                        <i class="fas fa-user-plus me-2"></i>Регистрация
-                                    </a>
-                                </div>
+                    <h3 class="mb-3">Статей пока нет</h3>
+                    <p class="text-muted mb-4">Будьте первым, кто создаст интересную статью!</p>
+                    {% if g.user %}
+                        <a href="{{ url_for('main.create_post') }}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-plus me-2"></i>Создать статью
+                        </a>
+                    {% else %}
+                        <div>
+                            <p class="mb-3">Войдите или зарегистрируйтесь, чтобы создать статью</p>
+                            <div class="d-flex justify-content-center gap-3">
+                                <a href="{{ url_for('auth.login') }}" class="btn btn-primary">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Войти
+                                </a>
+                                <a href="{{ url_for('auth.register') }}" class="btn btn-outline-primary">
+                                    <i class="fas fa-user-plus me-2"></i>Регистрация
+                                </a>
                             </div>
-                        {% endif %}
-                    </div>
-                {% endif %}
-            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endif %}
         </div>
     </div>
 {% endblock %}
