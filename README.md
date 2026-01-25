@@ -112,28 +112,25 @@ pytest
 # Тесты с покрытием
 pytest --cov=app
 
-# Использование Makefile
-make test          # Все тесты
-make test-clean    # Чистый вывод
-make test-cov       # С покрытием
+# Быстрые тесты (без медленных)
+pytest -m "not slow"
+
+# Unit тесты
+pytest -m "unit"
 ```
 
-### Makefile команды
+### Разработка без Makefile
 
-```bash
-make install       # Установка зависимостей
-make dev-setup     # Настройка окружения
-make run           # Запуск приложения
-make check         # Проверка кода
-make clean         # Очистка
-```
+В этом проекте не используется Makefile, так как все задачи решаются стандартными инструментами Python и IDE:
 
-### Линтинг и форматирование
+- **Запуск приложения:** `flask --app app run` или через IDE
+- **Установка зависимостей:** `pip install -r requirements.txt`
+- **Тестирование:** `pytest` напрямую
+- **Линтинг:** встроенные линтеры IDE или `flake8 app`
+- **Форматирование:** `black app` или через IDE
+- **Очистка:** `find . -name "*.pyc" -delete && find . -name "__pycache__" -delete`
 
-```bash
-make lint          # Проверка кода
-make format        # Форматирование
-```
+Такой подход упрощает разработку и не требует изучения дополнительных команд.
 
 ## Безопасность
 

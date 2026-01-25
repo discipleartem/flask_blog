@@ -175,7 +175,7 @@ class TestPostRoutes:
         
         response = client.get('/post/create')
         assert response.status_code == 200
-        assert 'Создать новый пост' in response.get_data(as_text=True)
+        assert 'Создать новую статью' in response.get_data(as_text=True)
 
     def test_create_post_submission(self, client, auth, setup_csrf_token):
         """Создание поста должно работать."""
