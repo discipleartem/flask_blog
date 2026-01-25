@@ -67,6 +67,21 @@ def _create_test_data():
             (title, content, author_id)
         )
     db.commit()
+    
+    # Создаем тестовые комментарии для некоторых постов
+    test_comments = [
+        (1, user_id, 'Комментарий к первому посту'),  # Комментарий к посту 1
+        (1, user_id, 'Второй комментарий к первому посту'),  # Еще один комментарий к посту 1
+        (2, user_id, 'Комментарий ко второму посту'),  # Комментарий к посту 2
+        (3, user_id, 'Комментарий к третьему посту'),  # Комментарий к посту 3
+    ]
+    
+    for post_id, author_id, content in test_comments:
+        db.execute(
+            'INSERT INTO comment (post_id, author_id, content, created) VALUES (?, ?, ?, datetime("now"))',
+            (post_id, author_id, content)
+        )
+    db.commit()
 
 
 @pytest.fixture
