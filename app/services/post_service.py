@@ -65,12 +65,13 @@ class PostService:
             content=row['content'],
             created=row['created'] if row['created'] else None,
             author_username=row['username'],
-            author_discriminator=row['discriminator']
+            author_discriminator=row['discriminator'],
+            comment_count=0  # Для单个 поста не считаем комментарии для производительности
         )
     
     @staticmethod
     def get_all() -> List[Post]:
-        """Возвращает список всех постов с информацией об авторах.
+        """Возвращает список всех постов с информацией об авторах и количеством комментариев.
         
         Returns:
             List[Post]: список постов, отсортированных по дате создания (новые первые)
@@ -78,9 +79,15 @@ class PostService:
         db = get_db()
         rows = db.execute(
             '''SELECT p.id, p.author_id, p.title, p.content, p.created,
-                      u.username, u.discriminator
+                      u.username, u.discriminator,
+                      COALESCE(c.comment_count, 0) as comment_count
                FROM post p
                JOIN user u ON p.author_id = u.id
+               LEFT JOIN (
+                   SELECT post_id, COUNT(*) as comment_count 
+                   FROM comment 
+                   GROUP BY post_id
+               ) c ON p.id = c.post_id
                ORDER BY p.created DESC'''
         ).fetchall()
         
@@ -93,7 +100,8 @@ class PostService:
                 content=row['content'],
                 created=row['created'] if row['created'] else None,
                 author_username=row['username'],
-                author_discriminator=row['discriminator']
+                author_discriminator=row['discriminator'],
+                comment_count=row['comment_count']
             ))
         
         return posts
