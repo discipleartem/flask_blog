@@ -1,8 +1,6 @@
 # tests/test_integration.py
 """Интеграционные тесты для всего приложения."""
 
-from flask import session
-
 
 class TestUserWorkflows:
     """Тесты полных пользовательских сценариев."""

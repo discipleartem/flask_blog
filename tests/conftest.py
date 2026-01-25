@@ -49,7 +49,8 @@ def _create_test_data():
     # Создаем тестового пользователя
     hashed_pw, salt = hash_password("test_pass")
     db.execute(
-        "INSERT INTO user (username, discriminator, password, salt) VALUES (?, ?, ?, ?)",
+        "INSERT INTO user (username, discriminator, password, salt) "
+        "VALUES (?, ?, ?, ?)",
         ("test_user", 1234, hashed_pw, salt),
     )
     db.commit()
@@ -69,7 +70,8 @@ def _create_test_data():
 
     for title, content, author_id in test_posts:
         db.execute(
-            'INSERT INTO post (title, content, author_id, created) VALUES (?, ?, ?, datetime("now"))',
+            "INSERT INTO post (title, content, author_id, created) "
+            'VALUES (?, ?, ?, datetime("now"))',
             (title, content, author_id),
         )
     db.commit()
@@ -88,7 +90,8 @@ def _create_test_data():
 
     for post_id, author_id, content in test_comments:
         db.execute(
-            'INSERT INTO comment (post_id, author_id, content, created) VALUES (?, ?, ?, datetime("now"))',
+            "INSERT INTO comment (post_id, author_id, content, created) "
+            'VALUES (?, ?, ?, datetime("now"))',
             (post_id, author_id, content),
         )
     db.commit()
@@ -316,5 +319,6 @@ pytest.mark.slow = pytest.mark.slow
 
 # Описание фикстур:
 # - app/client/auth: для unit тестов (CSRF отключен)
-# - app_with_csrf/client_with_csrf/auth_with_csrf: для интеграционных тестов (CSRF включен)
+# - app_with_csrf/client_with_csrf/auth_with_csrf:
+#   для интеграционных тестов (CSRF включен)
 # - security_app/security_client/security_auth: для тестов безопасности (CSRF включен)

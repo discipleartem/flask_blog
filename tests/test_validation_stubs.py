@@ -7,7 +7,7 @@ from flask import Flask
 from app.forms import Form, StringField, DataRequired, Length, EqualTo
 
 # TODO: Regexp будет реализован в будущем
-from app.forms.csrf import generate_csrf_token, validate_csrf_token
+from app.forms.csrf import generate_csrf_token
 
 
 @pytest.fixture

@@ -8,7 +8,8 @@ class TestCommentCounts:
     """Тестирование счетчиков комментариев."""
 
     def test_post_service_get_all_includes_comment_count(self, app):
-        """Проверяет, что PostService.get_all() возвращает посты с количеством комментариев."""
+        """Проверяет, что PostService.get_all() возвращает посты
+        с количеством комментариев."""
         with app.app_context():
             posts = PostService.get_all()
 
@@ -44,7 +45,8 @@ class TestCommentCounts:
                 )
 
     def test_index_page_renders_comment_counts(self, client):
-        """Проверяет, что главная страница корректно отображает счетчики комментариев."""
+        """Проверяет, что главная страница корректно отображает
+        счетчики комментариев."""
         response = client.get("/")
         assert response.status_code == 200
 

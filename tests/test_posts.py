@@ -1,8 +1,5 @@
 """Тесты для функционала постов блога."""
 
-from flask import session
-
-from app.models import Post
 from app.services import PostService
 
 
@@ -63,12 +60,8 @@ class TestPostModel:
 
         with app.app_context():
             # Создаём несколько постов
-            post1 = PostService.create(
-                author_id=1, title="Пост 1", content="Содержание 1"
-            )
-            post2 = PostService.create(
-                author_id=1, title="Пост 2", content="Содержание 2"
-            )
+            PostService.create(author_id=1, title="Пост 1", content="Содержание 1")
+            PostService.create(author_id=1, title="Пост 2", content="Содержание 2")
 
             # Получаем все посты
             all_posts = PostService.get_all()

@@ -61,7 +61,8 @@ class TestDatabaseSchema:
             # Проверка существования таблицы
             try:
                 result = db.execute(
-                    "SELECT name FROM sqlite_master WHERE type='table' AND name='comment'"
+                    "SELECT name FROM sqlite_master "
+                    "WHERE type='table' AND name='comment'"
                 ).fetchone()
                 assert result is not None
             except Exception:
@@ -173,7 +174,8 @@ class TestDatabaseOperations:
 
             hashed_pw, salt = hash_password("test_password")
             db.execute(
-                "INSERT INTO user (username, discriminator, password, salt) VALUES (?, ?, ?, ?)",
+                "INSERT INTO user (username, discriminator, password, salt) "
+                "VALUES (?, ?, ?, ?)",
                 ("comment_test_user", 6666, hashed_pw, salt),
             )
             db.commit()
@@ -197,7 +199,8 @@ class TestDatabaseOperations:
                 if post:
                     # CREATE
                     db.execute(
-                        "INSERT INTO comment (content, author_id, post_id) VALUES (?, ?, ?)",
+                        "INSERT INTO comment (content, author_id, post_id) "
+                        "VALUES (?, ?, ?)",
                         ("Test comment", user["id"], post["id"]),
                     )
                     db.commit()
@@ -256,7 +259,8 @@ class TestDatabaseConstraints:
             # Создаем первого пользователя
             hashed_pw1, salt1 = hash_password("password1")
             db.execute(
-                "INSERT INTO user (username, discriminator, password, salt) VALUES (?, ?, ?, ?)",
+                "INSERT INTO user (username, discriminator, password, salt) "
+                "VALUES (?, ?, ?, ?)",
                 ("unique_test", 1111, hashed_pw1, salt1),
             )
             db.commit()
@@ -266,7 +270,8 @@ class TestDatabaseConstraints:
             try:
                 hashed_pw2, salt2 = hash_password("password2")
                 db.execute(
-                    "INSERT INTO user (username, discriminator, password, salt) VALUES (?, ?, ?, ?)",
+                    "INSERT INTO user (username, discriminator, password, salt) "
+                    "VALUES (?, ?, ?, ?)",
                     ("unique_test", 1111, hashed_pw2, salt2),
                 )
                 db.commit()
@@ -316,7 +321,8 @@ class TestDatabaseTransactions:
                 # Создаем пользователя
                 hashed_pw, salt = hash_password("test_password")
                 db.execute(
-                    "INSERT INTO user (username, discriminator, password, salt) VALUES (?, ?, ?, ?)",
+                    "INSERT INTO user (username, discriminator, password, salt) "
+                    "VALUES (?, ?, ?, ?)",
                     ("transaction_test", 5555, hashed_pw, salt),
                 )
 
@@ -346,7 +352,8 @@ class TestDatabaseTransactions:
             # Создаем пользователя в транзакции
             hashed_pw, salt = hash_password("test_password")
             db.execute(
-                "INSERT INTO user (username, discriminator, password, salt) VALUES (?, ?, ?, ?)",
+                "INSERT INTO user (username, discriminator, password, salt) "
+                "VALUES (?, ?, ?, ?)",
                 ("commit_test", 4444, hashed_pw, salt),
             )
             db.commit()
@@ -407,7 +414,8 @@ class TestDatabasePerformance:
 
             for user_data in users_to_insert:
                 db.execute(
-                    "INSERT INTO user (username, discriminator, password, salt) VALUES (?, ?, ?, ?)",
+                    "INSERT INTO user (username, discriminator, password, salt) "
+                    "VALUES (?, ?, ?, ?)",
                     user_data,
                 )
 

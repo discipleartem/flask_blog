@@ -34,7 +34,10 @@ class CommentService:
         db.commit()
 
         # Получаем созданный комментарий с информацией об авторе
-        return CommentService.find_by_id(cursor.lastrowid)
+        comment = CommentService.find_by_id(cursor.lastrowid)
+        if comment is None:
+            raise RuntimeError("Failed to retrieve created comment")
+        return comment
 
     @staticmethod
     def find_by_id(comment_id: int) -> Optional[Comment]:
@@ -49,7 +52,8 @@ class CommentService:
         db = get_db()
         row = db.execute(
             """SELECT c.id, c.author_id, c.post_id, c.content, c.created,
-                      u.username as author_username, u.discriminator as author_discriminator
+                      u.username as author_username,
+                      u.discriminator as author_discriminator
                FROM comment c
                JOIN user u ON c.author_id = u.id
                WHERE c.id = ?""",
@@ -86,7 +90,8 @@ class CommentService:
         db = get_db()
         rows = db.execute(
             """SELECT c.id, c.author_id, c.post_id, c.content, c.created,
-                      u.username as author_username, u.discriminator as author_discriminator
+                      u.username as author_username,
+                      u.discriminator as author_discriminator
                FROM comment c
                JOIN user u ON c.author_id = u.id
                WHERE c.post_id = ?

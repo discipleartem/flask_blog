@@ -122,7 +122,8 @@ class DatabaseTestHelper:
         """
         hashed_pw, salt = hash_password(password)
         db.execute(
-            "INSERT INTO user (username, discriminator, password, salt) VALUES (?, ?, ?, ?)",
+            "INSERT INTO user (username, discriminator, password, salt) "
+            "VALUES (?, ?, ?, ?)",
             (username, discriminator, hashed_pw, salt),
         )
         return hashed_pw, salt
@@ -147,7 +148,8 @@ class DatabaseTestHelper:
         # Создаем пользователя
         hashed_pw, salt = hash_password(password)
         db.execute(
-            "INSERT INTO user (username, discriminator, password, salt) VALUES (?, ?, ?, ?)",
+            "INSERT INTO user (username, discriminator, password, salt) "
+            "VALUES (?, ?, ?, ?)",
             (username, discriminator, hashed_pw, salt),
         )
         db.commit()

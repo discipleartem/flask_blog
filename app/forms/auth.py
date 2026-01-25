@@ -17,9 +17,13 @@ class RegistrationForm(Form):
                 max=20,
                 message="Имя пользователя должно быть от 3 до 20 символов",
             ),
-            # TODO: Добавить Regexp(r'^[a-zA-Z0-9_]+$', message='Имя пользователя может содержать только буквы, цифры и подчёркивания')
-            # TODO: Добавить Regexp(r'^(?!.*#).*$', message='Имя пользователя
-            # не должно содержать символ #')
+            # TODO: Добавить Regexp(
+            #     r'^[a-zA-Z0-9_]+$',
+            #     message='Имя пользователя может содержать только буквы, '
+            #             'цифры и подчёркивания'
+            # )
+            # TODO: Добавить Regexp(r'^(?!.*#).*$',
+            #     message='Имя пользователя не должно содержать символ #')
         ],
     )
 
@@ -48,7 +52,7 @@ class LoginForm(Form):
         "Пароль", validators=[DataRequired(message="Пароль обязателен")]
     )
 
-    def __init__(self, formdata=None, **kwargs):
+    def __init__(self, formdata=None, **kwargs) -> None:
         super().__init__(formdata, **kwargs)
         # Если форма отправлена с login_username, используем его как username
         if formdata and "login_username" in formdata:

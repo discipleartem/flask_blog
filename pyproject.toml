@@ -58,3 +58,75 @@ filterwarnings = [
     "ignore::PendingDeprecationWarning",
     "ignore::UserWarning"
 ]
+
+[tool.black]
+line-length = 88
+target-version = ['py313']
+skip-string-normalization = false
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.mypy]
+python_version = "3.13"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+strict_concatenate = true
+strict_optional = true
+show_error_codes = true
+show_error_context = true
+show_column_numbers = true
+color_output = true
+error_summary = true
+exclude = [
+    '\.venv',
+    '\.git',
+    '__pycache__',
+    'build',
+    'dist',
+    '.*\.egg-info',
+]
+
+[[tool.mypy.overrides]]
+module = [
+    "flask.*",
+    "werkzeug.*",
+    "click.*",
+]
+ignore_missing_imports = true
+
+[tool.bandit]
+exclude_dirs = [
+    "\\.git",
+    "\\.venv",
+    "__pycache__",
+    "build",
+    "dist",
+    ".*\\.egg-info",
+    "tests",
+]
+skips = []
+severity = "medium"
+confidence = "medium"
+max_lines = 500

@@ -13,14 +13,13 @@ from flask import (
 
 from app.auth.utils import login_required
 from app.services import PostService, CommentService
-from app.models import Post
 from app.forms import PostForm, CommentForm
 
 bp = Blueprint("main", __name__)
 
 
 @bp.route("/")
-def index():
+def index() -> str:
     """Главная страница блога - список всех постов."""
     posts = PostService.get_all()
     return render_template("main/index.html", posts=posts)
@@ -28,7 +27,7 @@ def index():
 
 @bp.route("/post/create", methods=["GET", "POST"])
 @login_required
-def create_post():
+def create_post() -> str:
     """Создание нового поста."""
     form = PostForm(request.form)
 
@@ -49,7 +48,7 @@ def create_post():
 
 
 @bp.route("/post/<int:post_id>")
-def view_post(post_id):
+def view_post(post_id) -> str:
     """Просмотр отдельного поста."""
     post = PostService.find_by_id(post_id)
     if post is None:
@@ -66,7 +65,7 @@ def view_post(post_id):
 
 @bp.route("/post/<int:post_id>/edit", methods=["GET", "POST"])
 @login_required
-def edit_post(post_id):
+def edit_post(post_id) -> str:
     """Редактирование поста (только для автора)."""
     post = PostService.find_by_id(post_id)
     if post is None:
@@ -97,7 +96,7 @@ def edit_post(post_id):
 
 @bp.route("/post/<int:post_id>/delete", methods=["POST"])
 @login_required
-def delete_post(post_id):
+def delete_post(post_id) -> str:
     """Удаление поста (только для автора)."""
     post = PostService.find_by_id(post_id)
     if post is None:
@@ -121,7 +120,7 @@ def delete_post(post_id):
 
 @bp.route("/post/<int:post_id>/comment", methods=["POST"])
 @login_required
-def add_comment(post_id):
+def add_comment(post_id) -> str:
     """Добавление комментария к посту."""
     post = PostService.find_by_id(post_id)
     if post is None:
@@ -130,7 +129,7 @@ def add_comment(post_id):
     form = CommentForm(request.form)
 
     if form.validate():
-        comment = CommentService.create(
+        CommentService.create(
             author_id=g.user["id"], post_id=post_id, content=form.content.data
         )
         flash("Комментарий успешно добавлен!", "success")
@@ -145,7 +144,7 @@ def add_comment(post_id):
 
 @bp.route("/comment/<int:comment_id>/delete", methods=["POST"])
 @login_required
-def delete_comment(comment_id):
+def delete_comment(comment_id) -> str:
     """Удаление комментария (только для автора)."""
     # Проверяем существование комментария
     comment = CommentService.find_by_id(comment_id)

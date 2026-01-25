@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from flask import Flask
 
 
-def create_app(test_config=None):
+def create_app(test_config=None) -> Flask:
     """Фабрика Flask-приложения.
 
     Создаёт и настраивает экземпляр Flask:
@@ -47,7 +47,7 @@ def create_app(test_config=None):
 
     # Добавляем кастомные фильтры для шаблонов
     @app.template_filter("nl2br")
-    def nl2br_filter(text):
+    def nl2br_filter(text) -> str:
         """Преобразует переносы строк в HTML теги <br>."""
         if text is None:
             return ""
@@ -57,7 +57,7 @@ def create_app(test_config=None):
 
     # Добавляем CSRF токен в контекст всех шаблонов
     @app.context_processor
-    def inject_csrf_token():
+    def inject_csrf_token() -> dict[str, str]:
         """Добавляет CSRF токен в контекст всех шаблонов."""
         from app.forms.csrf import generate_csrf_token
 

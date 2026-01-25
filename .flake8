@@ -1,4 +1,3 @@
 [flake8]
 max-line-length = 88
-ignore = F401,F841,E501,E741,W503
 exclude = .venv,__pycache__,*.pyc,.git,.pytest_cache,htmlcov,.coverage,.mypy_cache,.tox,build,dist

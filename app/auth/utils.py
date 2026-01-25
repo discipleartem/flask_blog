@@ -5,13 +5,12 @@ import secrets
 from typing import Optional
 
 from flask import flash, g, redirect, url_for
-from werkzeug.security import check_password_hash, generate_password_hash
 
 # Максимальное значение тега (дискриминатора), как в Discord (от 0001 до 9999).
 MAX_DISCRIMINATOR = 9999
 
 
-def hash_password(password: str, salt: bytes = None) -> tuple[str, bytes]:
+def hash_password(password: str, salt: Optional[bytes] = None) -> tuple[str, bytes]:
     """Хэширует пароль с использованием werkzeug.security.
 
     Args:

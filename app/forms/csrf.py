@@ -5,7 +5,7 @@ import os
 from flask import session, current_app
 
 
-def generate_csrf_token():
+def generate_csrf_token() -> str:
     """Генерирует CSRF-токен, привязанный к сессии.
 
     Реализация:
@@ -32,7 +32,7 @@ def generate_csrf_token():
     return hmac.new(key, token, hashlib.sha256).hexdigest()
 
 
-def validate_csrf_token(token):
+def validate_csrf_token(token) -> bool:
     """Проверяет CSRF-токен на совпадение с ожидаемым.
 
     Args:

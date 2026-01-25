@@ -22,7 +22,7 @@ warnings.filterwarnings(
 )
 
 
-def get_db():
+def get_db() -> sqlite3.Connection:
     """Возвращает соединение с БД для текущего контекста запроса.
 
     Если соединение ещё не создано — создаёт, настраивает row_factory и кладёт в g.db.
@@ -42,7 +42,7 @@ def get_db():
     return g.db
 
 
-def close_db(_=None):
+def close_db(_=None) -> None:
     """Закрывает соединение с БД, если оно было открыто.
 
     Вызывается автоматически при завершении обработки запроса (teardown_appcontext).
@@ -52,7 +52,7 @@ def close_db(_=None):
         db.close()
 
 
-def init_db():
+def init_db() -> None:
     """Инициализирует БД: создаёт таблицы из SQL-скрипта schema.sql."""
     db = get_db()
     # current_app.open_resource ищет файл относительно пакета приложения
@@ -61,13 +61,13 @@ def init_db():
 
 
 @click.command("init-db")
-def init_db_command():
+def init_db_command() -> None:
     """CLI-команда: очистить/создать таблицы (запускается как `flask init-db`)."""
     init_db()
     click.echo("База данных инициализирована.")
 
 
-def init_app(app):
+def init_app(app) -> None:
     """Подключает БД к Flask-приложению.
 
     - регистрирует закрытие соединения на teardown,

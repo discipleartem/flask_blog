@@ -33,7 +33,10 @@ class PostService:
         db.commit()
 
         # Получаем созданный пост с информацией об авторе
-        return PostService.find_by_id(cursor.lastrowid)
+        post = PostService.find_by_id(cursor.lastrowid)
+        if post is None:
+            raise RuntimeError("Failed to retrieve created post")
+        return post
 
     @staticmethod
     def find_by_id(post_id: int) -> Optional[Post]:
@@ -66,15 +69,18 @@ class PostService:
             created=row["created"] if row["created"] else None,
             author_username=row["username"],
             author_discriminator=row["discriminator"],
-            comment_count=0,  # Для单个 поста не считаем комментарии для производительности
+            comment_count=0,  # Для单个 поста не считаем комментарии
+            # для производительности
         )
 
     @staticmethod
     def get_all() -> List[Post]:
-        """Возвращает список всех постов с информацией об авторах и количеством комментариев.
+        """Возвращает список всех постов с информацией об авторах
+        и количеством комментариев.
 
         Returns:
-            List[Post]: список постов, отсортированных по дате создания (новые первые)
+            List[Post]: список постов, отсортированных по дате создания
+            (новые первые)
         """
         db = get_db()
         rows = db.execute("""SELECT p.id, p.author_id, p.title, p.content, p.created,

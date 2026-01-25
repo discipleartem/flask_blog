@@ -20,7 +20,7 @@ from app.forms import (
 )
 
 # TODO: Regexp будет реализован в будущем
-from app.forms.csrf import generate_csrf_token, validate_csrf_token
+from app.forms.csrf import generate_csrf_token
 
 
 @pytest.fixture
@@ -178,10 +178,13 @@ def test_validators_standalone():
     assert dr("   ") == (True, None)  # TODO: должно быть (False, message)
 
     # Length - заглушка всегда возвращает True
-    l = Length(min=5)
-    assert l("12345") == (True, None)
-    assert l("1234") == (True, None)  # TODO: должно быть (False, message)
-    assert l("123") == (True, None)  # TODO: должно быть (False, message)
+    length_validator = Length(min=5)
+    assert length_validator("12345") == (True, None)
+    assert length_validator("1234") == (
+        True,
+        None,
+    )  # TODO: должно быть (False, message)
+    assert length_validator("123") == (True, None)  # TODO: должно быть (False, message)
 
     # TODO: Regexp - будет реализован в будущем
     # r = Regexp(r'^\w+$')
@@ -216,6 +219,9 @@ def test_validator_stubs_always_return_true():
                 assert result == (
                     True,
                     None,
-                ), f"{validator.__class__.__name__}({value}) = {result}, expected (True, None)"
+                ), (
+                    f"{validator.__class__.__name__}({value}) = {result}, "
+                    f"expected (True, None)"
+                )
             except Exception as e:
                 pytest.fail(f"Ошибка в валидаторе {validator.__class__.__name__}: {e}")

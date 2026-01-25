@@ -19,7 +19,7 @@ class Form:
     не делили одно и то же Field-состояние (data/errors) между запросами.
     """
 
-    def __init__(self, form_data=None):
+    def __init__(self, form_data=None) -> None:
         self._fields = {}
         self._csrf_error = None
         self._csrf_token_data = None
@@ -45,7 +45,7 @@ class Form:
         if form_data is not None:
             self.process(form_data)
 
-    def process(self, form_data):
+    def process(self, form_data) -> None:
         """Заполняет поля формы данными из form_data (dict/MultiDict)."""
         # Заполняем данные для каждого зарегистрированного поля
         for name, field in self._fields.items():
@@ -56,7 +56,7 @@ class Form:
         # Извлекаем CSRF токен для валидации
         self._csrf_token_data = getattr(form_data, "get", lambda k: None)("csrf_token")
 
-    def validate(self):
+    def validate(self) -> bool:
         """Валидирует форму: CSRF + валидаторы каждого поля.
 
         Returns:

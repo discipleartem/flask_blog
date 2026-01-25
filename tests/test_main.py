@@ -1,8 +1,6 @@
 # tests/test_main.py
 """Тесты для основных маршрутов приложения."""
 
-from flask import session
-
 
 class TestMainRoutes:
     """Тесты основных страниц приложения."""

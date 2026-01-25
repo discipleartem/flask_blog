@@ -117,7 +117,8 @@ def authenticate_admin(password: str) -> Tuple[Optional[dict], Optional[str]]:
         password: Пароль для проверки
 
     Returns:
-        Tuple[user_dict, error_message]: Данные пользователя или None, сообщение об ошибке или None
+        Tuple[user_dict, error_message]: Данные пользователя или None,
+        сообщение об ошибке или None
     """
     if password != current_app.config["ADMIN_PASSWORD"]:
         return None, "Неверный пароль для admin"
@@ -130,8 +131,9 @@ def authenticate_admin(password: str) -> Tuple[Optional[dict], Optional[str]]:
     # Создаём admin пользователя если его нет
     if admin_user is None:
         hashed_pw, salt = hash_password(password)
-        cursor = db.execute(
-            "INSERT INTO user (username, password, discriminator, salt) VALUES (?, ?, ?, ?)",
+        db.execute(
+            "INSERT INTO user (username, password, discriminator, salt) "
+            "VALUES (?, ?, ?, ?)",
             (ADMIN_USERNAME, hashed_pw, 0, salt),
         )
         db.commit()
@@ -154,7 +156,8 @@ def authenticate_user(
         password: Пароль для проверки
 
     Returns:
-        Tuple[user_dict, error_message]: Данные пользователя или None, сообщение об ошибке или None
+        Tuple[user_dict, error_message]: Данные пользователя или None,
+        сообщение об ошибке или None
     """
     if "#" not in username_to_check:
         return None, "Неверный формат логина"
@@ -180,7 +183,7 @@ def authenticate_user(
 
 
 @bp.route("/register", methods=("GET", "POST"))
-def register():
+def register() -> str:
     """Регистрация нового пользователя с автоматической генерацией дискриминатора.
 
     Процесс регистрации:
@@ -288,7 +291,8 @@ def _create_user_in_db(db, username: str, password: str, discriminator: int) -> 
     """
     hashed_pw, salt = hash_password(password)
     cursor = db.execute(
-        "INSERT INTO user (username, password, discriminator, salt) VALUES (?, ?, ?, ?)",
+        "INSERT INTO user (username, password, discriminator, salt) "
+        "VALUES (?, ?, ?, ?)",
         (username, hashed_pw, discriminator, salt),
     )
     db.commit()
@@ -307,7 +311,7 @@ def _display_form_errors(form: RegistrationForm) -> None:
 
 
 @bp.route("/login", methods=("GET", "POST"))
-def login():
+def login() -> str:
     """Вход пользователя с поддержкой дискриминаторов.
 
     Форматы входа:
@@ -436,7 +440,7 @@ def _handle_user_login(username: str, password: str) -> dict:
 
 
 @bp.before_app_request
-def load_logged_in_user():
+def load_logged_in_user() -> None:
     """Загружает текущего пользователя в контекст запроса.
 
     Выполняется перед каждым запросом к приложению.
@@ -461,7 +465,7 @@ def load_logged_in_user():
 
 
 @bp.route("/logout")
-def logout():
+def logout() -> str:
     """Выход пользователя из системы.
 
     Очищает сессию пользователя и перенаправляет на главную страницу.

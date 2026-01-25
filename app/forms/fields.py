@@ -13,7 +13,7 @@ class Field:
         name: имя поля в форме (устанавливается в Form.__init__)
     """
 
-    def __init__(self, label="", validators=None, description=""):
+    def __init__(self, label="", validators=None, description="") -> None:
         self.label = label
         self.validators = validators or []
         self.description = description
@@ -21,7 +21,7 @@ class Field:
         self.errors = []
         self.name = None  # Устанавливается в Form.__init__
 
-    def validate(self, form):
+    def validate(self, form) -> bool:
         """Запускает валидаторы по очереди и собирает ошибки.
 
         Валидаторы поддерживаются в двух вариантах:
@@ -38,7 +38,8 @@ class Field:
         is_valid = True
 
         for validator in self.validators:
-            # Проверяем, ожидает ли валидатор доступ к форме (2 аргумента: self, value, form)
+            # Проверяем, ожидает ли валидатор доступ к форме
+            # (2 аргумента: self, value, form)
             # или только значение (1 аргумент: self, value)
             try:
                 # Получаем количество параметров метода __call__

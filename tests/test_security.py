@@ -6,7 +6,7 @@ from flask import Flask
 from tests.base import BaseTestCase, FormTestHelper
 
 from app.forms import Form, StringField, DataRequired, Length, EqualTo
-from app.forms.csrf import generate_csrf_token, validate_csrf_token
+from app.forms.csrf import generate_csrf_token
 
 
 class TestCSRFProtection(BaseTestCase):

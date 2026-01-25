@@ -1,7 +1,5 @@
 """Тесты для функционала комментариев."""
 
-from flask import session
-
 from app.models import Comment
 from app.services import CommentService
 
@@ -75,10 +73,10 @@ class TestCommentModel:
             )
 
             # Создаём несколько комментариев
-            comment1 = CommentService.create(
+            CommentService.create(
                 author_id=1, post_id=post.id, content="Первый комментарий"
             )
-            comment2 = CommentService.create(
+            CommentService.create(
                 author_id=1, post_id=post.id, content="Второй комментарий"
             )
 
