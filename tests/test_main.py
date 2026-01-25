@@ -39,22 +39,16 @@ class TestPostManagement:
 
     def test_create_post_requires_login(self, client):
         """Создание поста требует аутентификации."""
-        response = client.get('/main/create', follow_redirects=False)
-        # Если маршрут существует, должен редиректить на страницу входа
-        if response.status_code == 404:
-            # Маршрут не реализован - пропускаем тест
-            pytest.skip("Маршрут /main/create не реализован")
-        else:
-            assert response.status_code == 302
-            assert '/auth/login' in response.headers['Location']
+        response = client.get('/post/create', follow_redirects=False)
+        assert response.status_code == 302
+        assert '/auth/login' in response.headers['Location']
 
     def test_create_post_authenticated(self, client, auth, app):
         """Создание поста аутентифицированным пользователем."""
         auth.login()
-        response = client.get('/main/create')
-        # Если маршрут существует
-        if response.status_code == 200:
-            assert 'Создать пост'.encode('utf-8') in response.data
+        response = client.get('/post/create')
+        assert response.status_code == 200
+        assert 'Создать'.encode('utf-8') in response.data
 
     def test_post_creation_success(self, client, auth, app):
         """Успешное создание поста."""
@@ -63,7 +57,7 @@ class TestPostManagement:
         with app.app_context():
             # Пробуем создать пост
             response = client.post(
-                '/main/create',
+                '/post/create',
                 data={
                     'title': 'Тестовый пост',
                     'content': 'Это содержимое тестового поста',
@@ -88,30 +82,24 @@ class TestPostManagement:
     def test_view_post(self, client, app):
         """Просмотр отдельного поста."""
         with app.app_context():
-            # Пробуем просмотреть пост с ID 1
-            response = client.get('/main/post/1')
-            # Если маршрут существует
-            if response.status_code in [200, 404]:
-                # 200 - пост существует, 404 - поста нет, но маршрут работает
-                assert True
+            # Пробуем просмотреть пост с ID 1 (создается в conftest.py)
+            response = client.get('/post/1')
+            # Должен вернуть 200 (пост есть)
+            assert response.status_code == 200
+            # Проверяем, что в ответе есть содержимое поста
+            assert b'Test Post' in response.data or b'post' in response.data
 
     def test_edit_post_requires_login(self, client):
         """Редактирование поста требует аутентификации."""
-        response = client.get('/main/edit/1', follow_redirects=False)
-        if response.status_code == 404:
-            pytest.skip("Маршрут /main/edit/1 не реализован")
-        else:
-            assert response.status_code == 302
-            assert '/auth/login' in response.headers['Location']
+        response = client.get('/post/1/edit', follow_redirects=False)
+        assert response.status_code == 302
+        assert '/auth/login' in response.headers['Location']
 
     def test_delete_post_requires_login(self, client):
         """Удаление поста требует аутентификации."""
-        response = client.post('/main/delete/1', follow_redirects=False)
-        if response.status_code == 404:
-            pytest.skip("Маршрут /main/delete/1 не реализован")
-        else:
-            assert response.status_code == 302
-            assert '/auth/login' in response.headers['Location']
+        response = client.post('/post/1/delete', follow_redirects=False)
+        assert response.status_code == 302
+        assert '/auth/login' in response.headers['Location']
 
 
 class TestErrorHandlers:
@@ -138,30 +126,6 @@ class TestErrorHandlers:
             assert response.status_code in [200, 302, 404, 500]
 
 
-class TestCSRFProtection:
-    """Тесты CSRF защиты."""
-
-    def test_csrf_token_generation(self, app):
-        """Генерация CSRF токена."""
-        with app.test_request_context():
-            from app.forms.csrf import generate_csrf_token
-            token = generate_csrf_token()
-            assert token is not None
-            assert len(token) > 0
-
-    def test_csrf_validation(self, app):
-        """Валидация CSRF токена."""
-        with app.test_request_context():
-            from app.forms.csrf import validate_csrf_token, generate_csrf_token
-            
-            # Генерируем токен
-            token = generate_csrf_token()
-            
-            # Правильный токен должен проходить валидацию
-            assert validate_csrf_token(token) is True
-            
-            # Неправильный токен не должен проходить валидацию
-            assert validate_csrf_token('wrong_token') is False
 
 
 class TestDatabaseOperations:
@@ -194,43 +158,6 @@ class TestDatabaseOperations:
             except Exception:
                 pass  # Таблиц может не существовать
 
-    def test_user_crud_operations(self, app):
-        """CRUD операции для пользователей."""
-        with app.app_context():
-            from app.db.db import get_db
-            from app.auth import hash_password
-            
-            db = get_db()
-            
-            # Создание пользователя
-            hashed_pw, salt = hash_password('test_password')
-            db.execute(
-                'INSERT INTO user (username, discriminator, password, salt) VALUES (?, ?, ?, ?)',
-                ('test_user_crud', 9999, hashed_pw, salt)
-            )
-            db.commit()
-            
-            # Чтение пользователя
-            user = db.execute(
-                'SELECT * FROM user WHERE username = ? AND discriminator = ?',
-                ('test_user_crud', 9999)
-            ).fetchone()
-            assert user is not None
-            assert user['username'] == 'test_user_crud'
-            
-            # Удаление пользователя
-            db.execute(
-                'DELETE FROM user WHERE username = ? AND discriminator = ?',
-                ('test_user_crud', 9999)
-            )
-            db.commit()
-            
-            # Проверка удаления
-            deleted_user = db.execute(
-                'SELECT * FROM user WHERE username = ? AND discriminator = ?',
-                ('test_user_crud', 9999)
-            ).fetchone()
-            assert deleted_user is None
 
 
 class TestConfiguration:

@@ -3,15 +3,86 @@
 {% block title %}Главная{% endblock %}
 
 {% block content %}
-    <div class="text-center">
-        <h1>Добро пожаловать в Flask Blog!</h1>
-        <p class="lead">Многопользовательская блог-платформа</p>
-
-        {% if g.user %}
-            <p>Привет, <strong>{{ g.user['username'] }}#{{ '%04d'|format(g.user['discriminator']|default(0)) }}</strong>!
-            </p>
-        {% else %}
-            <p><a href="{{ url_for('auth.register') }}" class="btn btn-primary">Зарегистрироваться</a></p>
-        {% endif %}
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-12">
+                <div class="text-center mb-5">
+                    <h1 class="display-5 fw-bold">Все статьи блога</h1>
+                    <p class="lead text-muted">Откройте для себя интересные истории и идеи</p>
+                </div>
+                
+                {% if posts %}
+                    <div class="row g-4">
+                        {% for post in posts %}
+                            <div class="col-lg-4 col-md-6">
+                                <div class="card h-100 border-0 shadow-lg">
+                                    <div class="card-body p-4">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="bg-primary bg-opacity-10 rounded-circle p-3 me-3">
+                                                <i class="fas fa-user text-primary fs-5"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-semibold text-dark">
+                                                    {{ post.author_display_name }}
+                                                </div>
+                                                <div class="text-muted small">
+                                                    {{ post.created.strftime('%d.%m.%Y %H:%M') if post.created else 'Неизвестно' }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <h3 class="card-title h4 mb-3">
+                                            <a href="{{ url_for('main.view_post', post_id=post.id) }}" 
+                                               class="text-decoration-none text-dark">
+                                                {{ post.title }}
+                                            </a>
+                                        </h3>
+                                        
+                                        <p class="card-text text-muted mb-4">
+                                            {{ post.content[:180] }}{% if post.content|length > 180 %}...{% endif %}
+                                        </p>
+                                        
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <a href="{{ url_for('main.view_post', post_id=post.id) }}" 
+                                               class="btn btn-outline-primary">
+                                                Читать далее
+                                            </a>
+                                            <span class="badge bg-secondary">
+                                                {{ post.content|length // 100 }} мин
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <div class="mb-4">
+                            <i class="fas fa-file-alt text-muted" style="font-size: 4rem;"></i>
+                        </div>
+                        <h3 class="mb-3">Статей пока нет</h3>
+                        <p class="text-muted mb-4">Будьте первым, кто создаст интересную статью!</p>
+                        {% if g.user %}
+                            <a href="{{ url_for('main.create_post') }}" class="btn btn-primary btn-lg">
+                                <i class="fas fa-plus me-2"></i>Создать статью
+                            </a>
+                        {% else %}
+                            <div>
+                                <p class="mb-3">Войдите или зарегистрируйтесь, чтобы создать статью</p>
+                                <div class="d-flex justify-content-center gap-3">
+                                    <a href="{{ url_for('auth.login') }}" class="btn btn-primary">
+                                        <i class="fas fa-sign-in-alt me-2"></i>Войти
+                                    </a>
+                                    <a href="{{ url_for('auth.register') }}" class="btn btn-outline-primary">
+                                        <i class="fas fa-user-plus me-2"></i>Регистрация
+                                    </a>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
     </div>
 {% endblock %}

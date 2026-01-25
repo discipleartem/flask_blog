@@ -4,6 +4,7 @@
 import pytest
 import tempfile
 import os
+from tests.base import DatabaseTestHelper
 
 
 class TestDatabaseSchema:
@@ -77,15 +78,12 @@ class TestDatabaseOperations:
         """CRUD операции для пользователей."""
         with app.app_context():
             from app.db.db import get_db
-            from app.auth import hash_password
             
             db = get_db()
             
-            # CREATE
-            hashed_pw, salt = hash_password('test_password')
-            db.execute(
-                'INSERT INTO user (username, discriminator, password, salt) VALUES (?, ?, ?, ?)',
-                ('test_user_crud', 8888, hashed_pw, salt)
+            # CREATE с использованием хелпера
+            hashed_pw, salt = DatabaseTestHelper.create_user_with_password(
+                db, 'test_user_crud', 8888, 'test_password'
             )
             db.commit()
             
@@ -113,12 +111,9 @@ class TestDatabaseOperations:
             assert updated_user['username'] == 'updated_user'
             
             # DELETE
-            db.execute(
-                'DELETE FROM user WHERE username = ?',
-                ('updated_user',)
-            )
-            db.commit()
+            DatabaseTestHelper.cleanup_test_data(db, usernames=['updated_user'])
             
+            # Проверка удаления
             deleted_user = db.execute(
                 'SELECT * FROM user WHERE username = ?',
                 ('updated_user',)
@@ -132,32 +127,17 @@ class TestDatabaseOperations:
             
             db = get_db()
             
-            # Сначала создаем тестового пользователя
-            from app.auth import hash_password
-            hashed_pw, salt = hash_password('test_password')
-            db.execute(
-                'INSERT INTO user (username, discriminator, password, salt) VALUES (?, ?, ?, ?)',
-                ('post_test_user', 7777, hashed_pw, salt)
+            # Создаем пользователя с постом через хелпер
+            user_id, post_id = DatabaseTestHelper.create_user_with_post(
+                db, 'post_test_user', 7777, 'test_password',
+                'Test Post', 'Test content'
             )
-            db.commit()
             
-            user = db.execute(
-                'SELECT id FROM user WHERE username = ? AND discriminator = ?',
-                ('post_test_user', 7777)
-            ).fetchone()
-            
-            if user:
-                # CREATE
-                db.execute(
-                    'INSERT INTO post (title, content, author_id) VALUES (?, ?, ?)',
-                    ('Test Post', 'Test content', user['id'])
-                )
-                db.commit()
-                
+            if user_id and post_id:
                 # READ
                 post = db.execute(
-                    'SELECT * FROM post WHERE title = ?',
-                    ('Test Post',)
+                    'SELECT * FROM post WHERE id = ?',
+                    (post_id,)
                 ).fetchone()
                 assert post is not None
                 assert post['title'] == 'Test Post'
@@ -166,13 +146,13 @@ class TestDatabaseOperations:
                 # UPDATE
                 db.execute(
                     'UPDATE post SET title = ?, content = ? WHERE id = ?',
-                    ('Updated Post', 'Updated content', post['id'])
+                    ('Updated Post', 'Updated content', post_id)
                 )
                 db.commit()
                 
                 updated_post = db.execute(
                     'SELECT * FROM post WHERE id = ?',
-                    (post['id'],)
+                    (post_id,)
                 ).fetchone()
                 assert updated_post['title'] == 'Updated Post'
                 assert updated_post['content'] == 'Updated content'
@@ -180,22 +160,18 @@ class TestDatabaseOperations:
                 # DELETE
                 db.execute(
                     'DELETE FROM post WHERE id = ?',
-                    (post['id'],)
+                    (post_id,)
                 )
                 db.commit()
                 
                 deleted_post = db.execute(
                     'SELECT * FROM post WHERE id = ?',
-                    (post['id'],)
+                    (post_id,)
                 ).fetchone()
                 assert deleted_post is None
             
             # Удаляем тестового пользователя
-            db.execute(
-                'DELETE FROM user WHERE username = ? AND discriminator = ?',
-                ('post_test_user', 7777)
-            )
-            db.commit()
+            DatabaseTestHelper.cleanup_test_data(db, usernames=['post_test_user'])
 
     def test_comment_crud_operations(self, app):
         """CRUD операции для комментариев."""

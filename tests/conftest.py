@@ -6,6 +6,8 @@ import tempfile
 import pytest
 import warnings
 import sys
+import re
+from typing import Dict, Any
 
 # Полное подавление предупреждений о временных метках
 if not sys.warnoptions:
@@ -16,32 +18,79 @@ from app import create_app
 from app.db.db import get_db, init_db
 
 
-@pytest.fixture
-def app():
-    """Создает тестовое приложение с временной БД."""
+def _create_test_app(config: Dict[str, Any]) -> Any:
+    """Вспомогательная функция для создания тестового приложения."""
     db_fd, db_path = tempfile.mkstemp()
-
-    app = create_app({
+    
+    app_config = {
         'TESTING': True,
         'DATABASE': db_path,
         'SECRET_KEY': 'test-secret-key-for-testing',
-        'WTF_CSRF_ENABLED': False,  # Отключаем CSRF для тестов
-    })
-
+        'ADMIN_PASSWORD': 'test_admin_password',
+        **config
+    }
+    
+    app = create_app(app_config)
+    
     with app.app_context():
         init_db()
-        # Создаем тестового пользователя
-        db = get_db()
-        from app.auth import hash_password
-        hashed_pw, salt = hash_password('test_pass')
+        _create_test_data()
+    
+    return app, db_fd, db_path
+
+
+def _create_test_data():
+    """Создает тестовые данные в базе."""
+    db = get_db()
+    from app.auth import hash_password
+    
+    # Создаем тестового пользователя
+    hashed_pw, salt = hash_password('test_pass')
+    db.execute(
+        'INSERT INTO user (username, discriminator, password, salt) VALUES (?, ?, ?, ?)',
+        ('test_user', 1234, hashed_pw, salt),
+    )
+    db.commit()
+    
+    # Создаем тестовые посты
+    user_id = 1  # ID первого созданного пользователя
+    test_posts = [
+        ('Тестовый пост 1', 'Содержание первого тестового поста', user_id),
+        ('Тестовый пост 2', 'Содержание второго тестового поста', user_id),
+        ('Пост для просмотра', 'Этот пост используется для тестирования просмотра', user_id),
+        ('Новый пост', 'Содержание нового поста для тестов', user_id),
+    ]
+    
+    for title, content, author_id in test_posts:
         db.execute(
-            'INSERT INTO user (username, discriminator, password, salt) VALUES (?, ?, ?, ?)',
-            ('test_user', 1234, hashed_pw, salt),
+            'INSERT INTO post (title, content, author_id, created) VALUES (?, ?, ?, datetime("now"))',
+            (title, content, author_id)
         )
-        db.commit()
+    db.commit()
 
+
+@pytest.fixture
+def app():
+    """Создает тестовое приложение без CSRF защиты для unit тестов."""
+    app, db_fd, db_path = _create_test_app({
+        'WTF_CSRF_ENABLED': False
+    })
+    
     yield app
+    
+    os.close(db_fd)
+    os.unlink(db_path)
 
+
+@pytest.fixture
+def app_with_csrf():
+    """Приложение с включенной CSRF защитой для интеграционных тестов."""
+    app, db_fd, db_path = _create_test_app({
+        'WTF_CSRF_ENABLED': True
+    })
+    
+    yield app
+    
     os.close(db_fd)
     os.unlink(db_path)
 
@@ -53,15 +102,59 @@ def client(app):
 
 
 @pytest.fixture
+def auth(client):
+    """Фикстура для аутентификации."""
+    return AuthActions(client)
+
+
+@pytest.fixture
+def client_with_csrf(app_with_csrf):
+    """Клиент с включенной CSRF защитой."""
+    return app_with_csrf.test_client()
+
+
+@pytest.fixture
+def auth_with_csrf(client_with_csrf):
+    """Аутентификация с CSRF."""
+    return AuthActions(client_with_csrf)
+
+
+@pytest.fixture
+def security_app():
+    """Приложение для тестов безопасности (CSRF включен)."""
+    app, db_fd, db_path = _create_test_app({
+        'WTF_CSRF_ENABLED': True,
+        'SECRET_KEY': 'security-test-key'
+    })
+    
+    yield app
+    
+    os.close(db_fd)
+    os.unlink(db_path)
+
+
+@pytest.fixture
+def security_client(security_app):
+    """Клиент для тестов безопасности."""
+    return security_app.test_client()
+
+
+@pytest.fixture
+def security_auth(security_client):
+    """Аутентификация для тестов безопасности."""
+    return AuthActions(security_client)
+
+
+
+
+
+
+@pytest.fixture
 def runner(app):
     """CLI runner для тестирования команд."""
     return app.test_cli_runner()
 
 
-@pytest.fixture
-def auth(client):
-    """Фикстура для аутентификации."""
-    return AuthActions(client)
 
 
 class AuthActions:
@@ -70,11 +163,47 @@ class AuthActions:
     def __init__(self, client):
         self._client = client
 
-    def login(self, username='test_user#1234', password='test_pass', follow_redirects=False):
+    def _get_full_username(self, username: str) -> str:
+        """Получить полное имя пользователя с дискриминатором."""
+        if '#' in username:
+            return username
+            
+        # Ищем пользователя в базе данных
+        app = self._client.application
+        with app.app_context():
+            from app.db.db import get_db
+            db = get_db()
+            cursor = db.execute(
+                'SELECT username, discriminator FROM user WHERE username = ?',
+                (username,)
+            )
+            row = cursor.fetchone()
+            if row:
+                return f"{row[0]}#{row[1]:04d}"
+        return username  # fallback, если не найден
+
+    def login(self, username: str = 'test_user#1234', password: str = 'test_pass', follow_redirects: bool = False):
         """Выполнение входа пользователя."""
+        # Если username без дискриминатора, пытаемся найти его
+        full_username = self._get_full_username(username)
+        
+        # Получаем CSRF токен если он нужен
+        login_data = {'username': full_username, 'password': password}
+        
+        # Проверяем, включена ли CSRF защита
+        app = self._client.application
+        if app.config.get('WTF_CSRF_ENABLED', False):
+            # Получаем страницу входа чтобы получить CSRF токен
+            login_page = self._client.get('/auth/login')
+            page_content = login_page.get_data(as_text=True)
+            # Ищем CSRF токен в странице
+            csrf_match = re.search(r'name="csrf_token"[^>]*value="([^"]+)"', page_content, re.DOTALL)
+            if csrf_match:
+                login_data['csrf_token'] = csrf_match.group(1).strip()
+        
         return self._client.post(
             '/auth/login',
-            data={'username': username, 'password': password},
+            data=login_data,
             follow_redirects=follow_redirects
         )
 
@@ -82,13 +211,26 @@ class AuthActions:
         """Выполнение выхода пользователя."""
         return self._client.get('/auth/logout')
 
-    def register(self, username='new_user', password='new_pass123', follow_redirects=False):
+    def register(self, username: str = 'new_user', password: str = 'new_pass123', follow_redirects: bool = False):
         """Регистрация нового пользователя."""
-        return self._client.post(
+        register_data = {'username': username, 'password': password, 'password2': password}
+        
+        # Проверяем, включена ли CSRF защита
+        app = self._client.application
+        if app.config.get('WTF_CSRF_ENABLED', False):
+            # Получаем страницу регистрации чтобы получить CSRF токен
+            register_page = self._client.get('/auth/register')
+            # Ищем CSRF токен в странице
+            csrf_match = re.search(r'name="csrf_token"[^>]*value="([^"]+)"', register_page.get_data(as_text=True), re.DOTALL)
+            if csrf_match:
+                register_data['csrf_token'] = csrf_match.group(1).strip()
+        
+        response = self._client.post(
             '/auth/register',
-            data={'username': username, 'password': password},
+            data=register_data,
             follow_redirects=follow_redirects
         )
+        return response
 
 
 @pytest.fixture
@@ -116,62 +258,18 @@ def mock_csrf_token():
     return 'test-csrf-token-12345'
 
 
-@pytest.fixture(scope='session')
-def test_database():
-    """Создает тестовую базу данных для всей сессии."""
-    db_fd, db_path = tempfile.mkstemp()
-    
-    app = create_app({
-        'TESTING': True,
-        'DATABASE': db_path,
-        'SECRET_KEY': 'session-test-secret-key',
-    })
-    
-    with app.app_context():
-        init_db()
-        
-        # Создаем тестовых пользователей
-        db = get_db()
-        from app.auth import hash_password
-        
-        users = [
-            ('admin_user', 1000, 'admin_pass'),
-            ('regular_user', 2000, 'user_pass'),
-            ('moderator_user', 3000, 'mod_pass'),
-        ]
-        
-        for username, discriminator, password in users:
-            hashed_pw, salt = hash_password(password)
-            db.execute(
-                'INSERT INTO user (username, discriminator, password, salt) VALUES (?, ?, ?, ?)',
-                (username, discriminator, hashed_pw, salt)
-            )
-        
-        db.commit()
-    
-    yield db_path
-    
-    os.close(db_fd)
-    os.unlink(db_path)
-
-
 @pytest.fixture
-def app_with_test_db(test_database):
-    """Приложение с готовой тестовой базой данных."""
-    app = create_app({
-        'TESTING': True,
-        'DATABASE': test_database,
-        'SECRET_KEY': 'app-test-secret-key',
-        'WTF_CSRF_ENABLED': False,
-    })
-    
-    return app
-
-
-@pytest.fixture
-def client_with_test_db(app_with_test_db):
-    """Клиент с готовой тестовой базой данных."""
-    return app_with_test_db.test_client()
+def setup_csrf_token(client):
+    """Устанавливает CSRF токен в сессии для тестов."""
+    def _setup_token():
+        # Получаем страницу входа чтобы извлечь CSRF токен
+        login_page = client.get('/auth/login')
+        page_content = login_page.get_data(as_text=True)
+        csrf_match = re.search(r'name="csrf_token"[^>]*value="([^"]+)"', page_content, re.DOTALL)
+        if csrf_match:
+            return csrf_match.group(1).strip()
+        return 'test_csrf_token_for_testing'  # fallback
+    return _setup_token
 
 
 # Маркеры для разных типов тестов
@@ -180,3 +278,8 @@ pytest.mark.integration = pytest.mark.integration
 pytest.mark.security = pytest.mark.security
 pytest.mark.database = pytest.mark.database
 pytest.mark.slow = pytest.mark.slow
+
+# Описание фикстур:
+# - app/client/auth: для unit тестов (CSRF отключен)
+# - app_with_csrf/client_with_csrf/auth_with_csrf: для интеграционных тестов (CSRF включен)
+# - security_app/security_client/security_auth: для тестов безопасности (CSRF включен)

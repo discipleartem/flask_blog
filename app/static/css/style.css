@@ -74,4 +74,27 @@ main {
 footer {
     flex-shrink: 0; /* Не позволяет футеру сжиматься */
     background-color: var(--footer-bg);
+    padding: 1rem 0; /* Добавляем отступы напрямую к футеру */
+}
+
+footer div {
+    padding: 0 1rem; /* Горизонтальные отступы для текста */
+}
+
+/* Удаляем text-align из footer .container */
+/* footer .container {
+    text-align: left !important;
+} */
+
+/* Удаляем эти правила, так как они могут конфликтовать */
+/* footer .container .text-muted {
+    text-align: left !important;
+} */
+
+/* footer .container .mb-0 {
+    text-align: left !important;
+} */
+
+#footer-text {
+    text-align: left !important;
 }
