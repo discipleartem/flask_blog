@@ -29,7 +29,6 @@ def create_app(test_config=None):
     # SECRET_KEY нужен для сессий/подписей (в проде брать только из env или instance/config.py).
     app.config.from_mapping(
         SECRET_KEY=os.environ.get('SECRET_KEY', 'dev_key_123'),
-        DATABASE=os.path.join(app.instance_path, 'flask_blog.sqlite'),
     )
 
     # Загружаем конфигурацию:
