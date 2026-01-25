@@ -18,7 +18,8 @@ class Post:
         content: str = '',
         created: Optional[datetime] = None,
         author_username: str = '',
-        author_discriminator: int = 0
+        author_discriminator: int = 0,
+        comment_count: int = 0
     ):
         self.id = id
         self.author_id = author_id
@@ -27,6 +28,7 @@ class Post:
         self.created = created
         self.author_username = author_username
         self.author_discriminator = author_discriminator
+        self.comment_count = comment_count
     
     @property
     def author_display_name(self) -> str:
@@ -58,7 +60,8 @@ class Post:
             'created': self.created,
             'author_username': self.author_username,
             'author_discriminator': self.author_discriminator,
-            'author_display_name': self.author_display_name
+            'author_display_name': self.author_display_name,
+            'comment_count': self.comment_count
         }
     
     @classmethod

@@ -58,7 +58,7 @@
                                             </button>
                                             <button class="btn btn-link p-0 text-decoration-none d-flex align-items-center gap-2 hover:text-primary transition-colors">
                                                 <i class="fas fa-comment"></i>
-                                                <span class="fw-medium">0</span>
+                                                <span class="fw-medium">{{ post.comment_count }}</span>
                                             </button>
                                         </div>
                                         <a href="{{ url_for('main.view_post', post_id=post.id) }}" 
