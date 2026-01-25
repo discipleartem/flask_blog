@@ -35,9 +35,10 @@ class Form:
                 setattr(self, name, instance_field)
                 self._fields[name] = instance_field
 
-        # Автоматическое получение данных из запроса Flask, если form_data не передали явно.
+        # Автоматическое получение данных из запроса Flask, если form_data не
+        # передали явно.
         if form_data is None and has_request_context():
-            if request.method in ('POST', 'PUT', 'PATCH'):
+            if request.method in ("POST", "PUT", "PATCH"):
                 form_data = request.form
 
         # Заполнение полей данными
@@ -49,11 +50,11 @@ class Form:
         # Заполняем данные для каждого зарегистрированного поля
         for name, field in self._fields.items():
             # Работаем как с MultiDict (Flask), так и с обычным dict
-            if hasattr(form_data, 'get'):
+            if hasattr(form_data, "get"):
                 field.data = form_data.get(name)
 
         # Извлекаем CSRF токен для валидации
-        self._csrf_token_data = getattr(form_data, 'get', lambda k: None)('csrf_token')
+        self._csrf_token_data = getattr(form_data, "get", lambda k: None)("csrf_token")
 
     def validate(self):
         """Валидирует форму: CSRF + валидаторы каждого поля.
@@ -62,30 +63,30 @@ class Form:
             bool: True если форма валидна, иначе False (ошибки в self.errors).
         """
         from flask import current_app
-        
+
         self._csrf_error = None
         is_valid = True
 
         # В TESTING режиме отключаем CSRF для конкретных тестов
         if current_app.testing:
             # Если WTF_CSRF_ENABLED выключен, пропускаем CSRF проверку
-            if not current_app.config.get('WTF_CSRF_ENABLED', True):
+            if not current_app.config.get("WTF_CSRF_ENABLED", True):
                 return True  # CSRF отключен, считаем валидацию успешной
-            
+
             # Специальный тестовый токен всегда принимается
-            if self._csrf_token_data == 'test_csrf_token_for_testing':
+            if self._csrf_token_data == "test_csrf_token_for_testing":
                 return True  # Тестовый токен для обычных тестов
-            
+
             # Для тестов безопасности принимаем только валидные токены
             # Проверяем, что это не очевидно тестовый токен безопасности
-            if self._csrf_token_data not in ['wrong_token', 'invalid_token', '']:
+            if self._csrf_token_data not in ["wrong_token", "invalid_token", ""]:
                 # Для всех остальных токенов в тестах, включая правильные,
                 # используем нормальную валидацию CSRF
                 pass  # Продолжаем к обычной валидации ниже
             else:
                 # Явно неверные токены должны провалить валидацию
                 pass  # Продолжаем к обычной валидации, которая провалится
-        
+
         # В обычном режиме или в тестах с CSRF, проверяем токен
         if not validate_csrf_token(self._csrf_token_data):
             self._csrf_error = "Неверный или отсутствующий CSRF-токен."
@@ -111,7 +112,7 @@ class Form:
         """
         all_errors = {}
         if self._csrf_error:
-            all_errors['csrf'] = [self._csrf_error]
+            all_errors["csrf"] = [self._csrf_error]
 
         for name, field in self._fields.items():
             if field.errors:

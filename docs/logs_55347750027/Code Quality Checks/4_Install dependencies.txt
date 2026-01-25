@@ -1,0 +1,135 @@
+﻿2026-01-25T08:57:09.1188676Z ##[group]Run python -m pip install --upgrade pip
+2026-01-25T08:57:09.1189131Z [36;1mpython -m pip install --upgrade pip[0m
+2026-01-25T08:57:09.1189450Z [36;1mpip install -e ".[dev]"[0m
+2026-01-25T08:57:09.1229570Z shell: /usr/bin/bash -e {0}
+2026-01-25T08:57:09.1229854Z env:
+2026-01-25T08:57:09.1230043Z   PYTHON_VERSION: 3.13
+2026-01-25T08:57:09.1230339Z   pythonLocation: /opt/hostedtoolcache/Python/3.13.11/x64
+2026-01-25T08:57:09.1230773Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.13.11/x64/lib/pkgconfig
+2026-01-25T08:57:09.1231249Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.11/x64
+2026-01-25T08:57:09.1231625Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.11/x64
+2026-01-25T08:57:09.1231986Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.11/x64
+2026-01-25T08:57:09.1232358Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.13.11/x64/lib
+2026-01-25T08:57:09.1232671Z ##[endgroup]
+2026-01-25T08:57:10.2858763Z Requirement already satisfied: pip in /opt/hostedtoolcache/Python/3.13.11/x64/lib/python3.13/site-packages (25.3)
+2026-01-25T08:57:11.2423699Z Obtaining file:///home/runner/work/flask_blog/flask_blog
+2026-01-25T08:57:11.2443339Z   Installing build dependencies: started
+2026-01-25T08:57:12.3103408Z   Installing build dependencies: finished with status 'done'
+2026-01-25T08:57:12.3111206Z   Checking if build backend supports build_editable: started
+2026-01-25T08:57:12.6618176Z   Checking if build backend supports build_editable: finished with status 'done'
+2026-01-25T08:57:12.6627041Z   Getting requirements to build editable: started
+2026-01-25T08:57:13.0175619Z   Getting requirements to build editable: finished with status 'done'
+2026-01-25T08:57:13.0185240Z   Preparing editable metadata (pyproject.toml): started
+2026-01-25T08:57:13.2318119Z   Preparing editable metadata (pyproject.toml): finished with status 'done'
+2026-01-25T08:57:13.3137666Z Collecting Flask>=3.1.0 (from flask_blog==0.3.0)
+2026-01-25T08:57:13.3150607Z   Using cached flask-3.1.2-py3-none-any.whl.metadata (3.2 kB)
+2026-01-25T08:57:13.3306461Z Collecting python-dotenv>=1.0.0 (from flask_blog==0.3.0)
+2026-01-25T08:57:13.3317718Z   Using cached python_dotenv-1.2.1-py3-none-any.whl.metadata (25 kB)
+2026-01-25T08:57:13.3528241Z Collecting werkzeug>=3.1.0 (from flask_blog==0.3.0)
+2026-01-25T08:57:13.3539528Z   Using cached werkzeug-3.1.5-py3-none-any.whl.metadata (4.0 kB)
+2026-01-25T08:57:13.3700708Z Collecting click>=8.1.0 (from flask_blog==0.3.0)
+2026-01-25T08:57:13.3711881Z   Using cached click-8.3.1-py3-none-any.whl.metadata (2.6 kB)
+2026-01-25T08:57:13.4056353Z Collecting pytest>=8.0.0 (from flask_blog==0.3.0)
+2026-01-25T08:57:13.4068910Z   Using cached pytest-9.0.2-py3-none-any.whl.metadata (7.6 kB)
+2026-01-25T08:57:13.4223777Z Collecting pytest-flask>=1.3.0 (from flask_blog==0.3.0)
+2026-01-25T08:57:13.4235118Z   Using cached pytest_flask-1.3.0-py3-none-any.whl.metadata (14 kB)
+2026-01-25T08:57:13.4385687Z Collecting pytest-cov>=6.0.0 (from flask_blog==0.3.0)
+2026-01-25T08:57:13.4397108Z   Using cached pytest_cov-7.0.0-py3-none-any.whl.metadata (31 kB)
+2026-01-25T08:57:13.4942876Z Collecting black>=24.0.0 (from flask_blog==0.3.0)
+2026-01-25T08:57:13.4956585Z   Using cached black-26.1.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (88 kB)
+2026-01-25T08:57:13.5236228Z Collecting flake8>=7.0.0 (from flask_blog==0.3.0)
+2026-01-25T08:57:13.5248568Z   Using cached flake8-7.3.0-py2.py3-none-any.whl.metadata (3.8 kB)
+2026-01-25T08:57:13.6307294Z Collecting mypy>=1.8.0 (from flask_blog==0.3.0)
+2026-01-25T08:57:13.6327452Z   Using cached mypy-1.19.1-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.2 kB)
+2026-01-25T08:57:13.6543816Z Collecting bandit>=1.7.0 (from flask_blog==0.3.0)
+2026-01-25T08:57:13.7452796Z   Downloading bandit-1.9.3-py3-none-any.whl.metadata (7.1 kB)
+2026-01-25T08:57:13.7987263Z Collecting PyYAML>=5.3.1 (from bandit>=1.7.0->flask_blog==0.3.0)
+2026-01-25T08:57:13.8134015Z   Downloading pyyaml-6.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.4 kB)
+2026-01-25T08:57:13.8390486Z Collecting stevedore>=1.20.0 (from bandit>=1.7.0->flask_blog==0.3.0)
+2026-01-25T08:57:13.8540842Z   Downloading stevedore-5.6.0-py3-none-any.whl.metadata (2.3 kB)
+2026-01-25T08:57:13.8983746Z Collecting rich (from bandit>=1.7.0->flask_blog==0.3.0)
+2026-01-25T08:57:13.9131405Z   Downloading rich-14.3.1-py3-none-any.whl.metadata (18 kB)
+2026-01-25T08:57:13.9371711Z Collecting mypy-extensions>=0.4.3 (from black>=24.0.0->flask_blog==0.3.0)
+2026-01-25T08:57:13.9383391Z   Using cached mypy_extensions-1.1.0-py3-none-any.whl.metadata (1.1 kB)
+2026-01-25T08:57:13.9534069Z Collecting packaging>=22.0 (from black>=24.0.0->flask_blog==0.3.0)
+2026-01-25T08:57:13.9550450Z   Using cached packaging-26.0-py3-none-any.whl.metadata (3.3 kB)
+2026-01-25T08:57:13.9665768Z Collecting pathspec>=1.0.0 (from black>=24.0.0->flask_blog==0.3.0)
+2026-01-25T08:57:13.9677869Z   Using cached pathspec-1.0.3-py3-none-any.whl.metadata (13 kB)
+2026-01-25T08:57:13.9873617Z Collecting platformdirs>=2 (from black>=24.0.0->flask_blog==0.3.0)
+2026-01-25T08:57:13.9886517Z   Using cached platformdirs-4.5.1-py3-none-any.whl.metadata (12 kB)
+2026-01-25T08:57:14.0030271Z Collecting pytokens>=0.3.0 (from black>=24.0.0->flask_blog==0.3.0)
+2026-01-25T08:57:14.0044073Z   Using cached pytokens-0.4.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (3.8 kB)
+2026-01-25T08:57:14.0181236Z Collecting mccabe<0.8.0,>=0.7.0 (from flake8>=7.0.0->flask_blog==0.3.0)
+2026-01-25T08:57:14.0193935Z   Using cached mccabe-0.7.0-py2.py3-none-any.whl.metadata (5.0 kB)
+2026-01-25T08:57:14.0328479Z Collecting pycodestyle<2.15.0,>=2.14.0 (from flake8>=7.0.0->flask_blog==0.3.0)
+2026-01-25T08:57:14.0341006Z   Using cached pycodestyle-2.14.0-py2.py3-none-any.whl.metadata (4.5 kB)
+2026-01-25T08:57:14.0482633Z Collecting pyflakes<3.5.0,>=3.4.0 (from flake8>=7.0.0->flask_blog==0.3.0)
+2026-01-25T08:57:14.0498862Z   Using cached pyflakes-3.4.0-py2.py3-none-any.whl.metadata (3.5 kB)
+2026-01-25T08:57:14.0622307Z Collecting blinker>=1.9.0 (from Flask>=3.1.0->flask_blog==0.3.0)
+2026-01-25T08:57:14.0635823Z   Using cached blinker-1.9.0-py3-none-any.whl.metadata (1.6 kB)
+2026-01-25T08:57:14.0793608Z Collecting itsdangerous>=2.2.0 (from Flask>=3.1.0->flask_blog==0.3.0)
+2026-01-25T08:57:14.0806489Z   Using cached itsdangerous-2.2.0-py3-none-any.whl.metadata (1.9 kB)
+2026-01-25T08:57:14.0958495Z Collecting jinja2>=3.1.2 (from Flask>=3.1.0->flask_blog==0.3.0)
+2026-01-25T08:57:14.0970758Z   Using cached jinja2-3.1.6-py3-none-any.whl.metadata (2.9 kB)
+2026-01-25T08:57:14.1520254Z Collecting markupsafe>=2.1.1 (from Flask>=3.1.0->flask_blog==0.3.0)
+2026-01-25T08:57:14.1534348Z   Using cached markupsafe-3.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.7 kB)
+2026-01-25T08:57:14.1749426Z Collecting typing_extensions>=4.6.0 (from mypy>=1.8.0->flask_blog==0.3.0)
+2026-01-25T08:57:14.1762162Z   Using cached typing_extensions-4.15.0-py3-none-any.whl.metadata (3.3 kB)
+2026-01-25T08:57:14.2777364Z Collecting librt>=0.6.2 (from mypy>=1.8.0->flask_blog==0.3.0)
+2026-01-25T08:57:14.2795040Z   Using cached librt-0.7.8-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (1.3 kB)
+2026-01-25T08:57:14.2935492Z Collecting iniconfig>=1.0.1 (from pytest>=8.0.0->flask_blog==0.3.0)
+2026-01-25T08:57:14.2948935Z   Using cached iniconfig-2.3.0-py3-none-any.whl.metadata (2.5 kB)
+2026-01-25T08:57:14.3065259Z Collecting pluggy<2,>=1.5 (from pytest>=8.0.0->flask_blog==0.3.0)
+2026-01-25T08:57:14.3079115Z   Using cached pluggy-1.6.0-py3-none-any.whl.metadata (4.8 kB)
+2026-01-25T08:57:14.3271767Z Collecting pygments>=2.7.2 (from pytest>=8.0.0->flask_blog==0.3.0)
+2026-01-25T08:57:14.3287163Z   Using cached pygments-2.19.2-py3-none-any.whl.metadata (2.5 kB)
+2026-01-25T08:57:14.7113671Z Collecting coverage>=7.10.6 (from coverage[toml]>=7.10.6->pytest-cov>=6.0.0->flask_blog==0.3.0)
+2026-01-25T08:57:14.7128216Z   Using cached coverage-7.13.1-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (8.5 kB)
+2026-01-25T08:57:14.7624889Z Collecting markdown-it-py>=2.2.0 (from rich->bandit>=1.7.0->flask_blog==0.3.0)
+2026-01-25T08:57:14.7772372Z   Downloading markdown_it_py-4.0.0-py3-none-any.whl.metadata (7.3 kB)
+2026-01-25T08:57:14.7996890Z Collecting mdurl~=0.1 (from markdown-it-py>=2.2.0->rich->bandit>=1.7.0->flask_blog==0.3.0)
+2026-01-25T08:57:14.8151336Z   Downloading mdurl-0.1.2-py3-none-any.whl.metadata (1.6 kB)
+2026-01-25T08:57:14.8363756Z Downloading bandit-1.9.3-py3-none-any.whl (134 kB)
+2026-01-25T08:57:14.8640822Z Using cached black-26.1.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (1.8 MB)
+2026-01-25T08:57:14.8665859Z Using cached click-8.3.1-py3-none-any.whl (108 kB)
+2026-01-25T08:57:14.8677570Z Using cached flake8-7.3.0-py2.py3-none-any.whl (57 kB)
+2026-01-25T08:57:14.8689232Z Using cached mccabe-0.7.0-py2.py3-none-any.whl (7.3 kB)
+2026-01-25T08:57:14.8700454Z Using cached pycodestyle-2.14.0-py2.py3-none-any.whl (31 kB)
+2026-01-25T08:57:14.8712272Z Using cached pyflakes-3.4.0-py2.py3-none-any.whl (63 kB)
+2026-01-25T08:57:14.8723956Z Using cached flask-3.1.2-py3-none-any.whl (103 kB)
+2026-01-25T08:57:14.8735883Z Using cached blinker-1.9.0-py3-none-any.whl (8.5 kB)
+2026-01-25T08:57:14.8747380Z Using cached itsdangerous-2.2.0-py3-none-any.whl (16 kB)
+2026-01-25T08:57:14.8758742Z Using cached jinja2-3.1.6-py3-none-any.whl (134 kB)
+2026-01-25T08:57:14.8771250Z Using cached markupsafe-3.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (22 kB)
+2026-01-25T08:57:14.8783352Z Using cached mypy-1.19.1-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (13.6 MB)
+2026-01-25T08:57:14.8897448Z Using cached librt-0.7.8-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (193 kB)
+2026-01-25T08:57:14.8909519Z Using cached mypy_extensions-1.1.0-py3-none-any.whl (5.0 kB)
+2026-01-25T08:57:14.8920698Z Using cached packaging-26.0-py3-none-any.whl (74 kB)
+2026-01-25T08:57:14.8931954Z Using cached pathspec-1.0.3-py3-none-any.whl (55 kB)
+2026-01-25T08:57:14.8943129Z Using cached platformdirs-4.5.1-py3-none-any.whl (18 kB)
+2026-01-25T08:57:14.8953866Z Using cached pytest-9.0.2-py3-none-any.whl (374 kB)
+2026-01-25T08:57:14.8967526Z Using cached pluggy-1.6.0-py3-none-any.whl (20 kB)
+2026-01-25T08:57:14.8978412Z Using cached iniconfig-2.3.0-py3-none-any.whl (7.5 kB)
+2026-01-25T08:57:14.8989202Z Using cached pygments-2.19.2-py3-none-any.whl (1.2 MB)
+2026-01-25T08:57:14.9008612Z Using cached pytest_cov-7.0.0-py3-none-any.whl (22 kB)
+2026-01-25T08:57:14.9020043Z Using cached coverage-7.13.1-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (252 kB)
+2026-01-25T08:57:14.9032217Z Using cached pytest_flask-1.3.0-py3-none-any.whl (13 kB)
+2026-01-25T08:57:14.9043254Z Using cached python_dotenv-1.2.1-py3-none-any.whl (21 kB)
+2026-01-25T08:57:14.9054426Z Using cached pytokens-0.4.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (267 kB)
+2026-01-25T08:57:14.9202313Z Downloading pyyaml-6.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (801 kB)
+2026-01-25T08:57:14.9519241Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 801.6/801.6 kB 32.5 MB/s  0:00:00
+2026-01-25T08:57:14.9670224Z Downloading stevedore-5.6.0-py3-none-any.whl (54 kB)
+2026-01-25T08:57:14.9705940Z Using cached typing_extensions-4.15.0-py3-none-any.whl (44 kB)
+2026-01-25T08:57:14.9717649Z Using cached werkzeug-3.1.5-py3-none-any.whl (225 kB)
+2026-01-25T08:57:14.9869049Z Downloading rich-14.3.1-py3-none-any.whl (309 kB)
+2026-01-25T08:57:15.0048577Z Downloading markdown_it_py-4.0.0-py3-none-any.whl (87 kB)
+2026-01-25T08:57:15.0220409Z Downloading mdurl-0.1.2-py3-none-any.whl (10.0 kB)
+2026-01-25T08:57:15.0790656Z Building wheels for collected packages: flask_blog
+2026-01-25T08:57:15.0802115Z   Building editable for flask_blog (pyproject.toml): started
+2026-01-25T08:57:15.3287580Z   Building editable for flask_blog (pyproject.toml): finished with status 'done'
+2026-01-25T08:57:15.3294732Z   Created wheel for flask_blog: filename=flask_blog-0.3.0-0.editable-py3-none-any.whl size=3177 sha256=e0dfd2d84cad4ed54fd205d15e80d0f4df24f9241719ee25ce4bef39464ea6f2
+2026-01-25T08:57:15.3296900Z   Stored in directory: /tmp/pip-ephem-wheel-cache-ihkwee5w/wheels/92/68/f0/e4e21125bd6c1bad3b54462725f76e6985f9818075fb8ba31b
+2026-01-25T08:57:15.3315299Z Successfully built flask_blog
+2026-01-25T08:57:15.3937487Z Installing collected packages: typing_extensions, stevedore, PyYAML, pytokens, python-dotenv, pygments, pyflakes, pycodestyle, pluggy, platformdirs, pathspec, packaging, mypy-extensions, mdurl, mccabe, markupsafe, librt, itsdangerous, iniconfig, coverage, click, blinker, werkzeug, pytest, mypy, markdown-it-py, jinja2, flake8, black, rich, pytest-cov, Flask, pytest-flask, flask_blog, bandit
+2026-01-25T08:57:19.5969387Z 
+2026-01-25T08:57:19.6019385Z Successfully installed Flask-3.1.2 PyYAML-6.0.3 bandit-1.9.3 black-26.1.0 blinker-1.9.0 click-8.3.1 coverage-7.13.1 flake8-7.3.0 flask_blog-0.3.0 iniconfig-2.3.0 itsdangerous-2.2.0 jinja2-3.1.6 librt-0.7.8 markdown-it-py-4.0.0 markupsafe-3.0.3 mccabe-0.7.0 mdurl-0.1.2 mypy-1.19.1 mypy-extensions-1.1.0 packaging-26.0 pathspec-1.0.3 platformdirs-4.5.1 pluggy-1.6.0 pycodestyle-2.14.0 pyflakes-3.4.0 pygments-2.19.2 pytest-9.0.2 pytest-cov-7.0.0 pytest-flask-1.3.0 python-dotenv-1.2.1 pytokens-0.4.0 rich-14.3.1 stevedore-5.6.0 typing_extensions-4.15.0 werkzeug-3.1.5
