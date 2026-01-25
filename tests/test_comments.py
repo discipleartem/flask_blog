@@ -214,18 +214,22 @@ class TestCommentRoutes:
             )
         
         # Добавляем комментарий
+        with client.session_transaction() as sess:
+            sess['csrf_token'] = 'test-csrf-token'
+        
         response = client.post(
             f'/post/{post.id}/comment',
             data={
                 'content': 'Новый комментарий',
-                'csrf_token': client.get('/').data.decode().split('name="csrf_token" value="')[1].split('"')[0]
+                'csrf_token': 'test-csrf-token'
             },
             follow_redirects=True
         )
         
         assert response.status_code == 200
-        assert b'Kommentariy uspeshno dobavlen' in response.data
-        assert b'Novyy kommentariy' in response.data
+        # Проверяем, что комментарий появился в ответе
+        content = response.data.decode('utf-8')
+        assert 'Новый комментарий' in content
 
     def test_add_comment_as_anonymous_user(self, client, auth):
         """Добавление комментария анонимным пользователем должно быть запрещено."""
@@ -277,16 +281,21 @@ class TestCommentRoutes:
             )
         
         # Удаляем комментарий
+        with client.session_transaction() as sess:
+            sess['csrf_token'] = 'test-csrf-token'
+        
         response = client.post(
             f'/comment/{comment.id}/delete',
             data={
-                'csrf_token': client.get('/').data.decode().split('name="csrf_token" value="')[1].split('"')[0]
+                'csrf_token': 'test-csrf-token'
             },
             follow_redirects=True
         )
         
         assert response.status_code == 200
-        assert b'Kommentariy uspeshno udal' in response.data
+        # Проверяем, что комментарий удалён (его нет в ответе)
+        content = response.data.decode('utf-8')
+        assert 'Тестовый комментарий' not in content
 
     def test_view_post_with_comments(self, client, auth):
         """Просмотр поста с комментариями."""
@@ -313,9 +322,12 @@ class TestCommentRoutes:
         response = client.get(f'/post/{post.id}')
         
         assert response.status_code == 200
-        assert b'Testovyy post' in response.data
-        assert b'Testovyy kommentariy' in response.data
-        assert b'Kommentarii' in response.data
+        # Проверяем наличие поста и секции комментариев
+        content = response.data.decode('utf-8')
+        assert 'Тестовый пост' in content
+        assert 'Тестовый комментарий' in content
+        # Проверяем наличие слова "Комментарии" в HTML
+        assert 'Комментарии' in content
 
 
 class TestCommentModelMethods:

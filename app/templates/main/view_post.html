@@ -68,7 +68,15 @@
                                     <form method="post" action="{{ url_for('main.add_comment', post_id=post.id) }}">
                                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                         <div class="mb-3">
-                                            {{ render_field(comment_form.content, class='form-control', rows='3', placeholder='Напишите ваш комментарий...') }}
+                                            <label for="content" class="form-label">Комментарий</label>
+                                            <textarea class="form-control" id="content" name="content" rows="3" placeholder="Напишите ваш комментарий..." required>{{ comment_form.content.data or '' }}</textarea>
+                                            {% if comment_form.content.errors %}
+                                                <div class="text-danger mt-1">
+                                                    {% for error in comment_form.content.errors %}
+                                                        <small>{{ error }}</small>
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
                                         </div>
                                         <button type="submit" class="btn btn-primary">
                                             <i class="fas fa-paper-plane me-2"></i>Отправить

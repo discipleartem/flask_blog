@@ -63,7 +63,7 @@ class CommentService:
             author_id=row['author_id'],
             post_id=row['post_id'],
             content=row['content'],
-            created=datetime.fromisoformat(row['created']) if row['created'] else None,
+            created=datetime.fromisoformat(row['created']) if isinstance(row['created'], str) else row['created'],
             author_username=row['author_username'],
             author_discriminator=row['author_discriminator']
         )
@@ -96,7 +96,7 @@ class CommentService:
                 author_id=row['author_id'],
                 post_id=row['post_id'],
                 content=row['content'],
-                created=datetime.fromisoformat(row['created']) if row['created'] else None,
+                created=datetime.fromisoformat(row['created']) if isinstance(row['created'], str) else row['created'],
                 author_username=row['author_username'],
                 author_discriminator=row['author_discriminator']
             ))
