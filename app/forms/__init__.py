@@ -1,6 +1,14 @@
 from .base import Form
 from .fields import StringField, PasswordField, TextAreaField
-from .validators import DataRequired, Length, Regexp, EqualTo
+from .validators import (
+    DataRequired, Length, EqualTo,
+    # TODO: Валидаторы-заглушки (требуют реализации)
+    Email, Username, PasswordStrength, UniqueUsername, 
+    Slug, NumberRange, URL
+    # TODO: Regexp - будет реализован в будущем
+)
+from .post import PostForm
+from .auth import RegistrationForm, LoginForm
 
 __all__ = [
     'Form',
@@ -9,6 +17,17 @@ __all__ = [
     'TextAreaField',
     'DataRequired',
     'Length',
-    'Regexp',
-    'EqualTo'
+    'EqualTo',
+    'PostForm',
+    'RegistrationForm',
+    'LoginForm',
+    # TODO: Валидаторы-заглушки (требуют реализации)
+    'Email',
+    'Username', 
+    'PasswordStrength',
+    'UniqueUsername',
+    'Slug',
+    'NumberRange',
+    'URL'
+    # TODO: 'Regexp' - будет добавлен при реализации
 ]

@@ -24,3 +24,4 @@ class ProductionConfig(Config):
 class TestingConfig(Config):
     TESTING = True
     DATABASE = ':memory:'  # SQLite в памяти для тестов
+    WTF_CSRF_ENABLED = True  # Включаем CSRF для тестов

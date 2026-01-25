@@ -29,7 +29,6 @@ def create_app(test_config=None):
     # SECRET_KEY нужен для сессий/подписей (в проде брать только из env или instance/config.py).
     app.config.from_mapping(
         SECRET_KEY=os.environ.get('SECRET_KEY', 'dev_key_123'),
-        DATABASE=os.path.join(app.instance_path, 'flask_blog.sqlite'),
     )
 
     # Загружаем конфигурацию:
@@ -44,6 +43,22 @@ def create_app(test_config=None):
     # Гарантируем существование папки instance/ (там будет БД и локальный конфиг).
     os.makedirs(app.instance_path, exist_ok=True)
 
+    # Добавляем кастомные фильтры для шаблонов
+    @app.template_filter('nl2br')
+    def nl2br_filter(text):
+        """Преобразует переносы строк в HTML теги <br>."""
+        if text is None:
+            return ''
+        import markupsafe
+        return markupsafe.Markup(text.replace('\n', '<br>\n'))
+
+    # Добавляем CSRF токен в контекст всех шаблонов
+    @app.context_processor
+    def inject_csrf_token():
+        """Добавляет CSRF токен в контекст всех шаблонов."""
+        from app.forms.csrf import generate_csrf_token
+        return {'csrf_token': generate_csrf_token}
+
     # Импорты внутри функции предотвращают циклические ссылки при импорте пакетов.
     from app import db
     db.init_app(app)
@@ -53,7 +68,7 @@ def create_app(test_config=None):
     app.register_blueprint(auth_bp)
 
     # Главные страницы: /
-    from app.main import bp as main_bp
+    from app.main.routes import bp as main_bp
     app.register_blueprint(main_bp)
 
     return app

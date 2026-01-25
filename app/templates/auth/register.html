@@ -8,12 +8,28 @@
             <div class="card shadow-sm">
                 <div class="card-body">
                     <h2 class="card-title text-center mb-4">Регистрация</h2>
-                    <form method="post">
+                    
+                    {% if form.errors %}
+                        <div class="alert alert-danger">
+                            <ul class="mb-0">
+                                {% for field_name, field_errors in form.errors.items() %}
+                                    {% for error in field_errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+                    
+                    <form method="post" id="registerForm" autocomplete="off">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        
                         <div class="mb-3">
                             <label for="username" class="form-label">Логин</label>
                             <input type="text" class="form-control" id="username" name="username"
-                                   placeholder="Любой логин" required autocomplete="username">
-                            <div class="form-text">Вам будет присвоен уникальный тег, например: Логин#1234</div>
+                                   placeholder="Любой логин" required autocomplete="off"
+                                   value="{{ form.username.data or '' }}">
+                            <div class="form-text">Введите желаемый логин. Система автоматически добавит уникальный тег.</div>
                         </div>
                         <div class="mb-3">
                             <label for="password" class="form-label">Пароль</label>
