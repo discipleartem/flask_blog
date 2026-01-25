@@ -9,6 +9,7 @@ from .validators import (
 )
 from .post import PostForm
 from .auth import RegistrationForm, LoginForm
+from .comment import CommentForm
 
 __all__ = [
     'Form',
@@ -21,6 +22,7 @@ __all__ = [
     'PostForm',
     'RegistrationForm',
     'LoginForm',
+    'CommentForm',
     # TODO: Валидаторы-заглушки (требуют реализации)
     'Email',
     'Username', 
