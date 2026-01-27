@@ -35,7 +35,8 @@ class Form:
             if isinstance(field, Field):
                 # Создаем уникальный экземпляр поля для объекта формы
                 instance_field = copy.deepcopy(field)
-                instance_field.name: str = name
+                if hasattr(instance_field, 'name'):
+                    instance_field.name = name  # type: ignore
                 setattr(self, name, instance_field)
                 self._fields[name] = instance_field
 
@@ -93,7 +94,7 @@ class Form:
 
         # В обычном режиме или в тестах с CSRF, проверяем токен
         if not validate_csrf_token(self._csrf_token_data):
-            self._csrf_error = "Неверный или отсутствующий CSRF-токен."  # type: ignore
+            self._csrf_error = "Неверный или отсутствующий CSRF-токен."
             is_valid = False
 
         # Валидация каждого поля

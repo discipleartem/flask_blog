@@ -1,10 +1,11 @@
 import os
+from typing import Any, Optional
 from dotenv import load_dotenv
 
 from flask import Flask
 
 
-def create_app(test_config=None) -> Flask:
+def create_app(test_config: Optional[dict[str, Any]] = None) -> Flask:
     """Фабрика Flask-приложения.
 
     Создаёт и настраивает экземпляр Flask:
@@ -47,7 +48,7 @@ def create_app(test_config=None) -> Flask:
 
     # Добавляем кастомные фильтры для шаблонов
     @app.template_filter("nl2br")
-    def nl2br_filter(text) -> str:
+    def nl2br_filter(text: Any) -> str:
         """Преобразует переносы строк в HTML теги <br> с безопасной обработкой."""
         if text is None:
             return ""
@@ -64,7 +65,7 @@ def create_app(test_config=None) -> Flask:
         """Добавляет CSRF токен в контекст всех шаблонов."""
         from app.forms.csrf import generate_csrf_token
 
-        return {"csrf_token": generate_csrf_token}
+        return {"csrf_token": generate_csrf_token()}
 
     # Импорты внутри функции предотвращают циклические ссылки при импорте
     # пакетов.

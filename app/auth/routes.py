@@ -15,7 +15,7 @@
 """
 
 import sqlite3
-from typing import Any, Optional, Tuple
+from typing import Any, Optional, Tuple, Union
 
 from flask import (
     flash,
@@ -30,6 +30,7 @@ from flask import (
     make_response,
     jsonify,
 )
+from werkzeug.wrappers import Response as WerkzeugResponse
 
 from app.auth import bp
 from app.auth.utils import generate_discriminator, hash_password, verify_password
@@ -77,8 +78,17 @@ def set_full_username_cookie(
     existing_data[base_username.lower()] = full_username
 
     # Устанавливаем обновленное cookie
+    max_age = COOKIE_OPTIONS["max_age"]
+    httponly = COOKIE_OPTIONS["httponly"]
+    secure = COOKIE_OPTIONS["secure"]
+    samesite = COOKIE_OPTIONS["samesite"]
+    
     response.set_cookie(
-        FULL_USERNAME_COOKIE, json.dumps(existing_data), **COOKIE_OPTIONS
+        FULL_USERNAME_COOKIE, json.dumps(existing_data),
+        max_age=int(max_age) if isinstance(max_age, (int, str)) else None,
+        httponly=bool(httponly),
+        secure=bool(secure),
+        samesite=str(samesite) if samesite is not None else None
     )
 
 
@@ -98,7 +108,7 @@ def get_full_username_cookie(base_username: str) -> Optional[str]:
 
     try:
         data = json.loads(request.cookies[FULL_USERNAME_COOKIE])
-        return data.get(base_username.lower())
+        return data.get(base_username.lower())  # type: ignore
     except (json.JSONDecodeError, TypeError):
         return None
 
@@ -273,7 +283,7 @@ def authenticate_user(
 
 
 @bp.route("/register", methods=("GET", "POST"))
-def register() -> str:
+def register() -> Union[str, Response]:
     """Регистрация нового пользователя с автоматической генерацией дискриминатора.
 
     Процесс регистрации:
@@ -301,7 +311,7 @@ def register() -> str:
             flash(registration_result["error"], "danger")
         else:
             # Успешная регистрация с автоматическим входом
-            return registration_result["response"]
+            return registration_result["response"]  # type: ignore
 
     # Отображение ошибок валидации формы
     elif request.method == "POST":
@@ -394,10 +404,10 @@ def _create_user_in_db(
         (username, hashed_pw, discriminator, salt),
     )
     db.commit()
-    return cursor.lastrowid
+    return cursor.lastrowid or 0
 
 
-def _display_form_errors(form: RegistrationForm) -> None:
+def _display_form_errors(form: Union[RegistrationForm, LoginForm]) -> None:
     """Отображает ошибки валидации формы.
 
     Args:
@@ -409,7 +419,7 @@ def _display_form_errors(form: RegistrationForm) -> None:
 
 
 @bp.route("/login", methods=("GET", "POST"))
-def login() -> str:
+def login() -> Union[str, Response]:
     """Вход пользователя с поддержкой дискриминаторов.
 
     Форматы входа:
@@ -431,7 +441,7 @@ def login() -> str:
         login_result = _process_login_attempt()
 
         if login_result["success"]:
-            return login_result["response"]
+            return login_result["response"]  # type: ignore
         else:
             flash(login_result["error"], "danger")
 
@@ -582,11 +592,11 @@ def logout() -> Response:
     """
     session.clear()
     flash("Вы вышли из системы.", "info")
-    return redirect(url_for("main.index"))
+    return make_response(redirect(url_for("main.index")))
 
 
 @bp.route("/api/get-user-info")
-def get_user_info() -> Response:
+def get_user_info() -> Union[Response, Tuple[Response, int]]:
     """API endpoint для получения информации о текущем пользователе.
 
     Возвращает полный логин для сохранения в localStorage после регистрации.
@@ -597,7 +607,7 @@ def get_user_info() -> Response:
     user_id = session.get("user_id")
 
     if not user_id:
-        return jsonify({"error": "Пользователь не авторизован"}), 401
+        return make_response(jsonify({"error": "Пользователь не авторизован"})), 401
 
     db = get_db()
     user = db.execute(
@@ -605,7 +615,7 @@ def get_user_info() -> Response:
     ).fetchone()
 
     if not user:
-        return jsonify({"error": "Пользователь не найден"}), 404
+        return make_response(jsonify({"error": "Пользователь не найден"})), 404
 
     full_username = format_full_username(user["username"], user["discriminator"])
 

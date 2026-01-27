@@ -49,7 +49,7 @@ def validate_csrf_token(token: Optional[str]) -> bool:
 
     # Для тестов вне контекста запроса
     if not has_request_context():
-        return token == TEST_CSRF_TOKEN  # type: ignore
+        return token == TEST_CSRF_TOKEN
 
     if not token or "_csrf_token" not in session:
         return False

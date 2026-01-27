@@ -12,6 +12,8 @@ from typing import Any
 
 import click
 from flask import Flask, g, current_app
+from flask.g import AppContext
+from sqlite3 import Connection
 
 # Подавляем предупреждение об устаревшем конвертере временных меток Python
 # 3.12+
@@ -23,7 +25,7 @@ warnings.filterwarnings(
 )
 
 
-def get_db() -> sqlite3.Connection:
+def get_db() -> Connection:
     """Возвращает соединение с БД для текущего контекста запроса.
 
     Если соединение ещё не создано — создаёт, настраивает row_factory и кладёт в g.db.
@@ -40,7 +42,7 @@ def get_db() -> sqlite3.Connection:
         # Позволяет обращаться к колонкам по именам, как к словарю
         g.db.row_factory = sqlite3.Row
 
-    return g.db
+    return g.db  # type: ignore
 
 
 def close_db(e: Any = None) -> None:

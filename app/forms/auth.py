@@ -1,5 +1,7 @@
 """Формы для аутентификации пользователей."""
 
+from typing import Any, Optional
+
 from . import Form, StringField, PasswordField, DataRequired, Length
 
 # TODO: Regexp будет реализован в будущем для валидации формата данных
@@ -52,7 +54,7 @@ class LoginForm(Form):
         "Пароль", validators=[DataRequired(message="Пароль обязателен")]
     )
 
-    def __init__(self, formdata=None, **kwargs) -> None:
+    def __init__(self, formdata: Optional[Any] = None, **kwargs: Any) -> None:
         super().__init__(formdata, **kwargs)
         # Если форма отправлена с login_username, используем его как username
         if formdata and "login_username" in formdata:

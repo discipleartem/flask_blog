@@ -1,5 +1,7 @@
 """Главные маршруты приложения."""
 
+from typing import Union
+
 from flask import (
     Blueprint,
     render_template,
@@ -10,6 +12,7 @@ from flask import (
     abort,
     g,
     Response,
+    make_response,
 )
 
 from app.auth.utils import login_required
@@ -28,7 +31,7 @@ def index() -> str:
 
 @bp.route("/post/create", methods=["GET", "POST"])
 @login_required
-def create_post() -> Response:
+def create_post() -> Union[str, Response]:
     """Создание нового поста."""
     form = PostForm(request.form)
 
@@ -39,7 +42,7 @@ def create_post() -> Response:
             content=form.content.data or "",
         )
         flash("Пост успешно создан!", "success")
-        return redirect(url_for("main.view_post", post_id=post.id))
+        return make_response(redirect(url_for("main.view_post", post_id=post.id)))
 
     # Если форма не валидна, показываем ошибки
     elif request.method == "POST":
@@ -68,7 +71,7 @@ def view_post(post_id: int) -> str:
 
 @bp.route("/post/<int:post_id>/edit", methods=["GET", "POST"])
 @login_required
-def edit_post(post_id: int) -> Response:
+def edit_post(post_id: int) -> Union[str, Response]:
     """Редактирование поста (только для автора)."""
     post = PostService.find_by_id(post_id)
     if post is None:
@@ -82,11 +85,11 @@ def edit_post(post_id: int) -> Response:
     if request.method == "POST" and form.validate():
         PostService.update(post_id, form.title.data or "", form.content.data or "")
         flash("Пост успешно обновлён!", "success")
-        return redirect(url_for("main.view_post", post_id=post_id))
+        return make_response(redirect(url_for("main.view_post", post_id=post_id)))
     elif request.method == "GET":
         # Заполняем форму текущими данными поста
-        form.title.data = post.title or ""
-        form.content.data = post.content or ""
+        form.title.data = post.title or ""  # type: ignore
+        form.content.data = post.content or ""  # type: ignore
 
     # Если форма не валидна при POST, показываем ошибки
     elif request.method == "POST":
@@ -114,11 +117,11 @@ def delete_post(post_id: int) -> Response:
         for field_name, field_errors in form.errors.items():
             for error in field_errors:
                 flash(error, "danger")
-        return redirect(url_for("main.view_post", post_id=post_id))
+        return make_response(redirect(url_for("main.view_post", post_id=post_id)))
 
     PostService.delete(post_id)
     flash("Пост успешно удалён!", "success")
-    return redirect(url_for("main.index"))
+    return make_response(redirect(url_for("main.index")))
 
 
 @bp.route("/post/<int:post_id>/comment", methods=["POST"])
@@ -142,7 +145,7 @@ def add_comment(post_id: int) -> Response:
             for error in field_errors:
                 flash(error, "danger")
 
-    return redirect(url_for("main.view_post", post_id=post_id))
+    return make_response(redirect(url_for("main.view_post", post_id=post_id)))
 
 
 @bp.route("/comment/<int:comment_id>/delete", methods=["POST"])
@@ -160,7 +163,7 @@ def delete_comment(comment_id: int) -> Response:
         for field_name, field_errors in form.errors.items():
             for error in field_errors:
                 flash(error, "danger")
-        return redirect(url_for("main.view_post", post_id=comment.post_id))
+        return make_response(redirect(url_for("main.view_post", post_id=comment.post_id)))
 
     # Удаляем комментарий (проверка прав внутри сервиса)
     if CommentService.delete(comment_id, g.user["id"]):
@@ -168,4 +171,4 @@ def delete_comment(comment_id: int) -> Response:
     else:
         flash("Вы можете удалять только свои комментарии", "danger")
 
-    return redirect(url_for("main.view_post", post_id=comment.post_id))
+    return make_response(redirect(url_for("main.view_post", post_id=comment.post_id)))
