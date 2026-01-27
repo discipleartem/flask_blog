@@ -1,0 +1,29 @@
+name: Sync Dev to Main
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  sync-dev:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        fetch-depth: 0
+        
+    - name: Configure Git
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        
+    - name: Sync main to dev
+      run: |
+        git checkout dev
+        git pull origin dev
+        git merge origin/main --no-ff -m "Auto-sync: Merge main into dev"
+        git push origin dev
