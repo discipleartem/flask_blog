@@ -61,7 +61,7 @@ def set_full_username_cookie(response, base_username: str, full_username: str) -
         full_username: Полный логин с дискриминатором
     """
     import json
-    
+
     # Получаем текущие данные из cookie
     existing_data = {}
     if FULL_USERNAME_COOKIE in request.cookies:
@@ -69,15 +69,13 @@ def set_full_username_cookie(response, base_username: str, full_username: str) -
             existing_data = json.loads(request.cookies[FULL_USERNAME_COOKIE])
         except (json.JSONDecodeError, TypeError):
             existing_data = {}
-    
+
     # Добавляем/обновляем логин
     existing_data[base_username.lower()] = full_username
-    
+
     # Устанавливаем обновленное cookie
     response.set_cookie(
-        FULL_USERNAME_COOKIE, 
-        json.dumps(existing_data), 
-        **COOKIE_OPTIONS
+        FULL_USERNAME_COOKIE, json.dumps(existing_data), **COOKIE_OPTIONS
     )
 
 
@@ -91,10 +89,10 @@ def get_full_username_cookie(base_username: str) -> Optional[str]:
         Полный логин или None
     """
     import json
-    
+
     if FULL_USERNAME_COOKIE not in request.cookies:
         return None
-    
+
     try:
         data = json.loads(request.cookies[FULL_USERNAME_COOKIE])
         return data.get(base_username.lower())
@@ -145,11 +143,12 @@ def get_prefilled_usernames() -> Tuple[str, str]:
     # Используем новый cookie с полными логинами
     prefilled_full_username = ""
     prefilled_base_username = ""
-    
+
     # Ищем любой сохраненный логин для автозаполнения
     if FULL_USERNAME_COOKIE in request.cookies:
         try:
             import json
+
             data = json.loads(request.cookies[FULL_USERNAME_COOKIE])
             if data:
                 # Берем первый сохраненный логин для автозаполнения
@@ -158,7 +157,7 @@ def get_prefilled_usernames() -> Tuple[str, str]:
                 prefilled_full_username = data[first_base]
         except (json.JSONDecodeError, TypeError):
             pass
-    
+
     return prefilled_full_username, prefilled_base_username
 
 
@@ -229,7 +228,8 @@ def authenticate_user(
             return None, "Неверный формат логина"
 
         user = db.execute(
-            "SELECT * FROM user WHERE username = ? AND discriminator = ?", (username, tag)
+            "SELECT * FROM user WHERE username = ? AND discriminator = ?",
+            (username, tag),
         ).fetchone()
 
         if user is None:
@@ -354,13 +354,17 @@ def _process_registration(username: str, password: str) -> dict:
         # Создание ответа с cookie для автозаполнения
         response = make_response(redirect(url_for("main.index")))
         full_username = format_full_username(username, new_discriminator)
-        
+
         # Сохраняем полный логин в cookie для localStorage-подобной функциональности
         set_full_username_cookie(response, username, full_username)
 
         flash(f"Добро пожаловать {full_username}!", "success")
 
-        return {"response": response, "full_username": full_username, "base_username": username}
+        return {
+            "response": response,
+            "full_username": full_username,
+            "base_username": username,
+        }
 
     except sqlite3.IntegrityError:
         return {"error": "Ошибка при регистрации. Возможно, имя занято."}
@@ -477,12 +481,12 @@ def _determine_username_for_check(raw_username: str, full_username_hidden: str) 
     # Сначала проверяем скрытое поле (JavaScript)
     if full_username_hidden and "#" in full_username_hidden:
         return full_username_hidden
-    
+
     # Потом проверяем cookie
     cookie_full_username = get_full_username_cookie(raw_username)
     if cookie_full_username and "#" in cookie_full_username:
         return cookie_full_username
-    
+
     # В конце используем введенный логин
     return raw_username
 
@@ -528,7 +532,7 @@ def _handle_user_login(username: str, password: str) -> dict:
 
         full_username = format_full_username(user["username"], user["discriminator"])
         response = make_response(redirect(url_for("main.index")))
-        
+
         # Обновляем cookie с полными логинами
         set_full_username_cookie(response, user["username"], full_username)
 
@@ -579,29 +583,29 @@ def logout() -> str:
 @bp.route("/api/get-user-info")
 def get_user_info() -> dict:
     """API endpoint для получения информации о текущем пользователе.
-    
+
     Возвращает полный логин для сохранения в localStorage после регистрации.
-    
+
     Returns:
         JSON с информацией о пользователе или ошибку
     """
     user_id = session.get("user_id")
-    
+
     if not user_id:
         return {"error": "Пользователь не авторизован"}, 401
-    
+
     db = get_db()
     user = db.execute(
         "SELECT username, discriminator FROM user WHERE id = ?", (user_id,)
     ).fetchone()
-    
+
     if not user:
         return {"error": "Пользователь не найден"}, 404
-    
+
     full_username = format_full_username(user["username"], user["discriminator"])
-    
+
     return {
         "base_username": user["username"],
         "full_username": full_username,
-        "discriminator": user["discriminator"]
+        "discriminator": user["discriminator"],
     }
