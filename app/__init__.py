@@ -1,5 +1,5 @@
 import os
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 from dotenv import load_dotenv
 
 from flask import Flask
@@ -61,11 +61,11 @@ def create_app(test_config: Optional[dict[str, Any]] = None) -> Flask:
 
     # Добавляем CSRF токен в контекст всех шаблонов
     @app.context_processor
-    def inject_csrf_token() -> dict[str, str]:
+    def inject_csrf_token() -> dict[str, Callable[[], str]]:
         """Добавляет CSRF токен в контекст всех шаблонов."""
         from app.forms.csrf import generate_csrf_token
 
-        return {"csrf_token": generate_csrf_token()}
+        return {"csrf_token": generate_csrf_token}
 
     # Импорты внутри функции предотвращают циклические ссылки при импорте
     # пакетов.
