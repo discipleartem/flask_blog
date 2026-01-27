@@ -61,7 +61,7 @@ filterwarnings = [
 
 [tool.black]
 line-length = 88
-target-version = ['py312']
+target-version = ['py313']
 skip-string-normalization = false
 include = '\.pyi?$'
 extend-exclude = '''
