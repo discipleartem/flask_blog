@@ -2,7 +2,7 @@ import os
 from typing import Any, Callable, Optional
 from dotenv import load_dotenv
 
-from flask import Flask
+from flask import Flask, Response
 
 
 def create_app(test_config: Optional[dict[str, Any]] = None) -> Flask:
@@ -37,7 +37,9 @@ def create_app(test_config: Optional[dict[str, Any]] = None) -> Flask:
     # - обычный режим: из config.py и instance/config.py (если файл существует)
     # - тестовый режим: из test_config
     if test_config is None:
-        app.config.from_object("config.Config")
+        app.config.from_object(
+            "config.DevelopmentConfig"
+        )  # Используем DevelopmentConfig с DEBUG=True
         app.config.from_pyfile("config.py", silent=True)
     else:
         app.config.from_mapping(test_config)
@@ -66,6 +68,39 @@ def create_app(test_config: Optional[dict[str, Any]] = None) -> Flask:
         from app.forms.csrf import generate_csrf_token
 
         return {"csrf_token": generate_csrf_token}
+
+    # Настраиваем Content Security Policy
+    @app.after_request
+    def add_security_headers(response: Response) -> Response:
+        """Добавляет заголовки безопасности включая CSP."""
+        # В режиме разработки добавляем гибкие настройки для совместимости с расширениями
+        if app.debug:
+            csp = (
+                "default-src 'self'; "
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; "
+                "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; "
+                "font-src 'self' https://cdnjs.cloudflare.com; "
+                "img-src 'self' data:; "
+                "connect-src 'self' https://cdn.jsdelivr.net; "
+                "object-src 'none'; "
+                "base-uri 'self'; "
+                "form-action 'self';"
+            )
+        else:
+            # В проде строгие настройки
+            csp = (
+                "default-src 'self'; "
+                "script-src 'self' https://cdn.jsdelivr.net; "
+                "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; "
+                "font-src 'self' https://cdnjs.cloudflare.com; "
+                "img-src 'self' data:; "
+                "connect-src 'self' https://cdn.jsdelivr.net; "
+                "object-src 'none'; "
+                "base-uri 'self'; "
+                "form-action 'self';"
+            )
+        response.headers["Content-Security-Policy"] = csp
+        return response
 
     # Импорты внутри функции предотвращают циклические ссылки при импорте
     # пакетов.

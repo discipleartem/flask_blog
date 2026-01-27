@@ -10,6 +10,7 @@
 class AuthCookieManager {
     constructor() {
         this.cookieName = 'full_usernames';
+        this.initialized = false;
         this.init();
     }
 
@@ -17,7 +18,10 @@ class AuthCookieManager {
      * Инициализация при загрузке страницы
      */
     init() {
+        if (this.initialized) return;
+        
         console.log('AuthCookieManager инициализирован');
+        this.initialized = true;
     }
 
     /**
@@ -32,7 +36,9 @@ class AuthCookieManager {
             const [name, value] = cookie.trim().split('=');
             if (name === this.cookieName) {
                 try {
-                    const data = JSON.parse(decodeURIComponent(value));
+                    // Используем более безопасный способ парсинга
+                    const decodedValue = decodeURIComponent(value);
+                    const data = this.safeJSONParse(decodedValue);
                     return data[baseUsername.toLowerCase()] || null;
                 } catch (e) {
                     console.error('Ошибка парсинга cookie:', e);
@@ -42,6 +48,25 @@ class AuthCookieManager {
         }
         
         return null;
+    }
+
+    /**
+     * Безопасный парсинг JSON без использования eval
+     * @param {string} jsonString - строка JSON
+     * @returns {object} распарсенный объект
+     */
+    safeJSONParse(jsonString) {
+        // Проверяем валидность JSON перед парсингом
+        if (typeof jsonString !== 'string') {
+            throw new Error('Invalid input: expected string');
+        }
+        
+        // Базовая проверка на безопасность
+        if (!jsonString.trim().startsWith('{') || !jsonString.trim().endsWith('}')) {
+            throw new Error('Invalid JSON format');
+        }
+        
+        return JSON.parse(jsonString);
     }
 
     /**
@@ -66,35 +91,48 @@ class AuthCookieManager {
  * Обработка формы входа с cookie
  */
 function handleLoginWithCookies() {
-    const authCookie = new AuthCookieManager();
-    const form = document.querySelector('form[method="post"]');
-    const usernameInput = document.getElementById('login_username') || document.getElementById('username');
-    const fullUsernameHidden = document.getElementById('full_username');
+    try {
+        const authCookie = new AuthCookieManager();
+        const form = document.querySelector('form[method="post"]');
+        const usernameInput = document.getElementById('login_username') || document.getElementById('username');
+        const fullUsernameHidden = document.getElementById('full_username');
 
-    if (!form || !usernameInput) return;
-
-    form.addEventListener('submit', function(e) {
-        const baseUsername = usernameInput.value.trim();
-        
-        if (!baseUsername) return;
-
-        // Проверяем cookie
-        const storedFullUsername = authCookie.getFullUsername(baseUsername);
-        
-        if (storedFullUsername && authCookie.validateUsernameMatch(baseUsername, storedFullUsername)) {
-            // Используем полный логин из cookie
-            if (fullUsernameHidden) {
-                fullUsernameHidden.value = storedFullUsername;
-                console.log(`Используем полный логин из cookie: ${storedFullUsername}`);
-            }
-        } else {
-            // Очищаем скрытое поле, будем использовать fallback логику на сервере
-            if (fullUsernameHidden) {
-                fullUsernameHidden.value = '';
-            }
-            console.log('Cookie не найден или не совпадает, используем fallback');
+        if (!form || !usernameInput) {
+            console.warn('AuthCookieManager: Форма или поле логина не найдены');
+            return;
         }
-    });
+
+        form.addEventListener('submit', function(e) {
+            try {
+                const baseUsername = usernameInput.value.trim();
+                
+                if (!baseUsername) return;
+
+                // Проверяем cookie
+                const storedFullUsername = authCookie.getFullUsername(baseUsername);
+                
+                if (storedFullUsername && authCookie.validateUsernameMatch(baseUsername, storedFullUsername)) {
+                    // Используем полный логин из cookie, только если скрытое поле пустое
+                    if (fullUsernameHidden && !fullUsernameHidden.value.trim()) {
+                        fullUsernameHidden.value = storedFullUsername;
+                        console.log(`Используем полный логин из cookie: ${storedFullUsername}`);
+                    } else if (fullUsernameHidden && fullUsernameHidden.value.trim()) {
+                        console.log(`Скрытое поле уже заполнено: ${fullUsernameHidden.value}`);
+                    }
+                } else {
+                    // Очищаем скрытое поле, будем использовать fallback логику на сервере
+                    if (fullUsernameHidden) {
+                        fullUsernameHidden.value = '';
+                    }
+                    console.log('Cookie не найден или не совпадает, используем fallback');
+                }
+            } catch (error) {
+                console.error('Ошибка при обработке формы входа:', error);
+            }
+        });
+    } catch (error) {
+        console.error('Ошибка при инициализации AuthCookieManager:', error);
+    }
 }
 
 // Инициализация при загрузке страницы
