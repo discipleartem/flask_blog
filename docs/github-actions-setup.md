@@ -20,6 +20,7 @@ on:
 jobs:
   sync-dev:
     runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, '[skip-sync]'))
     
     steps:
     - name: Checkout repository
@@ -27,6 +28,22 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         fetch-depth: 0
+        
+    - name: Wait for checks to complete
+      uses: lewagon/wait-on-check-action@v1.3.4
+      with:
+        ref: ${{ github.ref }}
+        check-name: 'Code Quality Checks'
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        wait-interval: 10
+        
+    - name: Wait for tests to complete
+      uses: lewagon/wait-on-check-action@v1.3.4
+      with:
+        ref: ${{ github.ref }}
+        check-name: 'Test Suite'
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        wait-interval: 10
         
     - name: Configure Git
       run: |
@@ -108,11 +125,17 @@ jobs:
 
 ### Процесс синхронизации
 1. Checkout репозитория с полным доступом (`fetch-depth: 0`)
-2. Настройка Git конфигурации для bot-пользователя
-3. Переключение на ветку `dev`
-4. Pull последних изменений `dev`
-5. Слияние `origin/main` в `dev` без fast-forward
-6. Push обновлённой `dev` в remote
+2. **Ожидание завершения CI проверок** (Code Quality Checks, Test Suite)
+3. Настройка Git конфигурации для bot-пользователя
+4. Переключение на ветку `dev`
+5. Pull последних изменений `dev`
+6. Слияние `origin/main` в `dev` без fast-forward
+7. Push обновлённой `dev` в remote
+
+### Условия запуска workflow
+- **Автоматически**: При push в `main` (если в коммите нет `[skip-sync]`)
+- **Вручную**: Через Actions → Sync Dev to Main → Run workflow
+- **Пропуск синхронизации**: Добавь `[skip-sync]` в сообщение коммита
 
 ## Альтернативные методы синхронизации
 
@@ -142,14 +165,18 @@ git push origin dev
 ## Решение проблем
 
 ### Ошибка: Repository rule violations
-**Причина**: Защита ветки `dev` или Repository rules блокируют push
+**Причина**: Repository Rules блокируют push в `dev`
 **Решение**: 
-1. **Settings → Branches** → `dev` → Edit
-   - ❌ Убери "Block force pushes" (для GitHub Actions)
-   - ❌ Убери "Restrict updates" (для синхронизации)
-2. **Settings → Rules** → Branches
-   - Убери правила для `dev` или создай исключение
-3. **Или используй `--force-with-lease`** в workflow (уже настроено)
+1. **Settings → Rules → Branches** → отключи правила для `dev`
+2. **Или создай исключение** для `github-actions[bot]`
+3. **Или используй Personal Access Token** с полными правами
+
+**Проблема с CI проверками:**
+**Причина**: Синхронизация запускается до завершения проверок
+**Решение**: 
+- Workflow теперь ждёт завершения всех проверок
+- Использует `lewagon/wait-on-check-action` для ожидания
+- Синхронизация происходит только после успешных проверок
 
 ### Важно: Безопасность force push в `dev`
 **Кто может форснуть `dev`:**
@@ -221,7 +248,15 @@ git push origin dev
 1. **Разработка**: `feature/new-post` → PR → `dev` (с проверками)
 2. **Тестирование**: Автоматические тесты на `dev`
 3. **Релиз**: `dev` → PR → `main` (с проверками)
-4. **Синхронизация**: `main` → (авто) → `dev` (только GitHub Actions)
+4. **Ожидание CI**: GitHub Actions ждёт завершения проверок на `main`
+5. **Синхронизация**: `main` → (авто) → `dev` (только после успешных проверок)
+
+### Новые возможности workflow
+
+- **Ожидание проверок**: Workflow ждёт Code Quality Checks и Test Suite
+- **Условный запуск**: Только для `main` с исключениями
+- **Ручное управление**: `[skip-sync]` в коммите для пропуска синхронизации
+- **Безопасность**: Синхронизация только после успешных CI проверок
 
 ## Рекомендации
 
@@ -233,6 +268,8 @@ git push origin dev
 6. **Держи `dev` защищённой, но с исключениями** - для GitHub Actions
 7. **Проверяй CI статус** перед слиянием PR в `dev`
 8. **Следи за логами GitHub Actions** при проблемах синхронизации
+9. **Используй `[skip-sync]`** для временного отключения синхронизации
+10. **Настрой Repository Rules** правильно - отключи для `dev` или создай исключения
 
 ## Структура файлов
 
