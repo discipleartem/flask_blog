@@ -20,7 +20,12 @@ def create_app(test_config: Optional[dict[str, Any]] = None) -> Flask:
         Flask: готовое к запуску приложение.
     """
     # Загружаем переменные из .env файла
-    load_dotenv()
+    # Указываем путь к .env файлу для хостинга
+    from pathlib import Path
+
+    project_root = Path(__file__).parent.parent
+    env_path = project_root / ".env"
+    load_dotenv(env_path)
 
     # instance_relative_config=True означает, что конфиг и файлы instance
     # лежат вне пакета app/ (удобно для секретов и локальных настроек).
