@@ -20,13 +20,10 @@ class TestCommentCounts:
                 ), f"У поста {post.id} нет поля comment_count"
                 assert isinstance(
                     post.comment_count, int
-                ), f"comment_count должен быть int, а не {
-                    type(
-                        post.comment_count)}"
+                ), f"comment_count должен быть int, а не {type(post.comment_count)}"
                 assert (
                     post.comment_count >= 0
-                ), f"comment_count не может быть отрицательным: {
-                    post.comment_count}"
+                ), f"comment_count не может быть отрицательным: {post.comment_count}"
 
     def test_comment_count_matches_database(self, app):
         """Проверяет, что счетчики комментариев соответствуют данным в БД."""
@@ -63,8 +60,7 @@ class TestCommentCounts:
                 import re
 
                 # Ищем ссылку на пост и следующий за ней блок с комментариями
-                post_pattern = f'href="/post/{
-                    post.id}"[^>]*>.*?fa-comment[^>]*>.*?<span[^>]*>(\\d+)</span>'
+                post_pattern = f'href="/post/{post.id}"[^>]*>.*?fa-comment[^>]*>.*?<span[^>]*>(\\d+)</span>'
                 matches = re.findall(post_pattern, html, re.DOTALL)
 
                 if matches:

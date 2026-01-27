@@ -79,10 +79,7 @@ class Post:
 
     def __repr__(self) -> str:
         """Строковое представление для отладки."""
-        return f"<Post(id={
-            self.id}, title='{
-            self.title}', author_id={
-            self.author_id})>"
+        return f"<Post(id={self.id}, title='{self.title}', author_id={self.author_id})>"
 
     def __eq__(self, other: Any) -> bool:
         """Сравнение постов по ID."""

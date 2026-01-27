@@ -76,10 +76,7 @@ class Comment:
 
     def __repr__(self) -> str:
         """Строковое представление для отладки."""
-        return f"<Comment(id={
-            self.id}, post_id={
-            self.post_id}, author_id={
-            self.author_id})>"
+        return f"<Comment(id={self.id}, post_id={self.post_id}, author_id={self.author_id})>"
 
     def __eq__(self, other: Any) -> bool:
         """Сравнение комментариев по ID."""
