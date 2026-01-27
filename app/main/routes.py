@@ -9,6 +9,7 @@ from flask import (
     url_for,
     abort,
     g,
+    Response,
 )
 
 from app.auth.utils import login_required
@@ -27,13 +28,13 @@ def index() -> str:
 
 @bp.route("/post/create", methods=["GET", "POST"])
 @login_required
-def create_post() -> str:
+def create_post() -> Response:
     """Создание нового поста."""
     form = PostForm(request.form)
 
     if request.method == "POST" and form.validate():
         post = PostService.create(
-            author_id=g.user["id"], title=form.title.data, content=form.content.data
+            author_id=g.user["id"], title=form.title.data or "", content=form.content.data or ""
         )
         flash("Пост успешно создан!", "success")
         return redirect(url_for("main.view_post", post_id=post.id))
@@ -48,7 +49,7 @@ def create_post() -> str:
 
 
 @bp.route("/post/<int:post_id>")
-def view_post(post_id) -> str:
+def view_post(post_id: int) -> str:
     """Просмотр отдельного поста."""
     post = PostService.find_by_id(post_id)
     if post is None:
@@ -65,7 +66,7 @@ def view_post(post_id) -> str:
 
 @bp.route("/post/<int:post_id>/edit", methods=["GET", "POST"])
 @login_required
-def edit_post(post_id) -> str:
+def edit_post(post_id: int) -> Response:
     """Редактирование поста (только для автора)."""
     post = PostService.find_by_id(post_id)
     if post is None:
@@ -77,13 +78,13 @@ def edit_post(post_id) -> str:
     form = PostForm(request.form)
 
     if request.method == "POST" and form.validate():
-        PostService.update(post_id, form.title.data, form.content.data)
+        PostService.update(post_id, form.title.data or "", form.content.data or "")
         flash("Пост успешно обновлён!", "success")
         return redirect(url_for("main.view_post", post_id=post_id))
     elif request.method == "GET":
         # Заполняем форму текущими данными поста
-        form.title.data = post.title
-        form.content.data = post.content
+        form.title.data = post.title or ""
+        form.content.data = post.content or ""
 
     # Если форма не валидна при POST, показываем ошибки
     elif request.method == "POST":
@@ -96,7 +97,7 @@ def edit_post(post_id) -> str:
 
 @bp.route("/post/<int:post_id>/delete", methods=["POST"])
 @login_required
-def delete_post(post_id) -> str:
+def delete_post(post_id: int) -> Response:
     """Удаление поста (только для автора)."""
     post = PostService.find_by_id(post_id)
     if post is None:
@@ -120,7 +121,7 @@ def delete_post(post_id) -> str:
 
 @bp.route("/post/<int:post_id>/comment", methods=["POST"])
 @login_required
-def add_comment(post_id) -> str:
+def add_comment(post_id: int) -> Response:
     """Добавление комментария к посту."""
     post = PostService.find_by_id(post_id)
     if post is None:
@@ -130,7 +131,7 @@ def add_comment(post_id) -> str:
 
     if form.validate():
         CommentService.create(
-            author_id=g.user["id"], post_id=post_id, content=form.content.data
+            author_id=g.user["id"], post_id=post_id, content=form.content.data or ""
         )
         flash("Комментарий успешно добавлен!", "success")
     else:
@@ -144,7 +145,7 @@ def add_comment(post_id) -> str:
 
 @bp.route("/comment/<int:comment_id>/delete", methods=["POST"])
 @login_required
-def delete_comment(comment_id) -> str:
+def delete_comment(comment_id: int) -> Response:
     """Удаление комментария (только для автора)."""
     # Проверяем существование комментария
     comment = CommentService.find_by_id(comment_id)

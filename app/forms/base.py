@@ -1,4 +1,5 @@
 import copy
+from typing import Any, Dict, Iterator, List, Optional, Union
 
 from flask import request, has_request_context
 
@@ -22,10 +23,10 @@ class Form:
     не делили одно и то же Field-состояние (data/errors) между запросами.
     """
 
-    def __init__(self, form_data=None) -> None:
+    def __init__(self, form_data: Optional[Any] = None) -> None:
         self._fields = {}
-        self._csrf_error = None
-        self._csrf_token_data = None
+        self._csrf_error: Optional[str] = None
+        self._csrf_token_data: Optional[str] = None
 
         # Инспекция атрибутов класса для поиска полей.
         # Идём по dir(self.__class__) и вытаскиваем все Field.
@@ -34,7 +35,7 @@ class Form:
             if isinstance(field, Field):
                 # Создаем уникальный экземпляр поля для объекта формы
                 instance_field = copy.deepcopy(field)
-                instance_field.name = name
+                instance_field.name: str = name
                 setattr(self, name, instance_field)
                 self._fields[name] = instance_field
 
@@ -48,7 +49,7 @@ class Form:
         if form_data is not None:
             self.process(form_data)
 
-    def process(self, form_data) -> None:
+    def process(self, form_data: Any) -> None:
         """Заполняет поля формы данными из form_data (dict/MultiDict)."""
         # Заполняем данные для каждого зарегистрированного поля
         for name, field in self._fields.items():
@@ -92,7 +93,7 @@ class Form:
 
         # В обычном режиме или в тестах с CSRF, проверяем токен
         if not validate_csrf_token(self._csrf_token_data):
-            self._csrf_error = "Неверный или отсутствующий CSRF-токен."
+            self._csrf_error = "Неверный или отсутствующий CSRF-токен."  # type: ignore
             is_valid = False
 
         # Валидация каждого поля
@@ -102,12 +103,12 @@ class Form:
 
         return is_valid
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Field]:
         """Позволяет итерироваться по полям формы в шаблонах."""
         return iter(self._fields.values())
 
     @property
-    def errors(self):
+    def errors(self) -> Dict[str, List[str]]:
         """Собирает ошибки со всех полей + CSRF ошибку.
 
         Returns:

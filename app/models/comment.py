@@ -81,7 +81,7 @@ class Comment:
             self.post_id}, author_id={
             self.author_id})>"
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         """Сравнение комментариев по ID."""
         if not isinstance(other, Comment):
             return False

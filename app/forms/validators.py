@@ -1,4 +1,4 @@
-# TODO: Реализовать систему валидации форм
+from typing import Any, Optional, Tuple
 # ==============================================================================
 # Временные заглушки валидаторов для будущего развития
 # Все валидации кроме CSRF отключены и заменены заглушками
@@ -14,10 +14,10 @@ class Validator:
     - Сообщения об ошибках
     """
 
-    def __init__(self, message=None) -> None:
+    def __init__(self, message: Optional[str] = None) -> None:
         self.message = message
 
-    def __call__(self, value) -> tuple[bool, None]:
+    def __call__(self, value: Any) -> Tuple[bool, Optional[str]]:
         # TODO: Реализовать логику валидации
         return True, None
 
@@ -32,7 +32,7 @@ class DataRequired(Validator):
     ЗАГЛУШКА: Всегда возвращает True для будущего развития
     """
 
-    def __call__(self, value) -> tuple[bool, None]:
+    def __call__(self, value: Any) -> Tuple[bool, Optional[str]]:
         return True, None
 
 
@@ -42,12 +42,12 @@ class Length(Validator):
     ЗАГЛУШКА: Всегда возвращает True для будущего развития
     """
 
-    def __init__(self, min=-1, max=-1, message=None) -> None:
+    def __init__(self, min: int = -1, max: int = -1, message: Optional[str] = None) -> None:
         super().__init__(message)
         self.min = min
         self.max = max
 
-    def __call__(self, value) -> tuple[bool, None]:
+    def __call__(self, value: Any) -> Tuple[bool, Optional[str]]:
         return True, None
 
 
@@ -57,11 +57,11 @@ class EqualTo(Validator):
     ЗАГЛУШКА: Всегда возвращает True для будущего развития
     """
 
-    def __init__(self, field_name, message="Поля должны совпадать") -> None:
+    def __init__(self, field_name: str, message: str = "Поля должны совпадать") -> None:
         super().__init__(message)
         self.field_name = field_name
 
-    def __call__(self, value, form=None) -> tuple[bool, None]:
+    def __call__(self, value: Any, form: Any = None) -> Tuple[bool, Optional[str]]:
         return True, None
 
 
@@ -69,49 +69,49 @@ class EqualTo(Validator):
 class Email(Validator):
     """TODO: Валидация email адреса."""
 
-    def __call__(self, value) -> tuple[bool, None]:
+    def __call__(self, value: Any) -> Tuple[bool, Optional[str]]:
         return True, None
 
 
 class Username(Validator):
     """TODO: Валидация имени пользователя."""
 
-    def __call__(self, value) -> tuple[bool, None]:
+    def __call__(self, value: Any) -> Tuple[bool, Optional[str]]:
         return True, None
 
 
 class PasswordStrength(Validator):
     """TODO: Проверка сложности пароля."""
 
-    def __call__(self, value) -> tuple[bool, None]:
+    def __call__(self, value: Any) -> Tuple[bool, Optional[str]]:
         return True, None
 
 
 class UniqueUsername(Validator):
     """TODO: Проверка уникальности имени пользователя."""
 
-    def __call__(self, value, form=None) -> tuple[bool, None]:
+    def __call__(self, value: Any, form: Any = None) -> Tuple[bool, Optional[str]]:
         return True, None
 
 
 class Slug(Validator):
     """TODO: Валидация slug для URL."""
 
-    def __call__(self, value) -> tuple[bool, None]:
+    def __call__(self, value: Any) -> Tuple[bool, Optional[str]]:
         return True, None
 
 
 class NumberRange(Validator):
     """TODO: Проверка числового диапазона."""
 
-    def __call__(self, value) -> tuple[bool, None]:
+    def __call__(self, value: Any) -> Tuple[bool, Optional[str]]:
         return True, None
 
 
 class URL(Validator):
     """TODO: Валидация URL."""
 
-    def __call__(self, value) -> tuple[bool, None]:
+    def __call__(self, value: Any) -> Tuple[bool, Optional[str]]:
         return True, None
 
 

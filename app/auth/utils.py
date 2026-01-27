@@ -2,7 +2,7 @@
 
 import functools
 import secrets
-from typing import Optional
+from typing import Any, Callable, Optional
 
 from flask import flash, g, redirect, url_for
 
@@ -74,7 +74,7 @@ def verify_password(stored_password: str, provided_password: str, salt: bytes) -
         return False
 
 
-def generate_discriminator(db_conn, username: str) -> Optional[int]:
+def generate_discriminator(db_conn: Any, username: str) -> Optional[int]:
     """
     Генерирует уникальный случайный дискриминатор (тег) для пользователя.
 
@@ -101,11 +101,11 @@ def generate_discriminator(db_conn, username: str) -> Optional[int]:
     return secrets.choice(available)
 
 
-def login_required(view):
+def login_required(view: Callable) -> Callable:
     """Декоратор для защиты маршрутов."""
 
     @functools.wraps(view)
-    def wrapped_view(*args, **kwargs):
+    def wrapped_view(*args: Any, **kwargs: Any) -> Any:
         if g.user is None:
             flash("Для этого действия необходимо войти в систему.", "warning")
             return redirect(url_for("auth.login"))

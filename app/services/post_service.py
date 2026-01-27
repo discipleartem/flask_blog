@@ -33,7 +33,7 @@ class PostService:
         db.commit()
 
         # Получаем созданный пост с информацией об авторе
-        post = PostService.find_by_id(cursor.lastrowid)
+        post = PostService.find_by_id(cursor.lastrowid or 0)
         if post is None:
             raise RuntimeError("Failed to retrieve created post")
         return post

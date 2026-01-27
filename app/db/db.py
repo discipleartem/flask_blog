@@ -8,9 +8,10 @@
 
 import sqlite3  # работа с SQLite
 import warnings  # подавление предупреждений
+from typing import Any
 
 import click
-from flask import g, current_app
+from flask import Flask, g, current_app
 
 # Подавляем предупреждение об устаревшем конвертере временных меток Python
 # 3.12+
@@ -42,7 +43,7 @@ def get_db() -> sqlite3.Connection:
     return g.db
 
 
-def close_db(_=None) -> None:
+def close_db(e: Any = None) -> None:
     """Закрывает соединение с БД, если оно было открыто.
 
     Вызывается автоматически при завершении обработки запроса (teardown_appcontext).
@@ -57,7 +58,7 @@ def init_db() -> None:
     db = get_db()
     # current_app.open_resource ищет файл относительно пакета приложения
     with current_app.open_resource("db/schema.sql") as f:
-        db.executescript(f.read().decode("utf8"))
+        db.executescript(f.read())
 
 
 @click.command("init-db")
@@ -67,7 +68,7 @@ def init_db_command() -> None:
     click.echo("База данных инициализирована.")
 
 
-def init_app(app) -> None:
+def init_app(app: Flask) -> None:
     """Подключает БД к Flask-приложению.
 
     - регистрирует закрытие соединения на teardown,

@@ -1,6 +1,7 @@
 import hashlib
 import hmac
 import os
+from typing import Optional
 
 from flask import session, current_app
 
@@ -35,7 +36,7 @@ def generate_csrf_token() -> str:
     return hmac.new(key, token, hashlib.sha256).hexdigest()
 
 
-def validate_csrf_token(token) -> bool:
+def validate_csrf_token(token: Optional[str]) -> bool:
     """Проверяет CSRF-токен на совпадение с ожидаемым.
 
     Args:
@@ -48,7 +49,7 @@ def validate_csrf_token(token) -> bool:
 
     # Для тестов вне контекста запроса
     if not has_request_context():
-        return token == TEST_CSRF_TOKEN
+        return token == TEST_CSRF_TOKEN  # type: ignore
 
     if not token or "_csrf_token" not in session:
         return False

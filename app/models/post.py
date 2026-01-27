@@ -84,7 +84,7 @@ class Post:
             self.title}', author_id={
             self.author_id})>"
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         """Сравнение постов по ID."""
         if not isinstance(other, Post):
             return False

@@ -1,4 +1,5 @@
 import inspect
+from typing import Any, List, Optional
 
 
 class Field:
@@ -13,15 +14,15 @@ class Field:
         name: имя поля в форме (устанавливается в Form.__init__)
     """
 
-    def __init__(self, label="", validators=None, description="") -> None:
+    def __init__(self, label: str = "", validators: Optional[List[Any]] = None, description: str = "") -> None:
         self.label = label
         self.validators = validators or []
         self.description = description
         self.data = None
-        self.errors = []
+        self.errors: List[str] = []
         self.name = None  # Устанавливается в Form.__init__
 
-    def validate(self, form) -> bool:
+    def validate(self, form: Any) -> bool:
         """Запускает валидаторы по очереди и собирает ошибки.
 
         Валидаторы поддерживаются в двух вариантах:

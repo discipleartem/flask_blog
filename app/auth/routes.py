@@ -15,7 +15,7 @@
 """
 
 import sqlite3
-from typing import Optional, Tuple
+from typing import Any, Optional, Tuple
 
 from flask import (
     flash,
@@ -23,6 +23,7 @@ from flask import (
     redirect,
     render_template,
     request,
+    Response,
     session,
     url_for,
     current_app,
@@ -52,7 +53,7 @@ ADMIN_USERNAME = "admin"
 DISCRIMINATOR_FORMAT = "{:04d}"
 
 
-def set_full_username_cookie(response, base_username: str, full_username: str) -> None:
+def set_full_username_cookie(response: Response, base_username: str, full_username: str) -> None:
     """Устанавливает cookie с полным логином для localStorage-подобной функциональности.
 
     Args:
@@ -316,8 +317,8 @@ def _extract_form_data(form: RegistrationForm) -> Tuple[str, str, Optional[str]]
     Returns:
         Tuple[username, password, error]: Данные формы и ошибка валидации
     """
-    username = form.username.data.strip()
-    password = form.password.data
+    username = form.username.data.strip() if form.username.data else ""
+    password = form.password.data or ""
 
     # Проверка зарезервированного имени
     if username.lower() == ADMIN_USERNAME:
@@ -370,7 +371,7 @@ def _process_registration(username: str, password: str) -> dict:
         return {"error": "Ошибка при регистрации. Возможно, имя занято."}
 
 
-def _create_user_in_db(db, username: str, password: str, discriminator: int) -> int:
+def _create_user_in_db(db: Any, username: str, password: str, discriminator: int) -> int:
     """Создаёт запись пользователя в базе данных.
 
     Args:
@@ -567,7 +568,7 @@ def load_logged_in_user() -> None:
 
 
 @bp.route("/logout")
-def logout() -> str:
+def logout() -> Response:
     """Выход пользователя из системы.
 
     Очищает сессию пользователя и перенаправляет на главную страницу.
@@ -581,7 +582,7 @@ def logout() -> str:
 
 
 @bp.route("/api/get-user-info")
-def get_user_info() -> dict:
+def get_user_info() -> Response:
     """API endpoint для получения информации о текущем пользователе.
 
     Возвращает полный логин для сохранения в localStorage после регистрации.
@@ -592,7 +593,7 @@ def get_user_info() -> dict:
     user_id = session.get("user_id")
 
     if not user_id:
-        return {"error": "Пользователь не авторизован"}, 401
+        return jsonify({"error": "Пользователь не авторизован"}), 401
 
     db = get_db()
     user = db.execute(
@@ -600,12 +601,12 @@ def get_user_info() -> dict:
     ).fetchone()
 
     if not user:
-        return {"error": "Пользователь не найден"}, 404
+        return jsonify({"error": "Пользователь не найден"}), 404
 
     full_username = format_full_username(user["username"], user["discriminator"])
 
-    return {
+    return jsonify({
         "base_username": user["username"],
         "full_username": full_username,
         "discriminator": user["discriminator"],
-    }
+    })

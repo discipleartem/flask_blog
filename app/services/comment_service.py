@@ -34,7 +34,7 @@ class CommentService:
         db.commit()
 
         # Получаем созданный комментарий с информацией об авторе
-        comment = CommentService.find_by_id(cursor.lastrowid)
+        comment = CommentService.find_by_id(cursor.lastrowid or 0)
         if comment is None:
             raise RuntimeError("Failed to retrieve created comment")
         return comment
