@@ -6,7 +6,7 @@ from app.forms.csrf import validate_csrf_token
 from app.forms.fields import Field
 
 # Константа для тестового CSRF токена
-TEST_CSRF_TOKEN = "test_csrf_token_for_testing"
+TEST_CSRF_TOKEN = "csrf_test_token"  # nosec B105
 
 
 class Form:

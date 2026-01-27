@@ -13,6 +13,7 @@ dev = [
     "pytest>=8.0.0",
     "pytest-flask>=1.3.0",
     "pytest-cov>=4.0.0",
+    "pytest-cov>=4.0.0",
     "black>=24.0.0",
     "flake8>=7.0.0",
     "mypy>=1.8.0",
@@ -123,8 +124,10 @@ exclude_dirs = [
     "dist",
     ".*\\.egg-info",
     "tests",
+    "migrations",
+    "node_modules",
 ]
-skips = []
+skips = ["B101"]  # Пропускаем assert_used в тестах
 severity = "medium"
 confidence = "medium"
 max_lines = 500

@@ -53,8 +53,9 @@ def create_app(test_config=None) -> Flask:
             return ""
         import markupsafe
 
-        # Сначала экранируем HTML, затем заменяем переносы строк
+        # Сначала экранируем HTML, затем безопасно заменяем переносы строк
         escaped_text = markupsafe.escape(str(text))
+        # Данные уже экранированы, Markup безопасен для <br> замены
         return markupsafe.Markup(escaped_text.replace("\n", "<br>\n"))  # nosec: B704
 
     # Добавляем CSRF токен в контекст всех шаблонов

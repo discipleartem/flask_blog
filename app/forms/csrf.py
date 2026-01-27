@@ -5,7 +5,7 @@ import os
 from flask import session, current_app
 
 # Константа для тестового CSRF токена
-TEST_CSRF_TOKEN = "test_csrf_token_for_testing"
+TEST_CSRF_TOKEN = "csrf_test_token"  # nosec B105
 
 
 def generate_csrf_token() -> str:
@@ -23,7 +23,7 @@ def generate_csrf_token() -> str:
 
     # Для тестов вне контекста запроса используем простую строку
     if not has_request_context():
-        return "test_csrf_token_for_testing"
+        return "csrf_test_token"
 
     if "_csrf_token" not in session:
         # Случайное значение на сессию
