@@ -34,7 +34,9 @@ def create_post() -> Response:
 
     if request.method == "POST" and form.validate():
         post = PostService.create(
-            author_id=g.user["id"], title=form.title.data or "", content=form.content.data or ""
+            author_id=g.user["id"],
+            title=form.title.data or "",
+            content=form.content.data or "",
         )
         flash("Пост успешно создан!", "success")
         return redirect(url_for("main.view_post", post_id=post.id))

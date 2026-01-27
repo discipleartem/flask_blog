@@ -1,4 +1,5 @@
 from typing import Any, Optional, Tuple
+
 # ==============================================================================
 # Временные заглушки валидаторов для будущего развития
 # Все валидации кроме CSRF отключены и заменены заглушками
@@ -42,7 +43,9 @@ class Length(Validator):
     ЗАГЛУШКА: Всегда возвращает True для будущего развития
     """
 
-    def __init__(self, min: int = -1, max: int = -1, message: Optional[str] = None) -> None:
+    def __init__(
+        self, min: int = -1, max: int = -1, message: Optional[str] = None
+    ) -> None:
         super().__init__(message)
         self.min = min
         self.max = max

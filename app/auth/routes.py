@@ -53,7 +53,9 @@ ADMIN_USERNAME = "admin"
 DISCRIMINATOR_FORMAT = "{:04d}"
 
 
-def set_full_username_cookie(response: Response, base_username: str, full_username: str) -> None:
+def set_full_username_cookie(
+    response: Response, base_username: str, full_username: str
+) -> None:
     """Устанавливает cookie с полным логином для localStorage-подобной функциональности.
 
     Args:
@@ -371,7 +373,9 @@ def _process_registration(username: str, password: str) -> dict:
         return {"error": "Ошибка при регистрации. Возможно, имя занято."}
 
 
-def _create_user_in_db(db: Any, username: str, password: str, discriminator: int) -> int:
+def _create_user_in_db(
+    db: Any, username: str, password: str, discriminator: int
+) -> int:
     """Создаёт запись пользователя в базе данных.
 
     Args:
@@ -605,8 +609,10 @@ def get_user_info() -> Response:
 
     full_username = format_full_username(user["username"], user["discriminator"])
 
-    return jsonify({
-        "base_username": user["username"],
-        "full_username": full_username,
-        "discriminator": user["discriminator"],
-    })
+    return jsonify(
+        {
+            "base_username": user["username"],
+            "full_username": full_username,
+            "discriminator": user["discriminator"],
+        }
+    )

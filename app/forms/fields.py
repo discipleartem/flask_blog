@@ -14,7 +14,12 @@ class Field:
         name: имя поля в форме (устанавливается в Form.__init__)
     """
 
-    def __init__(self, label: str = "", validators: Optional[List[Any]] = None, description: str = "") -> None:
+    def __init__(
+        self,
+        label: str = "",
+        validators: Optional[List[Any]] = None,
+        description: str = "",
+    ) -> None:
         self.label = label
         self.validators = validators or []
         self.description = description
