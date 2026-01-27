@@ -1,4 +1,5 @@
 import inspect
+from typing import Any, List, Optional
 
 
 class Field:
@@ -13,15 +14,20 @@ class Field:
         name: имя поля в форме (устанавливается в Form.__init__)
     """
 
-    def __init__(self, label="", validators=None, description=""):
+    def __init__(
+        self,
+        label: str = "",
+        validators: Optional[List[Any]] = None,
+        description: str = "",
+    ) -> None:
         self.label = label
         self.validators = validators or []
         self.description = description
         self.data = None
-        self.errors = []
+        self.errors: List[str] = []
         self.name = None  # Устанавливается в Form.__init__
 
-    def validate(self, form):
+    def validate(self, form: Any) -> bool:
         """Запускает валидаторы по очереди и собирает ошибки.
 
         Валидаторы поддерживаются в двух вариантах:
@@ -38,7 +44,8 @@ class Field:
         is_valid = True
 
         for validator in self.validators:
-            # Проверяем, ожидает ли валидатор доступ к форме (2 аргумента: self, value, form)
+            # Проверяем, ожидает ли валидатор доступ к форме
+            # (2 аргумента: self, value, form)
             # или только значение (1 аргумент: self, value)
             try:
                 # Получаем количество параметров метода __call__
@@ -65,14 +72,11 @@ class Field:
 
 class StringField(Field):
     """Текстовое поле (пока без специфики, тип нужен для читабельности/расширения)."""
-    pass
 
 
 class PasswordField(Field):
     """Поле пароля (тип нужен для семантики; отображение контролируется шаблоном)."""
-    pass
 
 
 class TextAreaField(Field):
     """Многострочное текстовое поле."""
-    pass

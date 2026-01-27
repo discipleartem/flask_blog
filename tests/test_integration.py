@@ -1,68 +1,74 @@
 # tests/test_integration.py
 """Интеграционные тесты для всего приложения."""
 
-import pytest
-from flask import session
-
 
 class TestUserWorkflows:
     """Тесты полных пользовательских сценариев."""
 
-    def test_complete_user_registration_and_login(self, client_with_csrf, auth_with_csrf, app_with_csrf):
+    def test_complete_user_registration_and_login(
+        self, client_with_csrf, auth_with_csrf, app_with_csrf
+    ):
         """Полный цикл: регистрация -> вход -> выход."""
         with app_with_csrf.app_context():
             # 1. Регистрация
             response = client_with_csrf.post(
-                '/auth/register',
-                data={'username': 'integration_user', 'password': 'test_pass123'},
-                follow_redirects=True
+                "/auth/register",
+                data={"username": "integration_user", "password": "test_pass123"},
+                follow_redirects=True,
             )
-            
+
             if response.status_code == 200:
                 # 2. Вход
                 response = client_with_csrf.post(
-                    '/auth/login',
-                    data={'username': 'integration_user#0001', 'password': 'test_pass123'},
-                    follow_redirects=False
+                    "/auth/login",
+                    data={
+                        "username": "integration_user#0001",
+                        "password": "test_pass123",
+                    },
+                    follow_redirects=False,
                 )
-                
+
                 if response.status_code == 302:
                     # 3. Проверка сессии
                     with client_with_csrf.session_transaction() as sess:
-                        assert 'user_id' in sess
-                    
+                        assert "user_id" in sess
+
                     # 4. Выход
-                    response = client_with_csrf.get('/auth/logout', follow_redirects=False)
+                    response = client_with_csrf.get(
+                        "/auth/logout", follow_redirects=False
+                    )
                     assert response.status_code == 302
-                    
+
                     # 5. Проверка очистки сессии
                     with client_with_csrf.session_transaction() as sess:
-                        assert 'user_id' not in sess
+                        assert "user_id" not in sess
 
-    def test_create_post_workflow(self, client_with_csrf, auth_with_csrf, app_with_csrf):
+    def test_create_post_workflow(
+        self, client_with_csrf, auth_with_csrf, app_with_csrf
+    ):
         """Сценарий создания поста."""
         with app_with_csrf.app_context():
             # 1. Вход
             auth_with_csrf.login()
-            
+
             # 2. Создание поста
             response = client_with_csrf.post(
-                '/main/create',
+                "/main/create",
                 data={
-                    'title': 'Интеграционный пост',
-                    'content': 'Это тестовый пост для интеграционных тестов.',
+                    "title": "Интеграционный пост",
+                    "content": "Это тестовый пост для интеграционных тестов.",
                 },
-                follow_redirects=True
+                follow_redirects=True,
             )
-            
+
             # 3. Проверка создания (если маршрут существует)
             if response.status_code == 200:
                 try:
                     from app.db.db import get_db
+
                     db = get_db()
                     post = db.execute(
-                        'SELECT * FROM post WHERE title = ?',
-                        ('Интеграционный пост',)
+                        "SELECT * FROM post WHERE title = ?", ("Интеграционный пост",)
                     ).fetchone()
                     assert post is not None
                 except Exception:
@@ -73,16 +79,16 @@ class TestUserWorkflows:
         with app.app_context():
             # 1. Вход
             auth.login()
-            
+
             # 2. Попытка добавить комментарий к посту
             response = client.post(
-                '/main/post/1/comment',
+                "/main/post/1/comment",
                 data={
-                    'content': 'Это тестовый комментарий.',
+                    "content": "Это тестовый комментарий.",
                 },
-                follow_redirects=True
+                follow_redirects=True,
             )
-            
+
             # Проверка, что запрос обработан (даже если маршрут не существует)
             assert response.status_code in [200, 302, 404, 405]
 
@@ -94,19 +100,18 @@ class TestSecurityFeatures:
         """Безопасность сессий."""
         # 1. Вход
         auth.login()
-        
+
         # 2. Проверка, что сессия установлена
         with client.session_transaction() as sess:
-            assert 'user_id' in sess
-            original_user_id = sess['user_id']
-        
+            assert "user_id" in sess
+            original_user_id = sess["user_id"]
+
         # 3. Выход
         auth.logout()
-        
+
         # 4. Проверка, что сессия очищена
         with client.session_transaction() as sess:
-            assert 'user_id' not in sess or sess.get('user_id') != original_user_id
-
+            assert "user_id" not in sess or sess.get("user_id") != original_user_id
 
 
 class TestErrorHandling:
@@ -117,15 +122,16 @@ class TestErrorHandling:
         with app.app_context():
             try:
                 from app.db.db import get_db
+
                 db = get_db()
-                
+
                 # Попытка выполнить некорректный SQL
                 try:
-                    db.execute('INVALID SQL QUERY')
+                    db.execute("INVALID SQL QUERY")
                     assert False, "Should have raised an exception"
                 except Exception:
                     pass  # Ожидаемое поведение
-                
+
             except Exception:
                 pass  # БД может быть не настроена
 
@@ -133,13 +139,13 @@ class TestErrorHandling:
         """Обработка ошибок форм."""
         # Попытка отправить форму с некорректными данными
         response = client.post(
-            '/auth/register',
+            "/auth/register",
             data={
-                'username': '',  # Пустой логин
-                'password': '123'  # Слишком короткий пароль
-            }
+                "username": "",  # Пустой логин
+                "password": "123",  # Слишком короткий пароль
+            },
         )
-        
+
         # TODO: С заглушками валидации форма всегда валидна, происходит редирект
         # Когда валидаторы будут реализованы, здесь должно быть 200 или 400
         assert response.status_code in [200, 400, 302]  # Включаем 302 для заглушек
@@ -148,17 +154,18 @@ class TestErrorHandling:
         """Обработка ошибок аутентификации."""
         # Попытка входа с неверными данными
         response = client.post(
-            '/auth/login',
-            data={
-                'username': 'nonexistent#0000',
-                'password': 'wrong_password'
-            }
+            "/auth/login",
+            data={"username": "nonexistent#0000", "password": "wrong_password"},
         )
-        
+
         # Должна быть ошибка аутентификации
         assert response.status_code in [200, 400]
         # Проверяем наличие сообщения об ошибке
-        assert b'error' in response.data.lower() or b'nevernyi' in response.data.lower() or b'login' in response.data.lower()
+        assert (
+            b"error" in response.data.lower()
+            or b"nevernyi" in response.data.lower()
+            or b"login" in response.data.lower()
+        )
 
 
 class TestPerformance:
@@ -167,12 +174,12 @@ class TestPerformance:
     def test_page_load_times(self, client):
         """Проверка времени загрузки страниц."""
         import time
-        
+
         # Измеряем время загрузки главной страницы
         start_time = time.time()
-        response = client.get('/')
+        response = client.get("/")
         end_time = time.time()
-        
+
         assert response.status_code == 200
         # Страница должна загружаться менее 1 секунды
         assert (end_time - start_time) < 1.0
@@ -183,18 +190,18 @@ class TestPerformance:
             try:
                 from app.db.db import get_db
                 import time
-                
+
                 db = get_db()
-                
+
                 # Измеряем время простого запроса
                 start_time = time.time()
-                result = db.execute('SELECT 1').fetchone()
+                result = db.execute("SELECT 1").fetchone()
                 end_time = time.time()
-                
+
                 assert result[0] == 1
                 # Запрос должен выполняться менее 0.1 секунды
                 assert (end_time - start_time) < 0.1
-                
+
             except Exception:
                 pass  # БД может быть не настроена
 
@@ -205,31 +212,32 @@ class TestEnvironmentVariables:
     def test_secret_key_configuration(self):
         """Проверка конфигурации секретного ключа."""
         from config import Config
-        
+
         # SECRET_KEY должен быть настроен
         assert Config.SECRET_KEY is not None
         assert len(Config.SECRET_KEY) > 0
-        
+
         # В продакшене не должен использоваться ключ по умолчанию
-        if Config.SECRET_KEY == 'you-will-never-guess':
+        if Config.SECRET_KEY == "you-will-never-guess":
             import os
+
             # Это должно быть только в разработке
-            assert os.environ.get('FLASK_ENV') == 'development'
+            assert os.environ.get("FLASK_ENV") == "development"
 
     def test_database_path_configuration(self):
         """Проверка конфигурации пути к БД."""
         from config import Config
-        
+
         assert Config.DATABASE is not None
         assert len(Config.DATABASE) > 0
-        
+
         # Путь должен содержать имя файла БД
-        assert 'flask_blog.sqlite' in Config.DATABASE
+        assert "flask_blog.sqlite" in Config.DATABASE
 
     def test_admin_password_configuration(self):
         """Проверка конфигурации пароля администратора."""
         from config import Config
-        
+
         # ADMIN_PASSWORD может быть None (из переменной окружения)
         # или строка
         assert Config.ADMIN_PASSWORD is None or isinstance(Config.ADMIN_PASSWORD, str)
@@ -241,35 +249,32 @@ class TestApplicationFactory:
     def test_app_creation(self):
         """Создание приложения."""
         from app import create_app
-        
+
         app = create_app()
         assert app is not None
-        assert app.name == 'app'
+        assert app.name == "app"
 
     def test_app_creation_with_config(self):
         """Создание приложения с кастомной конфигурацией."""
         from app import create_app
-        
-        test_config = {
-            'TESTING': True,
-            'SECRET_KEY': 'test-secret-key'
-        }
-        
+
+        test_config = {"TESTING": True, "SECRET_KEY": "test-secret-key"}
+
         app = create_app(test_config)
-        assert app.config['TESTING'] is True
-        assert app.config['SECRET_KEY'] == 'test-secret-key'
+        assert app.config["TESTING"] is True
+        assert app.config["SECRET_KEY"] == "test-secret-key"
 
     def test_blueprints_registration(self):
         """Регистрация blueprint'ов."""
         from app import create_app
-        
+
         app = create_app()
-        
+
         # Проверяем, что blueprint'ы зарегистрированы
         blueprints = [bp.name for bp in app.blueprints.values()]
-        
+
         # Основные blueprint'ы должны быть зарегистрированы
-        expected_blueprints = ['auth', 'main']
+        expected_blueprints = ["auth", "main"]
         for bp_name in expected_blueprints:
             if bp_name in blueprints:
                 assert True

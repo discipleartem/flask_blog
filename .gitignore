@@ -47,3 +47,6 @@ htmlcov/
 
 # Windsurf IDE
 .windsurf/
+
+# Cookie files
+*.txt

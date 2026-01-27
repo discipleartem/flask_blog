@@ -1,11 +1,15 @@
 import hashlib
 import hmac
 import os
+from typing import Optional
 
 from flask import session, current_app
 
+# Константа для тестового CSRF токена
+TEST_CSRF_TOKEN = "csrf_test_token"  # nosec B105
 
-def generate_csrf_token():
+
+def generate_csrf_token() -> str:
     """Генерирует CSRF-токен, привязанный к сессии.
 
     Реализация:
@@ -17,22 +21,22 @@ def generate_csrf_token():
         str: подписанный CSRF-токен (hex).
     """
     from flask import has_request_context
-    
+
     # Для тестов вне контекста запроса используем простую строку
     if not has_request_context():
-        return 'test_csrf_token_for_testing'
-    
-    if '_csrf_token' not in session:
+        return "csrf_test_token"
+
+    if "_csrf_token" not in session:
         # Случайное значение на сессию
-        session['_csrf_token'] = os.urandom(32).hex()
+        session["_csrf_token"] = os.urandom(32).hex()
 
     # Создаем подпись токена, чтобы его нельзя было подделать вне сервера
-    key = current_app.config['SECRET_KEY'].encode()
-    token = session['_csrf_token'].encode()
+    key = current_app.config["SECRET_KEY"].encode()
+    token = session["_csrf_token"].encode()
     return hmac.new(key, token, hashlib.sha256).hexdigest()
 
 
-def validate_csrf_token(token):
+def validate_csrf_token(token: Optional[str]) -> bool:
     """Проверяет CSRF-токен на совпадение с ожидаемым.
 
     Args:
@@ -42,12 +46,12 @@ def validate_csrf_token(token):
         bool: True если токен валиден.
     """
     from flask import has_request_context
-    
+
     # Для тестов вне контекста запроса
     if not has_request_context():
-        return token == 'test_csrf_token_for_testing'
-    
-    if not token or '_csrf_token' not in session:
+        return token == TEST_CSRF_TOKEN
+
+    if not token or "_csrf_token" not in session:
         return False
 
     expected_token = generate_csrf_token()

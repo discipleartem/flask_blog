@@ -51,7 +51,95 @@
                     </div>
                 </article>
                 
-                <div class="text-center">
+                <!-- Секция комментариев -->
+                <section class="comments-section mt-5">
+                    <div class="card border-0 shadow-lg">
+                        <div class="card-body p-5">
+                            <h3 class="mb-4">
+                                <i class="fas fa-comments me-2"></i>
+                                Комментарии 
+                                <span class="badge bg-secondary ms-2">{{ comments|length }}</span>
+                            </h3>
+                            
+                            <!-- Форма добавления комментария -->
+                            {% if g.user %}
+                                <div class="add-comment mb-5">
+                                    <h5 class="mb-3">Добавить комментарий</h5>
+                                    <form method="post" action="{{ url_for('main.add_comment', post_id=post.id) }}">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <div class="mb-3">
+                                            <label for="content" class="form-label">Комментарий</label>
+                                            <textarea class="form-control" id="content" name="content" rows="3" placeholder="Напишите ваш комментарий..." required>{{ comment_form.content.data or '' }}</textarea>
+                                            {% if comment_form.content.errors %}
+                                                <div class="text-danger mt-1">
+                                                    {% for error in comment_form.content.errors %}
+                                                        <small>{{ error }}</small>
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-paper-plane me-2"></i>Отправить
+                                        </button>
+                                    </form>
+                                </div>
+                            {% else %}
+                                <div class="alert alert-info mb-4">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <a href="{{ url_for('auth.login') }}">Войдите</a>, чтобы оставлять комментарии.
+                                </div>
+                            {% endif %}
+                            
+                            <!-- Список комментариев -->
+                            <div class="comments-list">
+                                {% if comments %}
+                                    {% for comment in comments %}
+                                        <div class="comment-item border-bottom pb-3 mb-3">
+                                            <div class="d-flex align-items-start">
+                                                <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-3">
+                                                    <i class="fas fa-user text-primary"></i>
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <div class="d-flex align-items-center mb-2">
+                                                        <span class="fw-semibold text-dark me-2">
+                                                            {{ comment.author_display_name }}
+                                                        </span>
+                                                        <span class="text-muted small">
+                                                            {{ comment.created.strftime('%d.%m.%Y %H:%M') if comment.created else 'Неизвестно' }}
+                                                        </span>
+                                                        {% if g.user and comment.author_id == g.user['id'] %}
+                                                            <form method="post" 
+                                                                  action="{{ url_for('main.delete_comment', comment_id=comment.id) }}" 
+                                                                  class="d-inline ms-auto">
+                                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                                <button type="submit" 
+                                                                        class="btn btn-sm btn-outline-danger"
+                                                                        onclick="return confirm('Удалить этот комментарий?')"
+                                                                        title="Удалить комментарий">
+                                                                    <i class="fas fa-trash"></i>
+                                                                </button>
+                                                            </form>
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="comment-content">
+                                                        <p class="mb-0">{{ comment.content|nl2br }}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="text-center text-muted py-4">
+                                        <i class="fas fa-comment-slash fa-2x mb-3"></i>
+                                        <p>Пока нет комментариев. Будьте первым!</p>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <div class="text-center mt-4">
                     <a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary btn-lg">
                         <i class="fas fa-arrow-left me-2"></i>К списку статей
                     </a>

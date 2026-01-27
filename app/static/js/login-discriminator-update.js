@@ -6,6 +6,8 @@
  * - Управление видимостью кнопки обновления
  * - Очистка скрытого поля при изменении логина пользователем
  * - Анимация кнопки при взаимодействии
+ * 
+ * ВНИМАНИЕ: Этот скрипт совместим с новой cookie-системой авторизации
  */
 
 class LoginFormManager {
@@ -191,16 +193,19 @@ class LoginFormManager {
     
     /**
      * Обработчик изменения поля логина
+     * 
+     * ВНИМАНИЕ: Эта функция больше не очищает скрытое поле автоматически,
+     * так как новая cookie-система управляет этим самостоятельно
      */
     handleUsernameInputChange() {
         const currentUsername = this.getUsername();
         const fullUsername = this.getFullUsername();
         
-        // Очищаем скрытое поле если пользователь ввёл другой логин
-        if (currentUsername && fullUsername && currentUsername !== fullUsername) {
-            this.elements.fullUsernameHidden.value = '';
-            this.toggleUpdateButton();
-        }
+        // Только переключаем видимость кнопки
+        this.toggleUpdateButton();
+        
+        // Не очищаем скрытое поле - auth-cookies.js управляет этим
+        console.log('LoginFormManager: Изменение логина, cookie-система управляет скрытым полем');
     }
 }
 
