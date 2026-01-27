@@ -12,7 +12,6 @@ from typing import Any
 
 import click
 from flask import Flask, g, current_app
-from flask.g import AppContext
 from sqlite3 import Connection
 
 # Подавляем предупреждение об устаревшем конвертере временных меток Python
@@ -60,7 +59,8 @@ def init_db() -> None:
     db = get_db()
     # current_app.open_resource ищет файл относительно пакета приложения
     with current_app.open_resource("db/schema.sql") as f:
-        db.executescript(f.read())
+        schema_sql = f.read().decode('utf-8')
+        db.executescript(schema_sql)
 
 
 @click.command("init-db")

@@ -65,7 +65,7 @@ def create_app(test_config: Optional[dict[str, Any]] = None) -> Flask:
         """Добавляет CSRF токен в контекст всех шаблонов."""
         from app.forms.csrf import generate_csrf_token
 
-        return {"csrf_token": generate_csrf_token()}
+        return {"csrf_token": generate_csrf_token}
 
     # Импорты внутри функции предотвращают циклические ссылки при импорте
     # пакетов.
