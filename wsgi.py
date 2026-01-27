@@ -16,4 +16,6 @@ if project_home not in sys.path:
 
 # Импортируем Flask приложение
 # Переменная должна называться 'application' для WSGI
-from wsgi import application  # noqa
+from app import create_app
+
+application = create_app()

@@ -28,6 +28,9 @@ prod = [
 [project.scripts]
 flask-blog = "wsgi:app"
 
+[tool.flask]
+app = "wsgi.py"
+
 [build-system]
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
