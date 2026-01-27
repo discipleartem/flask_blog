@@ -59,7 +59,7 @@ def init_db() -> None:
     db = get_db()
     # current_app.open_resource ищет файл относительно пакета приложения
     with current_app.open_resource("db/schema.sql") as f:
-        schema_sql = f.read().decode("utf-8")
+        schema_sql = f.read().decode("utf-8")  # type: ignore[attr-defined]
         db.executescript(schema_sql)
 
 

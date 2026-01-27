@@ -65,7 +65,7 @@ def create_app(test_config: Optional[dict[str, Any]] = None) -> Flask:
         """Добавляет CSRF токен в контекст всех шаблонов."""
         from app.forms.csrf import generate_csrf_token
 
-        return {"csrf_token": generate_csrf_token}
+        return {"csrf_token": generate_csrf_token()}
 
     # Импорты внутри функции предотвращают циклические ссылки при импорте
     # пакетов.
@@ -74,7 +74,7 @@ def create_app(test_config: Optional[dict[str, Any]] = None) -> Flask:
     db.init_app(app)
 
     # Blueprint авторизации: /auth/...
-    from app.auth.routes import bp as auth_bp
+    from app.auth import bp as auth_bp
 
     app.register_blueprint(auth_bp)
 
