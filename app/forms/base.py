@@ -35,7 +35,7 @@ class Form:
             if isinstance(field, Field):
                 # Создаем уникальный экземпляр поля для объекта формы
                 instance_field = copy.deepcopy(field)
-                if hasattr(instance_field, 'name'):
+                if hasattr(instance_field, "name"):
                     instance_field.name = name  # type: ignore
                 setattr(self, name, instance_field)
                 self._fields[name] = instance_field

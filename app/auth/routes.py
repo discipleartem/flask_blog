@@ -82,13 +82,14 @@ def set_full_username_cookie(
     httponly = COOKIE_OPTIONS["httponly"]
     secure = COOKIE_OPTIONS["secure"]
     samesite = COOKIE_OPTIONS["samesite"]
-    
+
     response.set_cookie(
-        FULL_USERNAME_COOKIE, json.dumps(existing_data),
+        FULL_USERNAME_COOKIE,
+        json.dumps(existing_data),
         max_age=int(max_age) if isinstance(max_age, (int, str)) else None,
         httponly=bool(httponly),
         secure=bool(secure),
-        samesite=str(samesite) if samesite is not None else None
+        samesite=str(samesite) if samesite is not None else None,
     )
 
 

@@ -163,7 +163,9 @@ def delete_comment(comment_id: int) -> Response:
         for field_name, field_errors in form.errors.items():
             for error in field_errors:
                 flash(error, "danger")
-        return make_response(redirect(url_for("main.view_post", post_id=comment.post_id)))
+        return make_response(
+            redirect(url_for("main.view_post", post_id=comment.post_id))
+        )
 
     # Удаляем комментарий (проверка прав внутри сервиса)
     if CommentService.delete(comment_id, g.user["id"]):
