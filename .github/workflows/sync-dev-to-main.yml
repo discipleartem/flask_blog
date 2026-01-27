@@ -1,14 +1,17 @@
 name: Sync Dev to Main
 
 on:
-  push:
+  workflow_run:
+    workflows: ["CI/CD Pipeline"]
+    types:
+      - completed
     branches: [ main ]
   workflow_dispatch:
 
 jobs:
   sync-dev:
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, '[skip-sync]'))
+    if: github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch'
     
     steps:
     - name: Checkout repository
@@ -16,22 +19,6 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         fetch-depth: 0
-        
-    - name: Wait for checks to complete
-      uses: lewagon/wait-on-check-action@v1.3.4
-      with:
-        ref: ${{ github.ref }}
-        check-name: 'Code Quality Checks'
-        repo-token: ${{ secrets.GITHUB_TOKEN }}
-        wait-interval: 10
-        
-    - name: Wait for tests to complete
-      uses: lewagon/wait-on-check-action@v1.3.4
-      with:
-        ref: ${{ github.ref }}
-        check-name: 'Test Suite'
-        repo-token: ${{ secrets.GITHUB_TOKEN }}
-        wait-interval: 10
         
     - name: Configure Git
       run: |
