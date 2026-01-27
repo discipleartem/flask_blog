@@ -12,6 +12,11 @@
 
 class LoginFormManager {
     constructor() {
+        // Проверяем, что экземпляр еще не создан
+        if (window.loginFormManagerInstance) {
+            return window.loginFormManagerInstance;
+        }
+        
         // Константы
         this.SELECTORS = {
             USERNAME_INPUT: 'login_username',
@@ -34,6 +39,9 @@ class LoginFormManager {
         
         // Элементы DOM
         this.elements = {};
+        
+        // Сохраняем экземпляр глобально
+        window.loginFormManagerInstance = this;
         
         this.init();
     }
@@ -211,5 +219,9 @@ class LoginFormManager {
 
 // Инициализация при загрузке DOM
 document.addEventListener('DOMContentLoaded', function() {
-    window.loginFormManager = new LoginFormManager();
+    if (!window.loginFormManagerInstance) {
+        window.loginFormManager = new LoginFormManager();
+    } else {
+        window.loginFormManager = window.loginFormManagerInstance;
+    }
 });
