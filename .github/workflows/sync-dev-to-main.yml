@@ -26,4 +26,4 @@ jobs:
         git checkout dev
         git pull origin dev
         git merge origin/main --no-ff -m "Auto-sync: Merge main into dev"
-        git push origin dev
+        git push origin dev --force-with-lease
