@@ -27,6 +27,7 @@ from flask import (
     url_for,
     current_app,
     make_response,
+    jsonify,
 )
 
 from app.auth import bp
@@ -38,24 +39,67 @@ from app.forms import RegistrationForm, LoginForm
 COOKIE_DAYS = 30
 COOKIE_OPTIONS = {
     "max_age": COOKIE_DAYS * 24 * 60 * 60,
-    "httponly": True,
+    "httponly": False,  # Нужно для доступа из JavaScript
     "secure": True,
     "samesite": "Strict",
 }
+
+# Cookie для хранения полных логинов
+FULL_USERNAME_COOKIE = "full_usernames"
 
 # Константы для валидации
 ADMIN_USERNAME = "admin"
 DISCRIMINATOR_FORMAT = "{:04d}"
 
 
-def set_auth_cookie(response, username: str) -> None:
-    """Устанавливает HttpOnly cookie с логином пользователя для автозаполнения.
+def set_full_username_cookie(response, base_username: str, full_username: str) -> None:
+    """Устанавливает cookie с полным логином для localStorage-подобной функциональности.
 
     Args:
         response: Flask response объект
-        username: Полный логин пользователя (с дискриминатором или admin)
+        base_username: Базовый логин пользователя
+        full_username: Полный логин с дискриминатором
     """
-    response.set_cookie("last_username", username, **COOKIE_OPTIONS)
+    import json
+    
+    # Получаем текущие данные из cookie
+    existing_data = {}
+    if FULL_USERNAME_COOKIE in request.cookies:
+        try:
+            existing_data = json.loads(request.cookies[FULL_USERNAME_COOKIE])
+        except (json.JSONDecodeError, TypeError):
+            existing_data = {}
+    
+    # Добавляем/обновляем логин
+    existing_data[base_username.lower()] = full_username
+    
+    # Устанавливаем обновленное cookie
+    response.set_cookie(
+        FULL_USERNAME_COOKIE, 
+        json.dumps(existing_data), 
+        **COOKIE_OPTIONS
+    )
+
+
+def get_full_username_cookie(base_username: str) -> Optional[str]:
+    """Получает полный логин из cookie.
+
+    Args:
+        base_username: Базовый логин
+
+    Returns:
+        Полный логин или None
+    """
+    import json
+    
+    if FULL_USERNAME_COOKIE not in request.cookies:
+        return None
+    
+    try:
+        data = json.loads(request.cookies[FULL_USERNAME_COOKIE])
+        return data.get(base_username.lower())
+    except (json.JSONDecodeError, TypeError):
+        return None
 
 
 def create_user_session(user_id: int) -> None:
@@ -98,11 +142,24 @@ def get_prefilled_usernames() -> Tuple[str, str]:
     Returns:
         Tuple[full_username, base_username]: Полный и базовый логины
     """
-    prefilled_username = request.cookies.get("last_username", "")
-    prefilled_base_username = (
-        prefilled_username.split("#")[0] if prefilled_username else ""
-    )
-    return prefilled_username, prefilled_base_username
+    # Используем новый cookie с полными логинами
+    prefilled_full_username = ""
+    prefilled_base_username = ""
+    
+    # Ищем любой сохраненный логин для автозаполнения
+    if FULL_USERNAME_COOKIE in request.cookies:
+        try:
+            import json
+            data = json.loads(request.cookies[FULL_USERNAME_COOKIE])
+            if data:
+                # Берем первый сохраненный логин для автозаполнения
+                first_base = next(iter(data))
+                prefilled_base_username = first_base
+                prefilled_full_username = data[first_base]
+        except (json.JSONDecodeError, TypeError):
+            pass
+    
+    return prefilled_full_username, prefilled_base_username
 
 
 def authenticate_admin(password: str) -> Tuple[Optional[dict], Optional[str]]:
@@ -147,39 +204,69 @@ def authenticate_admin(password: str) -> Tuple[Optional[dict], Optional[str]]:
 def authenticate_user(
     username_to_check: str, password: str
 ) -> Tuple[Optional[dict], Optional[str]]:
-    """Аутентифицирует обычного пользователя по логину с дискриминатором.
+    """Аутентифицирует обычного пользователя с поддержкой localStorage.
 
-    Проверяет формат логина username#0000 и ищет соответствующую запись в БД.
+    Приоритеты:
+    1. Если есть дискриминатор - точное совпадение
+    2. Если нет дискриминатора - проверяем localStorage, потом fallback
 
     Args:
-        username_to_check: Логин в формате username#0000
+        username_to_check: Логин (может быть с дискриминатором или без)
         password: Пароль для проверки
 
     Returns:
         Tuple[user_dict, error_message]: Данные пользователя или None,
         сообщение об ошибке или None
     """
-    if "#" not in username_to_check:
-        return None, "Неверный формат логина"
-
-    try:
-        username, tag_str = username_to_check.rsplit("#", 1)
-        tag = int(tag_str)
-    except (ValueError, IndexError):
-        return None, "Неверный формат логина"
-
     db = get_db()
-    user = db.execute(
-        "SELECT * FROM user WHERE username = ? AND discriminator = ?", (username, tag)
-    ).fetchone()
 
-    if user is None:
+    # Случай 1: Введен полный логин с дискриминатором
+    if "#" in username_to_check:
+        try:
+            username, tag_str = username_to_check.rsplit("#", 1)
+            tag = int(tag_str)
+        except (ValueError, IndexError):
+            return None, "Неверный формат логина"
+
+        user = db.execute(
+            "SELECT * FROM user WHERE username = ? AND discriminator = ?", (username, tag)
+        ).fetchone()
+
+        if user is None:
+            return None, "Неверный логин или пароль"
+
+        if not verify_password(user["password"], password, user["salt"]):
+            return None, "Неверный логин или пароль"
+
+        return user, None
+
+    # Случай 2: Введен только базовый логин (без дискриминатора)
+    users = db.execute(
+        "SELECT * FROM user WHERE username = ?", (username_to_check,)
+    ).fetchall()
+
+    if not users:
         return None, "Неверный логин или пароль"
 
-    if not verify_password(user["password"], password, user["salt"]):
+    # Проверяем пароль для всех пользователей с таким логином
+    valid_users = []
+    for user in users:
+        if verify_password(user["password"], password, user["salt"]):
+            valid_users.append(user)
+
+    if not valid_users:
         return None, "Неверный логин или пароль"
 
-    return user, None
+    # Если только один пользователь с правильным паролем - входим
+    if len(valid_users) == 1:
+        return valid_users[0], None
+
+    # Если несколько пользователей с правильным паролем - отказываем
+    # (требуется полный логин с дискриминатором)
+    return None, (
+        f"Найдено несколько аккаунтов с логином '{username_to_check}'. "
+        "Пожалуйста, используйте полный логин с дискриминатором (например: user#1234)"
+    )
 
 
 @bp.route("/register", methods=("GET", "POST"))
@@ -267,11 +354,13 @@ def _process_registration(username: str, password: str) -> dict:
         # Создание ответа с cookie для автозаполнения
         response = make_response(redirect(url_for("main.index")))
         full_username = format_full_username(username, new_discriminator)
-        set_auth_cookie(response, full_username)
+        
+        # Сохраняем полный логин в cookie для localStorage-подобной функциональности
+        set_full_username_cookie(response, username, full_username)
 
         flash(f"Добро пожаловать {full_username}!", "success")
 
-        return {"response": response}
+        return {"response": response, "full_username": full_username, "base_username": username}
 
     except sqlite3.IntegrityError:
         return {"error": "Ошибка при регистрации. Возможно, имя занято."}
@@ -376,7 +465,7 @@ def _process_login_attempt() -> dict:
 def _determine_username_for_check(raw_username: str, full_username_hidden: str) -> str:
     """Определяет какой логин использовать для аутентификации.
 
-    Приоритет: скрытое поле с полным логином > видимое поле
+    Приоритет: скрытое поле с полным логином > cookie > видимое поле
 
     Args:
         raw_username: Логин из видимого поля
@@ -385,11 +474,17 @@ def _determine_username_for_check(raw_username: str, full_username_hidden: str) 
     Returns:
         str: Логин для проверки
     """
-    return (
-        full_username_hidden
-        if full_username_hidden and "#" in full_username_hidden
-        else raw_username
-    )
+    # Сначала проверяем скрытое поле (JavaScript)
+    if full_username_hidden and "#" in full_username_hidden:
+        return full_username_hidden
+    
+    # Потом проверяем cookie
+    cookie_full_username = get_full_username_cookie(raw_username)
+    if cookie_full_username and "#" in cookie_full_username:
+        return cookie_full_username
+    
+    # В конце используем введенный логин
+    return raw_username
 
 
 def _handle_admin_login(password: str) -> dict:
@@ -407,7 +502,8 @@ def _handle_admin_login(password: str) -> dict:
         create_user_session(admin_user["id"])
 
         response = make_response(redirect(url_for("main.index")))
-        set_auth_cookie(response, ADMIN_USERNAME)
+        # Для admin тоже сохраняем в full_usernames
+        set_full_username_cookie(response, ADMIN_USERNAME, ADMIN_USERNAME)
         flash("Добро пожаловать, admin!", "success")
 
         return {"success": True, "response": response}
@@ -432,7 +528,9 @@ def _handle_user_login(username: str, password: str) -> dict:
 
         full_username = format_full_username(user["username"], user["discriminator"])
         response = make_response(redirect(url_for("main.index")))
-        set_auth_cookie(response, full_username)
+        
+        # Обновляем cookie с полными логинами
+        set_full_username_cookie(response, user["username"], full_username)
 
         return {"success": True, "response": response}
 
@@ -476,3 +574,34 @@ def logout() -> str:
     session.clear()
     flash("Вы вышли из системы.", "info")
     return redirect(url_for("main.index"))
+
+
+@bp.route("/api/get-user-info")
+def get_user_info() -> dict:
+    """API endpoint для получения информации о текущем пользователе.
+    
+    Возвращает полный логин для сохранения в localStorage после регистрации.
+    
+    Returns:
+        JSON с информацией о пользователе или ошибку
+    """
+    user_id = session.get("user_id")
+    
+    if not user_id:
+        return {"error": "Пользователь не авторизован"}, 401
+    
+    db = get_db()
+    user = db.execute(
+        "SELECT username, discriminator FROM user WHERE id = ?", (user_id,)
+    ).fetchone()
+    
+    if not user:
+        return {"error": "Пользователь не найден"}, 404
+    
+    full_username = format_full_username(user["username"], user["discriminator"])
+    
+    return {
+        "base_username": user["username"],
+        "full_username": full_username,
+        "discriminator": user["discriminator"]
+    }
