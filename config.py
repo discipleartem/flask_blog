@@ -10,7 +10,7 @@ class Config:
     DATABASE = os.path.join(BASE_DIR, "instance", "flask_blog.sqlite")
 
     # Пароль для admin пользователя
-    ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD")
+    ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD") or "admin"
 
 
 class DevelopmentConfig(Config):

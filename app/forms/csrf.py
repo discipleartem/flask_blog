@@ -4,6 +4,9 @@ import os
 
 from flask import session, current_app
 
+# Константа для тестового CSRF токена
+TEST_CSRF_TOKEN = "test_csrf_token_for_testing"
+
 
 def generate_csrf_token() -> str:
     """Генерирует CSRF-токен, привязанный к сессии.
@@ -45,7 +48,7 @@ def validate_csrf_token(token) -> bool:
 
     # Для тестов вне контекста запроса
     if not has_request_context():
-        return token == "test_csrf_token_for_testing"
+        return token == TEST_CSRF_TOKEN
 
     if not token or "_csrf_token" not in session:
         return False

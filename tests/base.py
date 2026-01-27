@@ -193,12 +193,15 @@ class DatabaseTestHelper:
         if usernames:
             placeholders = ",".join("?" for _ in usernames)
             db.execute(
-                f"DELETE FROM user WHERE username IN ({placeholders})", usernames
+                f"DELETE FROM user WHERE username IN ({placeholders})",
+                usernames,  # nosec: B608
             )
 
         if user_ids:
             placeholders = ",".join("?" for _ in user_ids)
-            db.execute(f"DELETE FROM user WHERE id IN ({placeholders})", user_ids)
+            db.execute(
+                f"DELETE FROM user WHERE id IN ({placeholders})", user_ids
+            )  # nosec: B608
 
         db.commit()
 

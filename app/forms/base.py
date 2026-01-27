@@ -5,6 +5,9 @@ from flask import request, has_request_context
 from app.forms.csrf import validate_csrf_token
 from app.forms.fields import Field
 
+# Константа для тестового CSRF токена
+TEST_CSRF_TOKEN = "test_csrf_token_for_testing"
+
 
 class Form:
     """Базовый класс формы (упрощённый аналог WTForms).
@@ -74,7 +77,7 @@ class Form:
                 return True  # CSRF отключен, считаем валидацию успешной
 
             # Специальный тестовый токен всегда принимается
-            if self._csrf_token_data == "test_csrf_token_for_testing":
+            if self._csrf_token_data == TEST_CSRF_TOKEN:
                 return True  # Тестовый токен для обычных тестов
 
             # Для тестов безопасности принимаем только валидные токены

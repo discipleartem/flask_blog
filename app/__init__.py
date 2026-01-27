@@ -48,12 +48,14 @@ def create_app(test_config=None) -> Flask:
     # Добавляем кастомные фильтры для шаблонов
     @app.template_filter("nl2br")
     def nl2br_filter(text) -> str:
-        """Преобразует переносы строк в HTML теги <br>."""
+        """Преобразует переносы строк в HTML теги <br> с безопасной обработкой."""
         if text is None:
             return ""
         import markupsafe
 
-        return markupsafe.Markup(text.replace("\n", "<br>\n"))
+        # Сначала экранируем HTML, затем заменяем переносы строк
+        escaped_text = markupsafe.escape(str(text))
+        return markupsafe.Markup(escaped_text.replace("\n", "<br>\n"))  # nosec: B704
 
     # Добавляем CSRF токен в контекст всех шаблонов
     @app.context_processor
