@@ -5,6 +5,7 @@ except ImportError:
 import os
 import re
 import logging
+from datetime import datetime
 from typing import List, Tuple, Optional
 
 class MigrationRunner:
@@ -12,6 +13,50 @@ class MigrationRunner:
         self.db_path = db_path
         self.migrations_dir = "app/migrations"
         self.logger = logging.getLogger(__name__)
+
+
+
+    def generate_schema(self) -> bool:
+        """Генерирует файл schema.sql с актуальной структурой всех таблиц БД.
+        
+        Returns:
+            bool: True если успешно, False при ошибке
+        """
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                # Извлекаем DDL всех таблиц из sqlite_master
+                cursor = conn.execute("""
+                    SELECT sql FROM sqlite_master
+                    WHERE type='table' AND name NOT LIKE 'sqlite_%'
+                    ORDER BY name
+                """)
+                
+                tables_ddl = [row[0] for row in cursor.fetchall() if row[0]]
+                
+                if not tables_ddl:
+                    return True
+                
+                # Формируем содержимое файла schema.sql
+                schema_content = f"""-- Schema SQL
+-- Автоматически сгенерировано: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+-- Содержит актуальную структуру всех таблиц БД
+
+"""
+                
+                for ddl in tables_ddl:
+                    schema_content += f"{ddl};\n\n"
+                
+                # Сохраняем в файл
+                schema_path = os.path.join(self.migrations_dir, "schema.sql")
+                with open(schema_path, 'w', encoding='utf-8') as f:
+                    f.write(schema_content)
+                
+                self.logger.info(f"Schema file generated: {schema_path}")
+                return True
+                
+        except Exception as e:
+            self.logger.error(f"Error generating schema: {e}")
+            return False
 
 
 
@@ -154,6 +199,7 @@ class MigrationRunner:
                     """, (migration_name,))
                     
                     conn.commit()
+                    self.generate_schema()
                     return True
                     
                 except Exception as e:
@@ -191,6 +237,7 @@ class MigrationRunner:
                     """, (migration_name,))
                     
                     conn.commit()
+                    self.generate_schema()
                     return True
                     
                 except Exception as e:

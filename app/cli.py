@@ -72,6 +72,27 @@ def register_cli_commands(app):
         ctx.invoke(migrate)
     
     @app.cli.command()
+    @click.argument('target', required=False)
+    def rollback(target):
+        """Откатить миграции базы данных"""
+        db_path = app.config.get('DATABASE_PATH', 'blog.db')
+        runner = MigrationRunner(db_path)
+        
+        click.echo("🔄 Откат миграций...")
+        
+        if target:
+            click.echo(f"📋 Откат к миграции: {target}")
+        else:
+            click.echo("📋 Откат на 1 миграцию назад")
+        
+        success = runner.migrate_down(target)
+        
+        if success:
+            click.echo("✅ Миграции успешно откачены")
+        else:
+            click.echo("❌ Ошибка при откате миграций")
+    
+    @app.cli.command()
     def seed():
         """Наполнить базу данных тестовыми данными"""
         from app.db import execute_query, execute_insert
