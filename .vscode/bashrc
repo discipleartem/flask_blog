@@ -1,0 +1,10 @@
+# Автоматическая активация виртуального окружения
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+if [ -f "${PROJECT_DIR}/.venv/bin/activate" ]; then
+    source "${PROJECT_DIR}/.venv/bin/activate"
+    echo "✅ Виртуальное окружение активировано: $(which python)"
+    echo "🐍 Версия Python: $(python --version)"
+else
+    echo "⚠️  Виртуальное окружение не найдено в ${PROJECT_DIR}/.venv"
+fi

@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block title %}Главная - Flask Blog{% endblock %}
+
+{% block content %}
+    <div class="min-h-screen bg-gradient-to-br p-4 p-md-8">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-12">
+                <h1 class="display-4 fw-bold text-gray-900 mb-3">
+                    {% if current_user %}
+                    Мои посты
+                    {% else %}
+                    Блог
+                    {% endif %}
+                </h1>
+                <p class="lead text-gray-600">
+                    {% if current_user %}
+                    Последние статьи и новости из мира технологий
+                    {% else %}
+                    Последние статьи и новости из мира технологий
+                    {% endif %}
+                </p>
+            </div>
+
+            {% if current_user %}
+            <div class="text-center mb-6">
+                <a href="{{ url_for('blog.create_post') }}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-plus me-2"></i>Создать пост
+                </a>
+            </div>
+            {% endif %}
+
+            {% if posts_by_user %}
+                <div class="space-y-6">
+                    {% for user_data in posts_by_user %}
+                        <!-- Блок пользователя -->
+                        <div class="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 p-6">
+                            <div class="d-flex align-items-center mb-4">
+                                <div class="bg-primary bg-opacity-10 rounded-circle p-3 me-3">
+                                    <i class="fas fa-user text-primary fs-4"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h5 class="mb-1 fw-bold text-gray-900">{{ user_data.user.login_full }}</h5>
+                                    <small class="text-muted">
+                                        {% if user_data.user.is_admin %}
+                                        <i class="fas fa-crown text-warning me-1"></i>Администратор
+                                        {% else %}
+                                        Пользователь
+                                        {% endif %}
+                                        • {{ user_data.posts|length }} постов
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <!-- Посты пользователя -->
+                            <div class="space-y-4">
+                                {% for post in user_data.posts %}
+                                <div class="border-bottom pb-4 {% if not loop.last %}mb-4{% endif %}">
+                                    <h5 class="h4 fw-bold mb-3">
+                                        <a href="{{ url_for('blog.post_detail', post_id=post.id) }}" 
+                                           class="text-decoration-none text-gray-900 hover:text-blue-600 transition-colors">
+                                            {{ post.title }}
+                                        </a>
+                                    </h5>
+                                    <p class="text-gray-600 mb-4 fs-5">
+                                        {{ post.body[:200] }}{% if post.body|length > 200 %}...{% endif %}
+                                    </p>
+                                    
+                                    <div class="d-flex align-items-center text-sm text-gray-500 mb-4 flex-wrap gap-y-2">
+                                        <div class="d-flex align-items-center me-4">
+                                            <i class="fas fa-calendar w-4 h-4 me-1.5"></i>
+                                            <span>{{ post.created_at.strftime('%d %B %Y') }}</span>
+                                        </div>
+                                        <div class="d-flex align-items-center me-4">
+                                            <i class="fas fa-clock w-4 h-4 me-1.5"></i>
+                                            <span>{{ post.body|length // 100 }} мин чтения</span>
+                                        </div>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-comment w-4 h-4 me-1.5"></i>
+                                            <span>{{ post.comment_count or 0 }} комментариев</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-flex align-items-center justify-content-between pt-3 border-top">
+                                        <div class="d-flex align-items-center gap-4 text-gray-500">
+                                            <button class="btn btn-link p-0 text-decoration-none d-flex align-items-center gap-2 hover:text-danger transition-colors">
+                                                <i class="fas fa-heart"></i>
+                                                <span class="fw-medium">0</span>
+                                            </button>
+                                        </div>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <a href="{{ url_for('blog.post_detail', post_id=post.id) }}" 
+                                               class="btn btn-primary px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium text-decoration-none">
+                                                Подробнее
+                                            </a>
+                                            {% if current_user and (current_user.id == post.user_id or current_user.is_admin) %}
+                                            <div class="d-flex gap-2">
+                                                <a href="{{ url_for('blog.edit_post', post_id=post.id) }}" 
+                                                   class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <button type="button" 
+                                                        class="btn btn-sm btn-outline-danger" 
+                                                        data-bs-toggle="modal" 
+                                                        data-bs-target="#deletePostModal{{ post.id }}">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <div class="mb-4">
+                        <i class="fas fa-file-alt text-muted" style="font-size: 4rem;"></i>
+                    </div>
+                    <h3 class="mb-3">Постов пока нет</h3>
+                    <p class="text-muted mb-4">
+                        {% if current_user %}
+                        Будьте первым, кто создаст интересную статью!
+                        {% else %}
+                        <a href="{{ url_for('auth.register') }}" class="text-decoration-none">Зарегистрируйтесь</a>, 
+                        чтобы создать первую статью.
+                        {% endif %}
+                    </p>
+                    {% if not current_user %}
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-primary">
+                            <i class="fas fa-sign-in-alt me-2"></i>Войти
+                        </a>
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-user-plus me-2"></i>Регистрация
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+<!-- Модальные окна для удаления постов -->
+{% for user_data in posts_by_user %}
+{% for post in user_data.posts %}
+{% if current_user and (current_user.id == post.user_id or current_user.is_admin) %}
+<div class="modal fade" id="deletePostModal{{ post.id }}" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Удаление поста</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Вы уверены, что хотите удалить пост "<strong>{{ post.title }}</strong>"?</p>
+                <p class="text-muted">Это действие нельзя отменить.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <form method="POST" action="{{ url_for('blog.delete_post', post_id=post.id) }}" class="d-inline">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-2"></i>Удалить
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endfor %}
+{% endfor %}
+{% endblock %}

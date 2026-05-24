@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Страница не найдена{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <div class="error-template">
+                <h1 class="display-1">404</h1>
+                <h2 class="mb-4">Страница не найдена</h2>
+                <p class="lead mb-4">
+                    Извините, запрошенная страница не существует.
+                </p>
+                <div class="error-actions">
+                    <a href="{{ url_for('blog.index') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-home me-2"></i>На главную
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

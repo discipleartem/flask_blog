@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% if post %}Редактирование поста{% else %}Новый пост{% endif %} - Flask Blog
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10 col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    {% if post %}
+                    <i class="fas fa-edit me-2"></i>Редактирование поста
+                    {% else %}
+                    <i class="fas fa-plus me-2"></i>Новый пост
+                    {% endif %}
+                </h4>
+            </div>
+            <div class="card-body">
+                {% if error %}
+                <div class="alert alert-danger" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>{{ error }}
+                </div>
+                {% endif %}
+                
+                <form method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Заголовок</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="title" 
+                               name="title" 
+                               value="{{ post.title if post else '' }}"
+                               placeholder="Введите заголовок поста"
+                               required
+                               maxlength="200">
+                        <div class="form-text">
+                            Максимальная длина: 200 символов
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="body" class="form-label">Текст поста</label>
+                        <textarea class="form-control" 
+                                  id="body" 
+                                  name="body" 
+                                  rows="15"
+                                  placeholder="Напишите что-нибудь интересное..."
+                                  required>{% if post %}{{ post.body }}{% endif %}</textarea>
+                        <div class="form-text d-flex justify-content-between">
+                            <span>Поддерживается обычный текст. Для форматирования используйте переносы строк.</span>
+                            <span id="charCount">0 символов</span>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('blog.index') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Отмена
+                        </a>
+                        <div>
+                            {% if post %}
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Сохранить изменения
+                            </button>
+                            {% else %}
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Создать пост
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        {% if post %}
+        <!-- Информация о посте -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>Информация о посте
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-1">
+                            <strong>Автор:</strong> {{ post.author_login }}
+                        </p>
+                        <p class="mb-1">
+                            <strong>Создан:</strong> {{ post.created_at.strftime('%d.%m.%Y %H:%M') }}
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        {% if post.updated_at != post.created_at %}
+                        <p class="mb-1">
+                            <strong>Обновлён:</strong> {{ post.updated_at.strftime('%d.%m.%Y %H:%M') }}
+                        </p>
+                        {% endif %}
+                        <p class="mb-1">
+                            <strong>Комментариев:</strong> {{ post.comment_count or 0 }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const bodyTextarea = document.getElementById('body');
+    const charCount = document.getElementById('charCount');
+    
+    // Счетчик символов
+    function updateCharCount() {
+        const length = bodyTextarea.value.length;
+        charCount.textContent = `${length} символов`;
+        
+        if (length > 10000) {
+            charCount.classList.add('text-danger');
+            charCount.classList.remove('text-muted');
+        } else {
+            charCount.classList.remove('text-danger');
+            charCount.classList.add('text-muted');
+        }
+    }
+    
+    bodyTextarea.addEventListener('input', updateCharCount);
+    updateCharCount(); // Инициализация при загрузке
+    
+    // Автосохранение в localStorage
+    const saveKey = '{% if post %}post_edit_{{ post.id }}{% else %}new_post{% endif %}';
+    
+    // Загрузка из localStorage
+    const savedTitle = localStorage.getItem(saveKey + '_title');
+    const savedBody = localStorage.getItem(saveKey + '_body');
+    
+    if (savedTitle && !document.getElementById('title').value) {
+        document.getElementById('title').value = savedTitle;
+    }
+    
+    if (savedBody && !bodyTextarea.value) {
+        bodyTextarea.value = savedBody;
+        updateCharCount();
+    }
+    
+    // Сохранение в localStorage при вводе
+    let saveTimeout;
+    function autoSave() {
+        clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(() => {
+            localStorage.setItem(saveKey + '_title', document.getElementById('title').value);
+            localStorage.setItem(saveKey + '_body', bodyTextarea.value);
+            
+            // Показываем уведомление об автосохранении
+            const notification = document.createElement('div');
+            notification.className = 'position-fixed top-0 end-0 p-3';
+            notification.style.zIndex = '1050';
+            notification.innerHTML = `
+                <div class="toast show" role="alert">
+                    <div class="toast-body">
+                        <i class="fas fa-save me-2"></i>Сохранено в черновик
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 2000);
+        }, 2000);
+    }
+    
+    document.getElementById('title').addEventListener('input', autoSave);
+    bodyTextarea.addEventListener('input', autoSave);
+    
+    // Очистка черновика при отправке формы
+    document.querySelector('form').addEventListener('submit', function() {
+        localStorage.removeItem(saveKey + '_title');
+        localStorage.removeItem(saveKey + '_body');
+    });
+    
+    // Горячие клавиши
+    document.addEventListener('keydown', function(e) {
+        // Ctrl/Cmd + S для сохранения
+        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+            e.preventDefault();
+            document.querySelector('form[type="submit"]').click();
+        }
+        
+        // Escape для отмены
+        if (e.key === 'Escape') {
+            if (confirm('Вы уверены, что хотите отменить изменения?')) {
+                window.location.href = '{{ url_for("blog.index") }}';
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

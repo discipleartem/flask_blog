@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Внутренняя ошибка{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <div class="error-template">
+                <h1 class="display-1">500</h1>
+                <h2 class="mb-4">Внутренняя ошибка сервера</h2>
+                <p class="lead mb-4">
+                    Извините, что-то пошло не так. Мы работаем над исправлением.
+                </p>
+                {% if error %}
+                <div class="alert alert-danger">
+                    <small>Ошибка: {{ error }}</small>
+                </div>
+                {% endif %}
+                <div class="error-actions">
+                    <a href="{{ url_for('blog.index') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-home me-2"></i>На главную
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

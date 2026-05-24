@@ -1,0 +1,10 @@
+{
+    "python.terminal.integrated.shell.linux": "/bin/bash",
+    "python.terminal.integrated.shellArgs.linux": ["--rcfile", "${workspaceFolder}/.windsurf/bashrc_venv"],
+    "terminal.integrated.profiles.linux": {
+        "bash": {
+            "path": "bash",
+            "args": ["--rcfile", "${workspaceFolder}/.windsurf/bashrc_venv"]
+        }
+    }
+}

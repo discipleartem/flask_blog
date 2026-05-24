@@ -1,0 +1,15 @@
+
+
+-- UP
+BEGIN;
+    CREATE TABLE migrations (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT UNIQUE NOT NULL,
+        applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+COMMIT;
+
+-- DOWN
+BEGIN;
+    DROP TABLE migrations;
+COMMIT;
