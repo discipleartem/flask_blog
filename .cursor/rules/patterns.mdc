@@ -1,0 +1,34 @@
+---
+description: Паттерны — только когда упрощают (справочник проекта)
+globs: app/**/*.py
+alwaysApply: false
+---
+
+# Паттерны
+
+Перед паттерном: **можно ли проще?** (функция, dataclass, декоратор)
+
+## Уже в проекте
+
+| Паттерн | Где |
+|---------|-----|
+| Factory | `create_app()` |
+| Repository | `app/repositories/` |
+| DI | wiring в `create_app()` |
+| Strategy | JWT, хеширование |
+| Adapter | request ↔ service ↔ response |
+
+## Если появится потребность
+
+| Задача | Паттерн |
+|--------|---------|
+| Несовместимые API | Adapter |
+| Смена алгоритма | Strategy |
+| Сборка сложного объекта | Builder |
+| Фасад подсистемы | Facade |
+
+## По умолчанию не нужны
+
+Singleton (→ `g`/модуль), Abstract Factory, Visitor, Interpreter
+
+Подробные примеры паттернов — только по запросу; по умолчанию KISS.

@@ -1,0 +1,45 @@
+---
+description: Глобальные правила v5.1 — META, язык, workflow
+alwaysApply: true
+---
+
+# Global v5.1
+
+> **Сначала простое → потом паттерны (если нужны). Не усложняй без причины.**
+
+## META
+
+| | |
+|-|-|
+| Rules-first | `.cursor/rules/`, `docs/`, `AGENTS.md` |
+| Agent-loop | анализ → план (простота) → действие → проверка (DRY?) → обучение |
+| Code | minimal diff · type hints · explicit · pythonic |
+
+**DRY · KISS · YAGNI** — приоритет над абстракциями. Паттерны только если упрощают.
+
+## Язык
+
+Русский: общение, docstrings, комментарии, ошибки, логи.  
+Английский: имена в коде, git-коммиты.
+
+## Режим по стеку
+
+| Стек | Действие |
+|------|----------|
+| Python | простой код; см. `python.mdc` |
+| JS/CSS/HTML | полная реализация |
+| Тесты, CI, Docker | полная реализация |
+
+## Правила по файлам
+
+| Файл | Когда |
+|------|--------|
+| `01-operations.mdc` | venv, git, секреты |
+| `python.mdc` | `**/*.py` — версии, менторский режим |
+| `pep8.mdc` | `**/*.py` — стиль PEP 8 |
+| `programming-principles.mdc` | `**/*.py` — KISS, DRY, SOLID, YAGNI |
+| `zen-python.mdc` | `**/*.py` — дзен Python |
+| `flask.mdc` | `app/**` |
+| `patterns.mdc` | `app/**` — справочник паттернов |
+
+Документация: `docs/LAYERS.md` · индекс: `.cursor/README.md`

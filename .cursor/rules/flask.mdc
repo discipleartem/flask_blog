@@ -1,0 +1,43 @@
+---
+description: Flask 3+ и слои Flask Blog
+globs: app/**/*.py
+alwaysApply: false
+---
+
+# Flask Blog
+
+## Слои
+
+```
+views → services → repositories → models
+```
+
+| Слой | Путь | Делает |
+|------|------|--------|
+| Views | `app/views/` | HTTP, flash, redirect → вызов service |
+| Services | `app/services/` | бизнес-правила |
+| Repositories | `app/repositories/` | SQL, маппинг |
+| Models | `app/models/` | структуры данных |
+| Auth | `app/auth.py` | JWT в `g` |
+
+DI в `create_app()`: `app.user_repo`, `app.post_service`, …
+
+## Flask 3
+
+- Factory `create_app()`; Blueprints; логика не во view
+- `request.get_json()` · `flask.g` · `app.json`
+- ❌ `FLASK_ENV`, `request.json`, `_request_ctx_stack`, `json_encoder`
+- Dev: `flask --app run run` · Prod: gunicorn, не `app.run()`
+- `SECRET_KEY`, `MAX_CONTENT_LENGTH`, CSRF; async views — по необходимости
+
+## ❌ Нарушения
+
+SQL вне repository · валидация домена во view · `save()` на entity · service импортирует `render_template`
+
+## Чеклист
+
+- [ ] View без толстой логики?
+- [ ] Новый SQL только в repository?
+- [ ] Service тестируется без HTTP?
+
+`docs/LAYERS.md`

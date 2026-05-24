@@ -1,0 +1,29 @@
+---
+description: Окружение, Git и ограничения агента
+alwaysApply: true
+---
+
+# Operations
+
+## .venv
+
+Все `python` / `pip` / `flask` / `pytest` — через `.venv`:
+
+```bash
+python3.12 -m venv .venv   # версия по умолчанию
+source .venv/bin/activate && which python
+make test | install-dev | migrate | code-quality
+```
+
+❌ системный Python · `pip` без venv
+
+## Git
+
+- `main` protected; рабочие ветки: `feature/*`, `fix/*`, `refactor/*`, `chore/*`
+- Conventional Commits (EN), атомарные; форматирование ≠ фича
+- PR: rebase на базу; squash — только по запросу
+- Агент: коммит/push **только по запросу**; не force-push `main`; не `--no-verify`
+
+## Секреты
+
+❌ коммитить `.env`, credentials · ❌ править секреты без запроса

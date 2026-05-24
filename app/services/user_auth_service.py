@@ -11,6 +11,8 @@
 - Fail fast — ранние проверки и ошибки
 """
 
+import logging
+import sqlite3
 from typing import Optional, Tuple
 
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -18,6 +20,8 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from ..models.users import User
 from ..repositories.user_repo import UserRepository
 from .jwt_service import JWTService
+
+logger = logging.getLogger(__name__)
 
 
 class UserAuthService:
@@ -37,12 +41,19 @@ class UserAuthService:
         self.user_repo = user_repo
         self.jwt_service = jwt_service
     
-    def register_user(self, login: str, password: str) -> Tuple[bool, str, Optional[User]]:
+    def register_user(
+        self, login: str, password: str, max_retries: int = 3
+    ) -> Tuple[bool, str, Optional[User]]:
         """Регистрирует нового пользователя.
+        
+        Защита от коллизий: при нарушении уникального constraint
+        (login + discriminator) из-за race condition, метод автоматически
+        повторяет попытку с новым дискриминатором до max_retries раз.
         
         Args:
             login: Логин пользователя
             password: Пароль пользователя
+            max_retries: Максимальное количество попыток при коллизии
             
         Returns:
             Кортеж (успех, сообщение, пользователь)
@@ -60,27 +71,56 @@ class UserAuthService:
         if len(password) < 6:
             return False, "Пароль должен содержать минимум 6 символов", None
         
-        # Генерируем дискриминатор
-        try:
-            discriminator = self.user_repo.generate_discriminator(login)
-        except ValueError as e:
-            return False, str(e), None
-        
-        # Хэшируем пароль
+        # Хэшируем пароль (одинаков для всех попыток)
         password_hash = generate_password_hash(password)
         
-        # Создаем пользователя
-        try:
-            user_id = self.user_repo.create_user(login, password_hash, discriminator)
+        # Пытаемся создать пользователя с повторными попытками при коллизии
+        last_error: str = ""
+        for attempt in range(1, max_retries + 1):
+            # Генерируем дискриминатор
+            try:
+                discriminator = self.user_repo.generate_discriminator(login)
+            except ValueError as e:
+                return False, str(e), None
             
-            user = self.user_repo.find_by_id(user_id)
-            if user:
-                return True, "Пользователь успешно зарегистрирован", user
-            else:
-                return False, "Ошибка при получении созданного пользователя", None
-            
-        except Exception as e:
-            return False, f"Ошибка при создании пользователя: {e}", None
+            try:
+                user_id = self.user_repo.create_user(
+                    login, password_hash, discriminator
+                )
+                
+                user = self.user_repo.find_by_id(user_id)
+                if user:
+                    if attempt > 1:
+                        logger.info(
+                            "Пользователь создан после %d попыток из-за "
+                            "коллизии дискриминатора: login=%s, "
+                            "discriminator=%s",
+                            attempt, login, discriminator,
+                        )
+                    return True, "Пользователь успешно зарегистрирован", user
+                else:
+                    return False, "Ошибка при получении созданного пользователя", None
+                    
+            except sqlite3.IntegrityError:
+                # Коллизия: другой пользователь только что занял этот
+                # дискриминатор. Пробуем снова с новым дискриминатором.
+                last_error = (
+                    f"Коллизия дискриминатора (попытка {attempt}/{max_retries})"
+                )
+                logger.warning(
+                    "Коллизия дискриминатора при регистрации: "
+                    "login=%s, discriminator=%s, attempt=%d/%d",
+                    login, discriminator, attempt, max_retries,
+                )
+                continue
+            except Exception as e:
+                return False, f"Ошибка при создании пользователя: {e}", None
+        
+        # Исчерпали все попытки
+        return False, (
+            "Не удалось создать пользователя из-за конфликта "
+            "дискриминаторов. Попробуйте ещё раз."
+        ), None
     
     def authenticate_user(self, login: str, password: str, discriminator: Optional[str] = None) -> Tuple[bool, str, Optional[User]]:
         """Аутентифицирует пользователя.

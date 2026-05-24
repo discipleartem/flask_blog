@@ -7,7 +7,7 @@
 ### 1. Создание виртуального окружения
 
 ```bash
-python3.13 -m venv .venv
+python3.12 -m venv .venv
 source .venv/bin/activate
 ```
 
@@ -35,7 +35,7 @@ python run.py
 
 ```
 flask_blog/
-├── .venv/                 # Виртуальное окружение (Python 3.13)
+├── .venv/                 # Виртуальное окружение (Python 3.12)
 ├── .vscode/              # Настройки VS Code
 │   ├── settings.json     # Автоматическая активация .venv
 │   └── launch.json       # Конфигурации отладки
@@ -81,16 +81,16 @@ make format      # Форматировать код
 make clean       # Очистить временные файлы
 ```
 
-## 🐍 Python 3.13
+## 🐍 Python 3.12
 
-Проект использует Python 3.13:
+Проект использует Python 3.12:
 
 ```bash
 # Проверка версии
-python --version  # Должно быть Python 3.13.x
+python --version  # Должно быть Python 3.12.x
 
 # Создание окружения
-python3.13 -m venv .venv
+python3.12 -m venv .venv
 ```
 
 ## 📦 Зависимости

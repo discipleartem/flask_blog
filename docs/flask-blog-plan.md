@@ -1,12 +1,12 @@
 ---
 name: flask-blog-mvp
-overview: MVP блог-платформа на Python 3.13 + Flask + SQLite с чистым SQL, кастомной авторизацией на дескриминаторе Discord (без email) и простым черно-белым UI на Bootstrap 5.
+overview: MVP блог-платформа на Python 3.12 + Flask + SQLite с чистым SQL, кастомной авторизацией на дескриминаторе Discord (без email) и простым черно-белым UI на Bootstrap 5.
 todos:
   - id: cleanup-dependencies
     content: Удалить Flask-Login и Flask-SQLAlchemy, оставить только Flask, python-dotenv, Werkzeug.
     status: completed
-  - id: setup-python-313
-    content: Установить Python 3.13 из PPA deadsnakes, обновить pyproject.toml и пересоздать виртуальное окружение.
+  - id: setup-python-312
+    content: Установить Python 3.12 из PPA deadsnakes, обновить pyproject.toml и пересоздать виртуальное окружение.
     status: completed
   - id: create-jwt-service
     content: Создать JWTService с самописным JWT (без алгоритма в header), поддержкой 24ч/30дней и HttpOnly cookies.
@@ -49,12 +49,12 @@ isProject: false
 - **Авторизация**: Только логин + дискриминатор + пароль (без email)
 - **БД**: Чистый SQL без ORM, SQLite
 - **JWT**: Самописный JWT с HttpOnly cookies (stateless)
-- **Python 3.13**: Последняя версия с улучшениями производительности
+- **Python 3.12**: Последняя версия с улучшениями производительности
 - **Менторский подход**: Объясняю, направляю, НЕ пишу код
 
 ## 1. Базовая структура проекта и окружение
 
-- **✅ Python 3.13**: Установлен из PPA deadsnakes, виртуальное окружение создано
+- **✅ Python 3.12**: Установлен из PPA deadsnakes, виртуальное окружение создано
 - **✅ Зависимости**: Flask, python-dotenv, Werkzeug (очищены от Flask-Login)
 - **Структура проекта**: `app/` (ядро), `app/views/` (контроллеры), `app/services/` (сервисный слой), `app/repositories/` (SQL-репозитории), `app/models/` (DTO), `migrations/`, `app/templates/`, `app/static/`.
 - **Настройки**: `config.py` с `.env` (SECRET_KEY, ADMIN_PASSWORD, DATABASE_URL)
@@ -217,7 +217,7 @@ def load_user_from_jwt():
 
 ### ✅ Выполненные задачи:
 1. **cleanup-dependencies** - Удалены лишние зависимости, оставлен только Flask
-2. **setup-python-313** - Python 3.13 установлен и настроен
+2. **setup-python-312** - Python 3.12 установлен и настроен
 3. **create-jwt-service** - JWTService реализован с самописным JWT
 4. **db-schema-migrations** - Полная система миграций с ролями и CLI
 
