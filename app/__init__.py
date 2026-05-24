@@ -10,6 +10,8 @@ from typing import Any
 
 import dotenv
 from flask import Flask, render_template
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 from .config import Config
 
@@ -41,6 +43,15 @@ def create_app(config_class: type[Config] = Config) -> Flask:
     # Применяем конфигурацию
     config_class.init_app(app)
     app.config.from_object(config_class)
+    
+    # Инициализируем Flask-Limiter для защиты от bruteforce атаки
+    limiter = Limiter(
+        app=app,
+        key_func=get_remote_address,
+        default_limits=["200 per day", "50 per hour"],
+        storage_uri="memory://"
+    )
+    app.limiter = limiter
     
     if not app.debug and not app.testing:
         import logging

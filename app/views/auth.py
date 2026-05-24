@@ -12,13 +12,20 @@
 """
 
 from flask import Blueprint, current_app, redirect, render_template, request, url_for
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from werkzeug.security import check_password_hash
 
 from ..auth import set_auth_cookie
+from ..services.login_attempt_service import LoginAttemptService
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
+limiter = Limiter(key_func=get_remote_address)
+login_attempt_service = LoginAttemptService()
 
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
+@limiter.limit("5 per hour")
 def register():
     """Регистрация нового пользователя."""
     if request.method == 'GET':
@@ -47,15 +54,10 @@ def register():
         full_login = f"{user.login}#{user.discriminator}"
         
         # Автоматический вход после регистрации
-        if user and user.discriminator:
-            token_success, token_message, token = current_app.auth_service.login_user(
-                login, password, user.discriminator
-            )
-        else:
-            # Fallback для admin или если дискриминатор не установлен
-            token_success, token_message, token = current_app.auth_service.login_user(
-                login, password, None
-            )
+        # Используем ID пользователя вместо логина и пароля для точной идентификации
+        token_success, token_message, token = current_app.auth_service.login_user_by_id(
+            user.id, remember_me=False
+        )
         
         if token_success and token:
             response = redirect(url_for('blog.index'))
@@ -89,6 +91,7 @@ def register():
 
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
+@limiter.limit("10 per minute")
 def login():
     """Вход пользователя."""
     if request.method == 'GET':
@@ -109,6 +112,18 @@ def login():
     
     if not password:
         return render_template('auth/login.html', error='Пароль обязателен')
+    
+    # Проверка защиты от bruteforce
+    ip_address = request.remote_addr or 'unknown'
+    
+    # Сначала проверяем, не превысит ли текущая попытка лимит
+    if login_attempt_service.will_exceed_max_attempts(ip_address, login_input):
+        return render_template('auth/login.html', 
+                             login=login_input,
+                             error=f"Слишком много неудачных попыток. Попробуйте позже.")
+    
+    # Проверяем блокировку аккаунта (если известен user_id)
+    # Это будет проверено позже после поиска пользователя
     
     # Всегда используем полный логин из cookies для авторизации
     last_full_login = request.cookies.get('last_full_login')
@@ -181,18 +196,81 @@ def login():
             )
             
             if success and token:
+                # Записываем успешную попытку входа
+                login_attempt_service.record_login_attempt(ip_address, login_input, True)
+                
                 return _complete_login(user, token, remember_me)
             else:
+                # Записываем неудачную попытку входа
+                login_attempt_service.record_login_attempt(ip_address, login_input, False)
+                
                 return render_template('auth/login.html', 
                                      login=login_input,
                                      error='Неверный пароль')
     
-    # Если нет полного логина в cookies, ищем по простому логину
+    # Проверяем cookies на наличие сохраненных аккаунтов
+    user_accounts_cookie = request.cookies.get('user_accounts')
+    
+    if user_accounts_cookie:
+        # Если есть сохраненные аккаунты в cookies, проверяем их
+        import json
+        try:
+            saved_accounts = json.loads(user_accounts_cookie)
+            
+            # Фильтруем аккаунты с тем же логином
+            matching_accounts = [acc for acc in saved_accounts if acc['full_login'].startswith(login_input + '#')]
+            
+            if len(matching_accounts) > 1:
+                # Если несколько аккаунтов с тем же логином, показываем страницу выбора из cookies
+                from flask import session
+                session['available_accounts'] = matching_accounts
+                session['login_input'] = login_input
+                session['remember_me'] = remember_me
+                session['password'] = password  # Сохраняем пароль для проверки
+                
+                return redirect(url_for('auth.select_account'))
+            
+            elif len(matching_accounts) == 1:
+                # Если один аккаунт, пробуем войти в него
+                account = matching_accounts[0]
+                from ..repositories import UserRepository
+                user_repo = UserRepository()
+                user = user_repo.find_by_id(account['user_id'])
+                
+                if user and check_password_hash(user.password_hash, password):
+                    # Пароль совпадает, входим
+                    token_success, token_message, token = current_app.auth_service.login_user_by_id(
+                        user.id, remember_me
+                    )
+                    
+                    if token_success and token:
+                        # Записываем успешную попытку входа
+                        login_attempt_service.record_login_attempt(ip_address, login_input, True)
+                        
+                        response = _complete_login(user, token, remember_me)
+                        # Обновляем cookies с аккаунтами
+                        _update_user_accounts_from_session(response, saved_accounts)
+                        return response
+                    else:
+                        # Записываем неудачную попытку входа
+                        login_attempt_service.record_login_attempt(ip_address, login_input, False)
+                        
+                        return render_template('auth/login.html', 
+                                             login=login_input,
+                                             error='Неверный пароль')
+        except (json.JSONDecodeError, KeyError):
+            # Если cookies повреждены, игнорируем их и ищем в базе данных
+            pass
+    
+    # Если нет подходящих аккаунтов в cookies или cookies отсутствуют, ищем в базе данных
     from ..repositories import UserRepository
     user_repo = UserRepository()
     users = user_repo.find_by_login(login_input)
     
     if not users:
+        # Записываем неудачную попытку входа (пользователь не найден)
+        login_attempt_service.record_login_attempt(ip_address, login_input, False)
+        
         return render_template('auth/login.html', 
                              login=login_input,
                              error='Пользователь не найден. Пройдите регистрацию.')
@@ -205,39 +283,82 @@ def login():
         )
         
         if success and token:
+            # Записываем успешную попытку входа
+            login_attempt_service.record_login_attempt(ip_address, login_input, True)
+            
             response = _complete_login(user, token, remember_me)
             # Сохраняем информацию об аккаунтах
             _update_user_accounts(response, [{'user': user, 'token': token}])
             return response
         else:
+            # Записываем неудачную попытку входа
+            login_attempt_service.record_login_attempt(ip_address, login_input, False)
+            
+            # Проверяем, нужно ли заблокировать аккаунт
+            failed_attempts = login_attempt_service.get_failed_attempts_count(ip_address, login_input)
+            if failed_attempts >= login_attempt_service.max_attempts:
+                login_attempt_service.lock_account(user.id)
+            
             return render_template('auth/login.html', 
                                  login=login_input,
                                  error='Неверный пароль')
     else:
-        # Если пользователей несколько, ищем тот что подходит по паролю
+        # Если пользователей несколько, проверяем пароль для каждого
         authenticated_users = []
         for user in users:
-            success, message, token = current_app.auth_service.login_user(
-                user.login, password, user.discriminator, remember_me=False
-            )
-            if success and token:
+            if check_password_hash(user.password_hash, password):
+                # Пароль подходит, добавляем в список
                 authenticated_users.append({
                     'user': user,
-                    'token': token
+                    'token': None  # Токен будет сгенерирован позже
                 })
         
         if not authenticated_users:
+            # Записываем неудачную попытку входа (пароль неверный)
+            login_attempt_service.record_login_attempt(ip_address, login_input, False)
+            
             return render_template('auth/login.html', 
                                  login=login_input,
                                  error='Неверный пароль')
         
-        # Входим в первый подходящий и сохраняем информацию обо всех
-        auth_info = authenticated_users[0]
-        response = _complete_login(auth_info['user'], auth_info['token'], remember_me)
+        # Если найдено несколько аккаунтов, показываем страницу выбора
+        if len(authenticated_users) > 1:
+            # Сохраняем информацию об аккаунтах в session для страницы выбора
+            from flask import session
+            accounts_info = []
+            for auth_info in authenticated_users:
+                accounts_info.append({
+                    'user_id': auth_info['user'].id,
+                    'full_login': f"{auth_info['user'].login}#{auth_info['user'].discriminator}"
+                })
+            session['available_accounts'] = accounts_info
+            session['login_input'] = login_input
+            session['remember_me'] = remember_me
+            session['password'] = password  # Сохраняем пароль для проверки
+            
+            return redirect(url_for('auth.select_account'))
         
-        # Сохраняем информацию обо всех аккаунтах
-        _update_user_accounts(response, authenticated_users)
-        return response
+        # Если аккаунт только один, входим в него
+        auth_info = authenticated_users[0]
+        token_success, token_message, token = current_app.auth_service.login_user_by_id(
+            auth_info['user'].id, remember_me
+        )
+        
+        if token_success and token:
+            # Записываем успешную попытку входа
+            login_attempt_service.record_login_attempt(ip_address, login_input, True)
+            
+            response = _complete_login(auth_info['user'], token, remember_me)
+            # Сохраняем информацию об аккаунтах
+            _update_user_accounts(response, [{'user': auth_info['user'], 'token': token}])
+            return response
+        else:
+            # Записываем неудачную попытку входа
+            login_attempt_service.record_login_attempt(ip_address, login_input, False)
+            
+            return render_template('auth/login.html', 
+                                 login=login_input,
+                                 error='Ошибка при входе')
 
 
 def _update_user_accounts(response, authenticated_users):
@@ -250,6 +371,18 @@ def _update_user_accounts(response, authenticated_users):
             'user_id': auth_info['user'].id
         })
     
+    import json
+    response.set_cookie(
+        'user_accounts',
+        json.dumps(accounts_info),
+        max_age=30*24*60*60,  # 30 дней
+        httponly=True,  # Безопасно храним в cookies
+        samesite='Lax'
+    )
+
+
+def _update_user_accounts_from_session(response, accounts_info):
+    """Обновляет информацию об аккаунтах в cookies на основе данных из session."""
     import json
     response.set_cookie(
         'user_accounts',
@@ -283,6 +416,85 @@ def _complete_login(user, token, remember_me: bool):
         httponly=False,
         samesite='Lax'
     )
+    
+    return response
+
+
+@auth_bp.route('/select-account', methods=['GET', 'POST'])
+def select_account():
+    """Страница выбора аккаунта при наличии нескольких с одинаковым логином."""
+    from flask import session
+    
+    # GET запрос - показываем страницу выбора
+    if request.method == 'GET':
+        accounts = session.get('available_accounts', [])
+        login_input = session.get('login_input', '')
+        
+        if not accounts:
+            return redirect(url_for('auth.login'))
+        
+        return render_template('auth/select_account.html', 
+                             accounts=accounts, 
+                             login=login_input)
+    
+    # POST запрос - обрабатываем выбор аккаунта
+    user_id = request.form.get('user_id')
+    
+    if not user_id:
+        return render_template('auth/select_account.html', 
+                             accounts=session.get('available_accounts', []),
+                             login=session.get('login_input', ''),
+                             error='Не выбран аккаунт')
+    
+    # Находим выбранного пользователя
+    from ..repositories import UserRepository
+    user_repo = UserRepository()
+    user = user_repo.find_by_id(int(user_id))
+    
+    if not user:
+        return render_template('auth/select_account.html', 
+                             accounts=session.get('available_accounts', []),
+                             login=session.get('login_input', ''),
+                             error='Аккаунт не найден')
+    
+    # Проверяем пароль
+    password = session.get('password', '')
+    if not password or not check_password_hash(user.password_hash, password):
+        return render_template('auth/select_account.html', 
+                             accounts=session.get('available_accounts', []),
+                             login=session.get('login_input', ''),
+                             error='Неверный пароль')
+    
+    # Генерируем токен для выбранного пользователя
+    remember_me = session.get('remember_me', False)
+    token_success, token_message, token = current_app.auth_service.login_user_by_id(
+        user.id, remember_me
+    )
+    
+    if not token_success or not token:
+        return render_template('auth/select_account.html', 
+                             accounts=session.get('available_accounts', []),
+                             login=session.get('login_input', ''),
+                             error=token_message)
+    
+    # Завершаем вход
+    response = _complete_login(user, token, remember_me)
+    
+    # Сохраняем информацию об аккаунтах из cookies
+    user_accounts_cookie = request.cookies.get('user_accounts')
+    if user_accounts_cookie:
+        import json
+        try:
+            saved_accounts = json.loads(user_accounts_cookie)
+            _update_user_accounts_from_session(response, saved_accounts)
+        except (json.JSONDecodeError, KeyError):
+            pass
+    
+    # Очищаем session
+    session.pop('available_accounts', None)
+    session.pop('login_input', None)
+    session.pop('remember_me', None)
+    session.pop('password', None)
     
     return response
 

@@ -140,6 +140,30 @@ class UserAuthService:
         except Exception as e:
             return False, f"Ошибка при генерации токена: {e}", None
     
+    def login_user_by_id(self, user_id: int, remember_me: bool = False) -> Tuple[bool, str, Optional[str]]:
+        """Выполняет вход пользователя по ID и возвращает JWT токен.
+        
+        Используется для автоматического входа после регистрации,
+        чтобы избежать коллизий при наличии пользователей с одинаковым логином и паролем.
+        
+        Args:
+            user_id: ID пользователя
+            remember_me: Запомнить пользователя на 30 дней
+            
+        Returns:
+            Кортеж (успех, сообщение, JWT токен)
+        """
+        user = self.user_repo.find_by_id(user_id)
+        
+        if not user:
+            return False, "Пользователь не найден", None
+        
+        try:
+            token = self.jwt_service.generate_token(user.id, remember_me)
+            return True, "Вход выполнен успешно", token
+        except Exception as e:
+            return False, f"Ошибка при генерации токена: {e}", None
+    
     def get_user_by_token(self, token: str) -> Optional[User]:
         """Получает пользователя по JWT токену.
         
