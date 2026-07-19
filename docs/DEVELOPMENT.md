@@ -80,18 +80,21 @@ Mobile/tablet: `interaction_resize-viewport` в том же окне Chrome.
 ```
 app/
   __init__.py      # create_app (+ current_year для шаблонов)
-  config.py
+  config.py        # load_dotenv(.env) + Config
   db.py            # sqlite3 helpers + migrations
   auth/            # register / login / logout
   users/           # profile + admin CRUD
   posts/           # feed + CRUD
   comments/        # CRUD
+  deploy/          # POST /internal/deploy (Bearer DEPLOY_SECRET)
   templates/       # Bootstrap 5, mobile/tablet first
   static/
     css/app.css    # тема, бренд, hero — исключения сверх BS5
     js/theme.js    # data-bs-theme + .theme-toggle
 migrations/        # numbered *.sql
 schema.sql         # source of truth
+.env.example       # шаблон секретов (реальный .env в .gitignore)
+.github/workflows/ # deploy.yml — push main → PA
 .vscode/
   settings.json    # IronBee CDP, Python interpreter, terminal+venv
   launch.json      # debugpy → flask run

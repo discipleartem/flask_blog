@@ -12,6 +12,7 @@ license = { text = "MIT" }
 authors = [{ name = "Artem" }]
 dependencies = [
     "Flask==3.0.3",
+    "python-dotenv==1.2.2",
 ]
 
 [project.optional-dependencies]

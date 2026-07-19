@@ -22,6 +22,7 @@ def create_app(config_object: type[Config] | None = None) -> Flask:
     from app.auth import bp as auth_bp
     from app.auth.helpers import load_logged_in_user
     from app.comments import bp as comments_bp
+    from app.deploy import bp as deploy_bp
     from app.posts import bp as posts_bp
     from app.users import bp as users_bp
 
@@ -29,6 +30,7 @@ def create_app(config_object: type[Config] | None = None) -> Flask:
     app.register_blueprint(users_bp)
     app.register_blueprint(posts_bp)
     app.register_blueprint(comments_bp)
+    app.register_blueprint(deploy_bp)
 
     app.before_request(load_logged_in_user)
 
