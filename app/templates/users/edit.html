@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Редактировать профиль · Flask Blog{% endblock %}
+{% block content %}
+<h1 class="h3 mb-4">{{ profile['name'] }}#{{ profile['discriminator'] }}</h1>
+<form method="post" class="form-panel">
+  <div class="mb-3">
+    <label class="form-label" for="password">Новый пароль</label>
+    <input class="form-control rounded-0" type="password" id="password" name="password"
+           minlength="6" autocomplete="new-password">
+    <div class="form-text">Оставьте пустым, чтобы не менять.</div>
+  </div>
+  {% if g.user['is_admin'] and g.user['id'] != profile['id'] %}
+  <div class="form-check mb-3">
+    <input class="form-check-input" type="checkbox" id="is_admin" name="is_admin"
+           {% if profile['is_admin'] %}checked{% endif %}>
+    <label class="form-check-label" for="is_admin">Права admin</label>
+  </div>
+  {% endif %}
+  <button type="submit" class="btn btn-dark">Сохранить</button>
+  <a class="btn btn-outline-secondary" href="{{ url_for('users.detail', user_id=profile['id']) }}">Отмена</a>
+</form>
+{% endblock %}

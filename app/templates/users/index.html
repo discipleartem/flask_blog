@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Пользователи · Flask Blog{% endblock %}
+{% block content %}
+<h1 class="h3 mb-4">Пользователи</h1>
+<div class="table-responsive">
+  <table class="table table-sm align-middle">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Тег</th>
+        <th>Admin</th>
+        <th>Создан</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in users %}
+      <tr>
+        <td>{{ u['id'] }}</td>
+        <td>
+          <a href="{{ url_for('users.detail', user_id=u['id']) }}">
+            {{ u['name'] }}#{{ u['discriminator'] }}
+          </a>
+        </td>
+        <td>{% if u['is_admin'] %}да{% else %}—{% endif %}</td>
+        <td class="meta">{{ u['created_at'] }}</td>
+        <td class="text-end">
+          <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('users.edit', user_id=u['id']) }}">Изменить</a>
+          {% if u['id'] != g.user['id'] %}
+          <form class="d-inline" method="post" action="{{ url_for('users.delete', user_id=u['id']) }}"
+                onsubmit="return confirm('Удалить пользователя?');">
+            <button type="submit" class="btn btn-outline-danger btn-sm">Удалить</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

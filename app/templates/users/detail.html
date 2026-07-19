@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}{{ profile['name'] }}#{{ profile['discriminator'] }} · Flask Blog{% endblock %}
+{% block content %}
+<h1 class="h3 mb-2">{{ profile['name'] }}#{{ profile['discriminator'] }}</h1>
+<p class="meta mb-4">
+  {% if profile['is_admin'] %}admin · {% endif %}
+  создан {{ profile['created_at'] }} · обновлён {{ profile['updated_at'] }}
+</p>
+<a class="btn btn-outline-secondary btn-sm" href="{{ url_for('users.edit', user_id=profile['id']) }}">Редактировать</a>
+{% if g.user and g.user['is_admin'] %}
+<a class="btn btn-link btn-sm" href="{{ url_for('users.index') }}">Все пользователи</a>
+{% endif %}
+{% endblock %}

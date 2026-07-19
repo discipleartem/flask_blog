@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Регистрация · Flask Blog{% endblock %}
+{% block content %}
+<h1 class="h3 mb-4">Регистрация</h1>
+<form method="post" class="form-panel">
+  <div class="mb-3">
+    <label class="form-label" for="name">Имя пользователя</label>
+    <input class="form-control rounded-0" type="text" id="name" name="name"
+           minlength="2" maxlength="32" required autocomplete="username">
+    <div class="form-text">Discriminator (#0001–#9999) будет назначен автоматически. Имя «admin» зарезервировано.</div>
+  </div>
+  <div class="mb-3">
+    <label class="form-label" for="password">Пароль</label>
+    <input class="form-control rounded-0" type="password" id="password" name="password"
+           minlength="6" required autocomplete="new-password">
+  </div>
+  <button type="submit" class="btn btn-dark">Создать аккаунт</button>
+  <a class="btn btn-link" href="{{ url_for('auth.login') }}">Уже есть аккаунт</a>
+</form>
+{% endblock %}
