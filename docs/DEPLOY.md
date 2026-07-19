@@ -1,5 +1,16 @@
 # Deploy on PythonAnywhere
 
+## Совместимость
+
+| Компонент | Версия |
+|-----------|--------|
+| Python | **3.12** |
+| Flask | **3.0.3** |
+
+На PythonAnywhere для Python 3.12 поддерживается Flask **3.0.3**. Не ставьте Flask 3.1+ — приложение и `requirements.txt` / `pyproject.toml` намеренно зафиксированы на `Flask==3.0.3`.
+
+Установка зависимостей на PA — только через `requirements.txt` (или `pip install -e .` с тем же pin).
+
 ## 1. Код
 
 ```bash
@@ -9,9 +20,10 @@ cd flask_blog
 python3.12 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+python -c "from importlib.metadata import version; print(version('flask'))"  # ожидается 3.0.3
 ```
 
-Либо `pip install -e .` если editable install доступен.
+Либо `pip install -e .` если editable install доступен (тоже ставит Flask 3.0.3).
 
 ## 2. Переменные окружения
 
@@ -83,6 +95,7 @@ cd ~/flask_blog
 git pull
 source .venv/bin/activate
 pip install -r requirements.txt
+python -c "from importlib.metadata import version; assert version('flask') == '3.0.3'"
 flask --app wsgi db-upgrade
 # Reload web app в панели PA
 ```

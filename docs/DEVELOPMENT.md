@@ -1,5 +1,14 @@
 # Development
 
+## Стек (зафиксирован)
+
+| Компонент | Версия | Примечание |
+|-----------|--------|------------|
+| Python | 3.12 | `.venv` |
+| Flask | **3.0.3** | ограничение PythonAnywhere; не поднимать до 3.1+ |
+
+Зависимости: [`pyproject.toml`](../pyproject.toml) (основной) и [`requirements.txt`](../requirements.txt) (для PA / `pip install -r`).
+
 ## Структура
 
 ```

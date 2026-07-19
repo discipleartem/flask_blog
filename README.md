@@ -1,9 +1,11 @@
 # Flask Blog
 
-Минималистичный блог на **Flask 3** с монохромным UI (Bootstrap 5), SQLite без ORM и session-аутентификацией в стиле Discord (`username#0001`).
+Минималистичный блог на **Flask 3.0.3** (Python 3.12) с монохромным UI (Bootstrap 5), SQLite без ORM и session-аутентификацией в стиле Discord (`username#0001`).
+
+Версия Flask зафиксирована под ограничения [PythonAnywhere](docs/DEPLOY.md): **Python 3.12 + Flask 3.0.3**.
 
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/)
-[![Flask 3](https://img.shields.io/badge/flask-3.1-black.svg)](https://flask.palletsprojects.com/)
+[![Flask 3.0.3](https://img.shields.io/badge/flask-3.0.3-black.svg)](https://flask.palletsprojects.com/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Project board](https://img.shields.io/badge/GitHub-Project-181717.svg)](https://github.com/users/discipleartem/projects/6/views/1)
 
@@ -23,7 +25,7 @@
 | Слой | Технология |
 |------|------------|
 | Runtime | Python 3.12, `.venv` |
-| Web | Flask ≥ 3.1 |
+| Web | Flask **3.0.3** (pin для PythonAnywhere) |
 | UI | Bootstrap 5.3, IBM Plex |
 | DB | SQLite3, raw SQL |
 | Auth | Session cookie, `werkzeug.security` |
@@ -31,7 +33,8 @@
 
 ## Требования
 
-- Python 3.12+
+- Python 3.12
+- Flask 3.0.3 (не обновлять до 3.1+ — ограничение хостинга)
 - Git
 
 ## Установка
@@ -88,4 +91,4 @@ python -m unittest discover -s tests -v
 
 ## License
 
-[MIT](LICENSE) © Artem
+[MIT](LICENSE) © Tomas
