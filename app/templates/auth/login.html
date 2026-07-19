@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Вход · Flask Blog{% endblock %}
+{% block content %}
+<h1 class="h3 mb-4">Вход</h1>
+<form method="post" class="form-panel">
+  <div class="mb-3">
+    <label class="form-label" for="tag">Логин</label>
+    <input class="form-control rounded-0" type="text" id="tag" name="tag"
+           placeholder="username#0001" required autocomplete="username">
+    <div class="form-text">Формат Discord: имя#четыре цифры</div>
+  </div>
+  <div class="mb-3">
+    <label class="form-label" for="password">Пароль</label>
+    <input class="form-control rounded-0" type="password" id="password" name="password"
+           required autocomplete="current-password">
+  </div>
+  <button type="submit" class="btn btn-dark">Войти</button>
+  <a class="btn btn-link" href="{{ url_for('auth.register') }}">Регистрация</a>
+</form>
+{% endblock %}

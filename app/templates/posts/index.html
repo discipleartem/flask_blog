@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Flask Blog{% endblock %}
+{% block content %}
+<section class="hero">
+  <h1 class="hero-brand">Flask Blog</h1>
+  <p class="hero-lead mb-4">Короткие тексты. Чистый монохром. Без лишнего шума.</p>
+  <div class="d-flex flex-wrap gap-2">
+    {% if g.user %}
+      <a class="btn btn-dark" href="{{ url_for('posts.create') }}">Написать</a>
+    {% else %}
+      <a class="btn btn-dark" href="{{ url_for('auth.login') }}">Войти</a>
+      <a class="btn btn-outline-secondary" href="{{ url_for('auth.register') }}">Регистрация</a>
+    {% endif %}
+  </div>
+</section>
+
+<section>
+  <h2 class="h5 text-secondary text-uppercase mb-3" style="letter-spacing:0.08em;">Статьи</h2>
+  {% if posts %}
+    {% for post in posts %}
+      <article class="post-row">
+        <a class="title-link" href="{{ url_for('posts.detail', post_id=post['id']) }}">{{ post['title'] }}</a>
+        <div class="meta mt-1">
+          {{ post['author_name'] }}#{{ post['author_disc'] }}
+          · {{ post['created_at'] }}
+        </div>
+      </article>
+    {% endfor %}
+  {% else %}
+    <p class="empty-state">Пока нет статей. Будьте первым.</p>
+  {% endif %}
+</section>
+{% endblock %}

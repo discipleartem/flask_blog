@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Редактировать комментарий · Flask Blog{% endblock %}
+{% block content %}
+<h1 class="h3 mb-4">Редактировать комментарий</h1>
+<form method="post" class="form-panel form-panel-wide">
+  <div class="mb-3">
+    <label class="form-label" for="body">Текст</label>
+    <textarea class="form-control rounded-0" id="body" name="body" rows="4" required>{{ comment['body'] }}</textarea>
+  </div>
+  <button type="submit" class="btn btn-dark">Сохранить</button>
+  <a class="btn btn-outline-secondary" href="{{ url_for('posts.detail', post_id=comment['post_id']) }}">Отмена</a>
+</form>
+{% endblock %}
