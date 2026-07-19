@@ -1,19 +1,48 @@
 # Flask Blog
 
-Блог на Flask 3 + Bootstrap 5 + SQLite (raw SQL), session-auth в стиле Discord (`username#0001`).
+Минималистичный блог на **Flask 3** с монохромным UI (Bootstrap 5), SQLite без ORM и session-аутентификацией в стиле Discord (`username#0001`).
+
+[![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/)
+[![Flask 3](https://img.shields.io/badge/flask-3.1-black.svg)](https://flask.palletsprojects.com/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Project board](https://img.shields.io/badge/GitHub-Project-181717.svg)](https://github.com/users/discipleartem/projects/6/views/1)
+
+**Репозиторий:** [discipleartem/flask_blog](https://github.com/discipleartem/flask_blog) · **Доска задач:** [Flask Blog](https://github.com/users/discipleartem/projects/6/views/1)
+
+## Возможности
+
+- Регистрация / вход без email: `name#discriminator`
+- CRUD статей и плоских комментариев (автор — свои; admin — все)
+- Один admin (`admin#0001`, имя `admin` зарезервировано)
+- Светлая / тёмная тема (переключатель солнце / луна)
+- Чистый SQL + `schema.sql` + самописные миграции
+- Деплой на [PythonAnywhere](docs/DEPLOY.md)
+
+## Стек
+
+| Слой | Технология |
+|------|------------|
+| Runtime | Python 3.12, `.venv` |
+| Web | Flask ≥ 3.1 |
+| UI | Bootstrap 5.3, IBM Plex |
+| DB | SQLite3, raw SQL |
+| Auth | Session cookie, `werkzeug.security` |
+| Tests | `unittest` |
 
 ## Требования
 
-- Python 3.12
-- виртуальное окружение `.venv`
+- Python 3.12+
+- Git
 
 ## Установка
 
 ```bash
+git clone https://github.com/discipleartem/flask_blog.git
+cd flask_blog
 python3.12 -m venv .venv
 source .venv/bin/activate
 pip install -e .
-# или: pip install -r requirements.txt
+# запасной вариант: pip install -r requirements.txt
 ```
 
 ## Запуск
@@ -21,19 +50,21 @@ pip install -e .
 ```bash
 source .venv/bin/activate
 export FLASK_APP=wsgi:app
-flask --app wsgi run --debug
-```
-
-По умолчанию:
-
-- БД: `instance/blog.sqlite3`
-- Admin: `admin#0001` / пароль из `ADMIN_PASSWORD` (по умолчанию `admin`)
-
-```bash
 export SECRET_KEY=change-me
 export ADMIN_PASSWORD=strong-password
 flask --app wsgi db-upgrade
+flask --app wsgi run --debug
 ```
+
+Откройте http://127.0.0.1:5000/
+
+По умолчанию:
+
+| Параметр | Значение |
+|----------|----------|
+| БД | `instance/blog.sqlite3` |
+| Admin | `admin#0001` |
+| Пароль admin | `ADMIN_PASSWORD` или `admin` |
 
 ## Тесты
 
@@ -44,9 +75,17 @@ python -m unittest discover -s tests -v
 
 ## Документация
 
-- [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)
-- [docs/DEPLOY.md](docs/DEPLOY.md) — PythonAnywhere
+- [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) — структура, миграции, права
+- [docs/DEPLOY.md](docs/DEPLOY.md) — деплой на PythonAnywhere
+- [CHANGELOG](https://github.com/discipleartem/flask_blog/releases) — релизы
 
-## Project board
+## Ветки
 
-[Flask Blog (GitHub Projects)](https://github.com/users/discipleartem/projects/6/views/1)
+| Ветка | Назначение |
+|-------|------------|
+| `main` | стабильный релиз |
+| `dev` | интеграция |
+
+## License
+
+[MIT](LICENSE) © Artem
