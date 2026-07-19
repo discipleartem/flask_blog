@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}{% if post %}Редактировать{% else %}Новая статья{% endif %} · Flask Blog{% endblock %}
+{% block content %}
+<h1 class="h3 mb-4">{% if post %}Редактировать статью{% else %}Новая статья{% endif %}</h1>
+<form method="post" class="form-panel form-panel-wide">
+  <div class="mb-3">
+    <label class="form-label" for="title">Заголовок</label>
+    <input class="form-control rounded-0" type="text" id="title" name="title" maxlength="200" required
+           value="{{ post['title'] if post else '' }}">
+  </div>
+  <div class="mb-3">
+    <label class="form-label" for="body">Текст</label>
+    <textarea class="form-control rounded-0" id="body" name="body" rows="12" required>{{ post['body'] if post else '' }}</textarea>
+  </div>
+  <button type="submit" class="btn btn-dark">{% if post %}Сохранить{% else %}Опубликовать{% endif %}</button>
+  {% if post %}
+  <a class="btn btn-outline-secondary" href="{{ url_for('posts.detail', post_id=post['id']) }}">Отмена</a>
+  {% endif %}
+</form>
+{% endblock %}
