@@ -24,4 +24,4 @@ htmlcov/
 .ruff_cache/
 .DS_Store
 *.log
-.scripts/
+scripts/

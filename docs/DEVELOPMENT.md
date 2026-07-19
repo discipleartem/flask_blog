@@ -46,13 +46,21 @@ Custom CSS (`app/static/css/app.css`) и JS (`theme.js`) — **только ис
 ### Быстрый старт
 
 1. Flask: `flask --app wsgi run --debug` (порт 5000).
-2. Отдельное окно Chrome с CDP:
+2. Отдельное окно Chrome с CDP (папка `scripts/` локальная, не в git):
 
 ```bash
-chmod +x scripts/dev-chrome.sh
-./scripts/dev-chrome.sh
-# или: ./scripts/dev-chrome.sh http://127.0.0.1:5000/
+PROFILE="${XDG_CACHE_HOME:-$HOME/.cache}/flask-blog-chrome-profile"
+mkdir -p "$PROFILE"
+google-chrome \
+  --remote-debugging-port=9222 \
+  --user-data-dir="$PROFILE" \
+  --no-first-run \
+  --no-default-browser-check \
+  --disable-sync \
+  http://127.0.0.1:5000/
 ```
+
+Опционально можно держать обёртку в локальном `scripts/dev-chrome.sh` (игнорируется git).
 
 3. В Cursor: **Developer: Reload Window** (чтобы IronBee подхватил settings).
 4. Агент ходит в это окно через IronBee (`navigation_go-to`, viewport resize для mobile/tablet).
@@ -84,8 +92,6 @@ app/
     js/theme.js    # data-bs-theme + .theme-toggle
 migrations/        # numbered *.sql
 schema.sql         # source of truth
-scripts/
-  dev-chrome.sh    # системный Chrome с CDP :9222 для IronBee
 .vscode/
   settings.json    # IronBee CDP, Python interpreter, terminal+venv
   launch.json      # debugpy → flask run
