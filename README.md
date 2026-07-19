@@ -79,7 +79,7 @@ python -m unittest discover -s tests -v
 ## Документация
 
 - [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) — структура, миграции, права
-- [docs/DEPLOY.md](docs/DEPLOY.md) — деплой на PythonAnywhere
+- [docs/DEPLOY.md](docs/DEPLOY.md) — PythonAnywhere **Beginner**: ограничения и Manual configuration
 - [CHANGELOG](https://github.com/discipleartem/flask_blog/releases) — релизы
 
 ## Ветки
