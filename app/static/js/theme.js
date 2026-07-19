@@ -17,13 +17,11 @@
   applyTheme(preferredTheme());
 
   document.addEventListener("DOMContentLoaded", function () {
-    const toggle = document.getElementById("themeToggle");
-    if (!toggle) {
-      return;
-    }
-    toggle.addEventListener("click", function () {
-      const current = document.documentElement.getAttribute("data-bs-theme") || "light";
-      applyTheme(current === "light" ? "dark" : "light");
+    document.querySelectorAll(".theme-toggle").forEach(function (toggle) {
+      toggle.addEventListener("click", function () {
+        const current = document.documentElement.getAttribute("data-bs-theme") || "light";
+        applyTheme(current === "light" ? "dark" : "light");
+      });
     });
   });
 })();

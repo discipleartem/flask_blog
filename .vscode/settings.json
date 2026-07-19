@@ -1,0 +1,29 @@
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+  "python.terminal.activateEnvironment": false,
+  "terminal.integrated.defaultProfile.linux": "bash (venv)",
+  "terminal.integrated.profiles.linux": {
+    "bash (venv)": {
+      "path": "/bin/bash",
+      "icon": "terminal-bash",
+      "args": ["--rcfile", "${workspaceFolder}/.vscode/terminal-init.sh"]
+    },
+    "bash": {
+      "path": "/bin/bash",
+      "icon": "terminal-bash"
+    }
+  },
+  "ironbeeDevTools.enable": true,
+  "ironbeeDevTools.browser.headless": false,
+  "ironbeeDevTools.browser.persistent": false,
+  "ironbeeDevTools.browser.useSystemBrowser": true,
+  "ironbeeDevTools.browser.executablePath": "/usr/bin/google-chrome",
+  "ironbeeDevTools.browser.locale": "ru-RU",
+  "ironbeeDevTools.browser.cdp.enable": true,
+  "ironbeeDevTools.browser.cdp.endpointUrl": "http://127.0.0.1:9222",
+  "ironbeeDevTools.browser.cdp.openInspect": true,
+  "ironbeeDevTools.install.chromium": true,
+  "ironbeeDevTools.platform.browser.enable": true,
+  "ironbeeDevTools.platform.node.enable": false,
+  "ironbeeDevTools.platform.backend.enable": true
+}

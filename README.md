@@ -26,7 +26,7 @@
 |------|------------|
 | Runtime | Python 3.12, `.venv` |
 | Web | Flask **3.0.3** (pin для PythonAnywhere) |
-| UI | Bootstrap 5.3, IBM Plex |
+| UI | **Bootstrap 5.3** (mobile/tablet first); custom CSS/JS — только исключения |
 | DB | SQLite3, raw SQL |
 | Auth | Session cookie, `werkzeug.security` |
 | Tests | `unittest` |
@@ -78,7 +78,7 @@ python -m unittest discover -s tests -v
 
 ## Документация
 
-- [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) — структура, миграции, права
+- [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) — структура, UI (Bootstrap 5), IronBee (Chrome + CDP), миграции, права
 - [docs/DEPLOY.md](docs/DEPLOY.md) — PythonAnywhere **Beginner**: ограничения и Manual configuration
 - [CHANGELOG](https://github.com/discipleartem/flask_blog/releases) — релизы
 

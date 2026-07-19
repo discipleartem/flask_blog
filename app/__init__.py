@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from datetime import datetime
+
 from flask import Flask
 
 from app.config import Config
@@ -29,6 +31,11 @@ def create_app(config_object: type[Config] | None = None) -> Flask:
     app.register_blueprint(comments_bp)
 
     app.before_request(load_logged_in_user)
+
+    @app.context_processor
+    def inject_template_globals() -> dict[str, int]:
+        """Глобальные переменные шаблонов."""
+        return {"current_year": datetime.now().year}
 
     with app.app_context():
         init_db(app)

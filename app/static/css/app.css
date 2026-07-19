@@ -1,3 +1,5 @@
+/* Custom CSS — only what Bootstrap 5 cannot express (theme tokens, brand type, reading). */
+
 :root {
   --fb-bg: #f7f7f7;
   --fb-surface: #ffffff;
@@ -18,13 +20,7 @@
   --fb-hero-grad: linear-gradient(160deg, #121212 0%, #1a1a1a 50%, #0a0a0a 100%);
 }
 
-html, body {
-  min-height: 100%;
-}
-
 body {
-  display: flex;
-  flex-direction: column;
   background: var(--fb-bg);
   color: var(--fb-ink);
   font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
@@ -38,8 +34,14 @@ body {
   font-family: "IBM Plex Serif", Georgia, serif;
   font-weight: 600;
   letter-spacing: -0.02em;
-  font-size: 1.35rem;
+  font-size: 1.25rem;
   color: var(--fb-ink) !important;
+}
+
+@media (min-width: 768px) {
+  .brand-mark {
+    font-size: 1.35rem;
+  }
 }
 
 .user-tag {
@@ -74,30 +76,25 @@ body {
 
 .hero {
   background: var(--fb-hero-grad);
-  border-bottom: 1px solid var(--fb-line);
-  margin: -1.5rem -12px 2rem;
-  padding: 3.5rem 1.25rem 2.75rem;
+  border: 1px solid var(--fb-line);
+  padding: 2rem 1.25rem;
 }
 
 @media (min-width: 768px) {
   .hero {
-    margin-left: calc(50% - 50vw);
-    margin-right: calc(50% - 50vw);
-    padding-left: max(1.25rem, calc(50vw - 540px + 1.25rem));
-    padding-right: max(1.25rem, calc(50vw - 540px + 1.25rem));
+    padding: 3rem 2rem 2.5rem;
   }
 }
 
-@media (min-width: 992px) {
+@media (min-width: 1200px) {
   .hero {
-    padding-left: max(1.25rem, calc(50vw - 660px + 1.25rem));
-    padding-right: max(1.25rem, calc(50vw - 660px + 1.25rem));
+    padding: 3.5rem 2.5rem 3rem;
   }
 }
 
 .hero-brand {
   font-family: "IBM Plex Serif", Georgia, serif;
-  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-size: clamp(2rem, 8vw, 4rem);
   font-weight: 600;
   letter-spacing: -0.03em;
   line-height: 1.05;
@@ -105,30 +102,51 @@ body {
 }
 
 .hero-lead {
-  max-width: 32rem;
+  max-width: 36rem;
   color: var(--fb-muted);
-  font-size: 1.1rem;
+  font-size: 1rem;
 }
 
-.post-row {
-  border-bottom: 1px solid var(--fb-line);
-  padding: 1.25rem 0;
-  transition: background-color 0.15s ease;
+@media (min-width: 768px) {
+  .hero-lead {
+    font-size: 1.1rem;
+  }
 }
 
-.post-row:first-child {
-  border-top: 1px solid var(--fb-line);
-}
-
-.post-row a.title-link {
-  color: var(--fb-ink);
-  text-decoration: none;
+.post-title {
   font-family: "IBM Plex Serif", Georgia, serif;
-  font-size: 1.35rem;
+  font-size: clamp(1.75rem, 4vw, 2.75rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.post-body {
+  white-space: pre-wrap;
+  line-height: 1.7;
+  font-size: 1.05rem;
+}
+
+.post-body-sm {
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.title-link {
+  color: var(--fb-ink);
+  font-family: "IBM Plex Serif", Georgia, serif;
+  font-size: 1.2rem;
   font-weight: 600;
 }
 
-.post-row a.title-link:hover {
+@media (min-width: 768px) {
+  .title-link {
+    font-size: 1.35rem;
+  }
+}
+
+.list-group-item-action:hover .title-link,
+.list-group-item-action:focus .title-link {
   text-decoration: underline;
   text-underline-offset: 0.15em;
 }
@@ -142,20 +160,26 @@ body {
   max-width: 28rem;
   border: 1px solid var(--fb-line);
   background: var(--fb-surface);
-  padding: 1.5rem;
+  padding: 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .form-panel {
+    padding: 1.5rem;
+  }
 }
 
 .form-panel-wide {
   max-width: 40rem;
 }
 
-.comment-block {
-  border-top: 1px solid var(--fb-line);
-  padding: 1rem 0;
-}
-
 .site-footer {
   background: var(--fb-surface);
+}
+
+.card {
+  background: var(--fb-surface);
+  border-color: var(--fb-line) !important;
 }
 
 .btn-dark {
@@ -174,7 +198,11 @@ body {
   --bs-btn-hover-color: #111;
 }
 
+.ls-wide {
+  letter-spacing: 0.08em;
+}
+
 .empty-state {
   color: var(--fb-muted);
-  padding: 2rem 0;
+  padding: 1.5rem 0;
 }
