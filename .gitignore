@@ -1,4 +1,8 @@
 .venv/
+.vscode/*
+!.vscode/launch.json
+!.vscode/settings.json
+!.vscode/terminal-init.sh
 __pycache__/
 *.py[cod]
 *$py.class
@@ -19,5 +23,5 @@ htmlcov/
 .mypy_cache/
 .ruff_cache/
 .DS_Store
-.cursor/
 *.log
+scripts/

@@ -1,0 +1,44 @@
+---
+description: UI/UX — Bootstrap 5 first; custom CSS/JS только в исключениях; mobile/tablet first
+globs: app/templates/**/*.html,app/static/**/*.{css,js}
+alwaysApply: false
+---
+
+# UI / UX — Bootstrap 5
+
+## Принцип
+
+**Bootstrap 5 — единственный UI-фреймворк.** Разметка, сетка, навбар, формы, кнопки, утилиты, collapse, alerts — через компоненты и utility-классы BS5.
+
+Custom CSS / JS — **только исключения**, когда Bootstrap не покрывает задачу:
+
+| Допустимо в custom | Примеры |
+|--------------------|---------|
+| Тема / токены | CSS-переменные светлой/тёмной темы, `data-bs-theme` |
+| Бренд-типографика | IBM Plex для `.brand-mark`, `.hero-brand` |
+| Декор, которого нет в BS | градиент hero, тонкие разделители постов |
+| Минимальный JS темы | `theme.js` (localStorage + `data-bs-theme`) |
+
+**Запрещено:** дублировать сетку/spacing/display Bootstrap своими правилами; писать layout «с нуля»; подключать другие CSS-фреймворки; раздувать `app.css`.
+
+Перед новым CSS/JS: можно ли решить utility/компонентом BS5? Если да — без custom.
+
+## Mobile / tablet first
+
+1. Базовые стили и разметка — для узкого экрана (phone).
+2. Усиление через breakpoints BS: `sm` → `md` (планшет) → `lg`/`xl`/`xxl` (ПК / wide).
+3. Навбар: `navbar-expand-lg` — меню свёрнуто на phone/tablet, раскрыто на desktop.
+4. Контейнер: `container-fluid` + `px-3` / `px-md-4` / `px-xl-5` — без узкого max-width на ПК.
+5. Sticky footer: `body.d-flex.flex-column.min-vh-100` + `main.flex-grow-1` + `footer.mt-auto` (утилиты BS, без кастомного flex-layout).
+
+## Навбар и тема
+
+- **Mobile / tablet:** тема **вне** `#navMain` — слева от hamburger (`d-lg-none`).
+- **Desktop (`lg+`):** тема слева от «Войти» / действий пользователя (`d-none d-lg-inline-flex`).
+- Два экземпляра кнопки; JS — на все `.theme-toggle`.
+
+## Шаблонная база
+
+- `base.html` — CDN Bootstrap **5.3.x** (CSS + `bootstrap.bundle.min.js`).
+- Страницы расширяют `base.html`; не подключать Bootstrap повторно.
+- Монохромная палитра сохраняется через токены в `app.css` + классы BS (`btn-dark`, `btn-outline-secondary`, `text-secondary`).

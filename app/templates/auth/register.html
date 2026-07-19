@@ -1,20 +1,30 @@
 {% extends "base.html" %}
 {% block title %}Регистрация · Flask Blog{% endblock %}
 {% block content %}
-<h1 class="h3 mb-4">Регистрация</h1>
-<form method="post" class="form-panel">
-  <div class="mb-3">
-    <label class="form-label" for="name">Имя пользователя</label>
-    <input class="form-control rounded-0" type="text" id="name" name="name"
-           minlength="2" maxlength="32" required autocomplete="username">
-    <div class="form-text">Discriminator (#0001–#9999) будет назначен автоматически. Имя «admin» зарезервировано.</div>
+<div class="row justify-content-center">
+  <div class="col-12 col-sm-10 col-md-7 col-lg-5 col-xl-4">
+    <h1 class="h3 mb-4 text-center">Регистрация</h1>
+    <div class="card border shadow-sm">
+      <div class="card-body p-3 p-md-4">
+        <form method="post">
+          <div class="mb-3">
+            <label class="form-label" for="name">Имя пользователя</label>
+            <input class="form-control" type="text" id="name" name="name"
+                   minlength="2" maxlength="32" required autocomplete="username">
+            <div class="form-text">Discriminator (#0001–#9999) будет назначен автоматически. Имя «admin» зарезервировано.</div>
+          </div>
+          <div class="mb-4">
+            <label class="form-label" for="password">Пароль</label>
+            <input class="form-control" type="password" id="password" name="password"
+                   minlength="6" required autocomplete="new-password">
+          </div>
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-dark">Создать аккаунт</button>
+            <a class="btn btn-outline-secondary" href="{{ url_for('auth.login') }}">Уже есть аккаунт</a>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
-  <div class="mb-3">
-    <label class="form-label" for="password">Пароль</label>
-    <input class="form-control rounded-0" type="password" id="password" name="password"
-           minlength="6" required autocomplete="new-password">
-  </div>
-  <button type="submit" class="btn btn-dark">Создать аккаунт</button>
-  <a class="btn btn-link" href="{{ url_for('auth.login') }}">Уже есть аккаунт</a>
-</form>
+</div>
 {% endblock %}

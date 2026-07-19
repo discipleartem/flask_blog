@@ -1,0 +1,42 @@
+name: Deploy to PythonAnywhere
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run remote deploy hook
+        env:
+          DEPLOY_URL: https://${{ secrets.PA_DOMAIN }}/internal/deploy
+          DEPLOY_SECRET: ${{ secrets.DEPLOY_SECRET }}
+        run: |
+          set -euo pipefail
+          curl -fsS -X POST \
+            -H "Authorization: Bearer ${DEPLOY_SECRET}" \
+            -H "Content-Type: application/json" \
+            -o /tmp/deploy-response.json \
+            -w "\nHTTP %{http_code}\n" \
+            "${DEPLOY_URL}"
+          cat /tmp/deploy-response.json
+          echo
+
+      - name: Reload webapp
+        env:
+          PA_HOST: ${{ secrets.PA_HOST }}
+          PA_USERNAME: ${{ secrets.PA_USERNAME }}
+          PA_DOMAIN: ${{ secrets.PA_DOMAIN }}
+          PA_API_TOKEN: ${{ secrets.PA_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          curl -fsS -X POST \
+            -H "Authorization: Token ${PA_API_TOKEN}" \
+            "https://${PA_HOST}/api/v0/user/${PA_USERNAME}/webapps/${PA_DOMAIN}/reload/"
+          echo "Reload requested"

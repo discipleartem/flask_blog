@@ -1,39 +1,139 @@
-# Deploy on PythonAnywhere
+# Deploy on PythonAnywhere (тариф Beginner)
 
-## 1. Код
+Официально: [PythonAnywhere](https://www.pythonanywhere.com/), [тарифы](https://www.pythonanywhere.com/pricing/),
+[возможности free/Beginner](https://help.pythonanywhere.com/pages/FreeAccountsFeatures/),
+[деплой Flask](https://help.pythonanywhere.com/pages/Flask/),
+[API](https://help.pythonanywhere.com/pages/API/).
+
+Сайт на free-плане: `https://YOUR_USERNAME.pythonanywhere.com/`  
+Пример: `https://discipleartem.pythonanywhere.com/`
+
+**После первичной настройки** код на прод обновляется **автоматически** при merge/push в `main`
+(GitHub Actions → hook на PA → reload). См. [Auto-deploy через GitHub](#auto-deploy-через-github).
+
+## Совместимость (наш проект)
+
+| Компонент | Версия |
+|-----------|--------|
+| Python | **3.12** |
+| Flask | **3.0.3** |
+| python-dotenv | **1.2.2** |
+
+Для Python 3.12 на PA ставьте только `Flask==3.0.3` (`requirements.txt` / `pyproject.toml`). Flask 3.1+ на этом окружении не используем.
+
+## Ограничения тарифа Beginner (free)
+
+По [Free Accounts Features](https://help.pythonanywhere.com/pages/FreeAccountsFeatures/) и [Pricing](https://www.pythonanywhere.com/pricing/):
+
+| Ограничение | Beginner |
+|-------------|----------|
+| Стоимость | $0 / месяц |
+| Web apps | **1** приложение, **1** web worker |
+| Домен | только `USERNAME.pythonanywhere.com` (свой домен — на платных планах) |
+| Срок жизни web app | истекает после **1 месяца бездействия** (нужно продлевать / заходить на сайт) |
+| Consoles | до **2** одновременно (Bash / Python) |
+| Диск | **512 MiB** |
+| CPU | **100 CPU-секунд** в сутки |
+| Bandwidth | низкий (Low) |
+| Исходящий интернет из кода | только **whitelist** сайтов, **HTTP(S)** |
+| SSH | **нет** (работа через Web UI + Bash console) |
+| MySQL | **нет** у новых free-аккаунтов после янв. 2026 (нам не нужен — SQLite) |
+| Scheduled / always-on tasks | **нет** у новых free-аккаунтов после янв. 2026 |
+| Поддержка | community (форумы / help), не прямая поддержка PA |
+
+Аккаунты, созданные **до** 2026-01-15 (US) / 2026-01-08 (EU), могут ещё иметь MySQL и 1 daily task — см. [анонс](https://blog.pythonanywhere.com/221/).
+
+### Что это значит для Flask Blog
+
+- SQLite-файл держите в home (`instance/`) — укладывайтесь в 512 MiB вместе с `.venv` и клоном репо.
+- Не рассчитывайте на фоновые cron-задачи на Beginner.
+- CDN Bootstrap/Fonts грузятся **в браузере у посетителя**, не с сервера PA — ок для whitelist.
+- `git clone` / `git pull` с GitHub обычно работают из Bash (HTTPS).
+- SSH с GitHub Actions на PA **недоступен** — поэтому auto-deploy идёт через HTTP-hook + [API reload](https://help.pythonanywhere.com/pages/API/).
+
+---
+
+## Первичная настройка: Manual configuration + virtualenv
+
+Для **уже существующего** проекта (наш репозиторий) нужен путь **Manual configuration**, а не «Quickstart new Flask project».
+
+Quickstart Flask создаёт/перезаписывает файл вроде `/home/USERNAME/mysite/flask_app.py` — это заглушка PA, **не** наш код. В мастере Web → Add a new web app выбирайте:
+
+1. **Manual configuration** (не Flask quickstart)
+2. Python **3.12**
+
+Официальная инструкция: [Setting up Flask on PythonAnywhere](https://help.pythonanywhere.com/pages/Flask/).
+
+### Шаг 1. Клон и зависимости (Bash console)
+
+Consoles → Bash (на Beginner максимум 2 консоли):
 
 ```bash
-# Bash console на PA
+cd ~
 git clone https://github.com/discipleartem/flask_blog.git
 cd flask_blog
+git checkout main
+
 python3.12 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-```
+python -c "from importlib.metadata import version; print(version('flask'))"  # 3.0.3
 
-Либо `pip install -e .` если editable install доступен.
-
-## 2. Переменные окружения
-
-В Web → WSGI configuration / или в коде перед импортом:
-
-```bash
-export SECRET_KEY='generate-a-long-random-string'
-export ADMIN_PASSWORD='your-strong-admin-password'
-export DATABASE='/home/YOUR_USERNAME/flask_blog/instance/blog.sqlite3'
-```
-
-Создайте каталог БД:
-
-```bash
 mkdir -p instance
-source .venv/bin/activate
+cp .env.example .env
+nano .env   # или vim: заполните SECRET_KEY, ADMIN_PASSWORD, DATABASE, DEPLOY_SECRET
 flask --app wsgi db-upgrade
 ```
 
-## 3. WSGI-файл (PythonAnywhere)
+Клон **обязательно** на ветке `main` — auto-deploy делает `git pull origin main`.
 
-В панели Web → WSGI configuration file примерно так:
+### Шаг 2. Файл `.env` на сервере
+
+Шаблон в репозитории: [`.env.example`](../.env.example). Реальный `.env` **не коммитится**.
+
+```env
+SECRET_KEY=generate-a-long-random-string
+ADMIN_PASSWORD=your-strong-admin-password
+DATABASE=/home/YOUR_USERNAME/flask_blog/instance/blog.sqlite3
+DEPLOY_SECRET=generate-another-long-random-string
+```
+
+| Переменная | Назначение |
+|------------|------------|
+| `SECRET_KEY` | Подпись session cookie Flask |
+| `ADMIN_PASSWORD` | Пароль `admin#0001` при seed БД |
+| `DATABASE` | Абсолютный путь к SQLite |
+| `DEPLOY_SECRET` | Bearer-токен для `POST /internal/deploy` (auto-deploy). Пусто = endpoint выключен (404) |
+
+`load_dotenv` читает `.env` при старте (`app/config.py`). Уже экспортированные переменные окружения имеют приоритет над `.env`.
+
+Сгенерировать секреты (в Bash на PA или локально):
+
+```bash
+python3 -c "import secrets; print(secrets.token_urlsafe(48))"
+```
+
+Альтернатива venv через `virtualenvwrapper` (`mkvirtualenv`), как в [доке PA](https://help.pythonanywhere.com/pages/Flask/) — тогда в Web tab укажите путь к этому env.
+
+### Шаг 3. Web app (Manual configuration)
+
+Web → **Add a new web app** → **Manual configuration** → **Python 3.12**.
+
+В секции **Virtualenv** укажите путь к venv, например:
+
+```text
+/home/YOUR_USERNAME/flask_blog/.venv
+```
+
+Пример для аккаунта `discipleartem`:
+
+```text
+/home/discipleartem/flask_blog/.venv
+```
+
+### Шаг 4. WSGI-файл
+
+Ссылка **WSGI configuration file** в Web tab. Замените содержимое на:
 
 ```python
 import sys
@@ -42,47 +142,177 @@ from pathlib import Path
 project = Path("/home/YOUR_USERNAME/flask_blog")
 sys.path.insert(0, str(project))
 
-# Activate venv site-packages
-activate = project / ".venv" / "lib" / "python3.12" / "site-packages"
-sys.path.insert(0, str(activate))
+# site-packages из venv (если Virtualenv в UI не подхватился)
+venv_site = project / ".venv" / "lib" / "python3.12" / "site-packages"
+sys.path.insert(0, str(venv_site))
 
 from app import create_app
 
 application = create_app()
 ```
 
-Либо укажите `wsgi.py`: `application` можно экспортировать как alias:
+Подставьте свой `YOUR_USERNAME` (например `discipleartem`). Секреты — **только** в `~/flask_blog/.env`, не в WSGI.
 
-```python
-from wsgi import app as application
-```
+Важно ([документация PA](https://help.pythonanywhere.com/pages/Flask/)):
 
-## 4. Static files
+- WSGI должен экспортировать **`application`**, не вызывать `app.run()`.
+- У нас `app.run()` нет — точка входа `wsgi.py` / `create_app()` безопасны для импорта.
 
-В Web → Static files:
+### Шаг 5. Static files
+
+Web → Static files:
 
 | URL | Directory |
 |-----|-----------|
 | `/static/` | `/home/YOUR_USERNAME/flask_blog/app/static` |
 
-## 5. Smoke-чеклист после деплоя
+### Шаг 6. Reload
 
-- [ ] `GET /` открывается, виден бренд «Flask Blog»
-- [ ] Переключатель темы (солнце/луна) меняет `data-bs-theme` и переживает reload
-- [ ] Логин `admin#0001` с `ADMIN_PASSWORD`
-- [ ] Регистрация обычного пользователя (не `admin`)
-- [ ] Создание статьи → появляется на главной
-- [ ] Комментарий под статьёй
-- [ ] Редактирование/удаление своей статьи
-- [ ] Admin: `/users/` список пользователей
+Кнопка зелёная **Reload** на вкладке Web. Откройте `https://YOUR_USERNAME.pythonanywhere.com/`.
 
-## 6. Обновление
+Дальше — [Smoke-чеклист](#smoke-чеклист) и [Auto-deploy через GitHub](#auto-deploy-через-github).
+
+---
+
+## Smoke-чеклист
+
+- [ ] Главная `/` — бренд «Flask Blog»
+- [ ] Тема light/dark (солнце/луна) переживает reload
+- [ ] Логин `admin#0001` + `ADMIN_PASSWORD`
+- [ ] Регистрация пользователя (не `admin`)
+- [ ] Создание статьи и комментария
+- [ ] Admin: `/users/`
+- [ ] `POST /internal/deploy` без Bearer → **401** (или **404**, если `DEPLOY_SECRET` пуст)
+- [ ] После простоя ~месяца — проверить, что web app не истёк (Beginner)
+
+---
+
+## Auto-deploy через GitHub
+
+Цель: релиз **`dev` → `main`** на GitHub сам выкатывает код на PythonAnywhere без ручного `git pull` и кнопки Reload.
+
+Workflow: [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml).
+
+### Как это работает
+
+```text
+  PR / squash-merge в main
+            │
+            ▼
+  GitHub Actions (push: main)
+            │
+            ├─ 1. POST https://PA_DOMAIN/internal/deploy
+            │      Authorization: Bearer DEPLOY_SECRET
+            │      на PA: git pull origin main
+            │             .venv/bin/pip install -r requirements.txt
+            │             .venv/bin/flask --app wsgi db-upgrade
+            │
+            └─ 2. POST PA API …/webapps/PA_DOMAIN/reload/
+                   Authorization: Token PA_API_TOKEN
+                   worker подхватывает новый код
+```
+
+Триггеры workflow:
+
+| Событие | Когда |
+|---------|--------|
+| `push` в ветку `main` | merge релиза `dev` → `main`, прямой push в `main` |
+| `workflow_dispatch` | ручной запуск: Actions → **Deploy to PythonAnywhere** → Run workflow |
+
+Код hook: `app/deploy/` → маршрут `POST /internal/deploy`.
+
+### Предварительные условия на PA
+
+Перед первым auto-deploy убедитесь:
+
+1. Первичная настройка выше уже сделана, сайт открывается.
+2. Клон: `cd ~/flask_blog && git checkout main && git status` — чистое дерево, tracking `origin/main`.
+3. В `.env` задан **непустой** `DEPLOY_SECRET` (тот же, что пойдёт в GitHub Secrets).
+4. После правки `.env` — **Reload** webapp (иначе процесс не увидит новый секрет).
+5. Из Bash на PA `git pull origin main` проходит без интерактива (публичный репо или сохранённые credentials).
+
+Проверка hook вручную (подставьте домен и секрет):
+
+```bash
+curl -i -X POST \
+  -H "Authorization: Bearer YOUR_DEPLOY_SECRET" \
+  "https://YOUR_USERNAME.pythonanywhere.com/internal/deploy"
+```
+
+Ожидание: HTTP **200** и JSON `{"ok": true, "steps": [...]}`.  
+Без заголовка / неверный токен → **401**. Пустой `DEPLOY_SECRET` на сервере → **404**.
+
+### Настройка GitHub Secrets (один раз)
+
+Репозиторий → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**.
+
+| Secret | Значение | Где взять |
+|--------|----------|-----------|
+| `DEPLOY_SECRET` | длинная случайная строка | **тот же**, что `DEPLOY_SECRET` в `.env` на PA |
+| `PA_API_TOKEN` | API token аккаунта PA | PythonAnywhere → Account → **API token** → Generate |
+| `PA_USERNAME` | логин PA | например `discipleartem` |
+| `PA_DOMAIN` | домен webapp | например `discipleartem.pythonanywhere.com` |
+| `PA_HOST` | хост API | `www.pythonanywhere.com` (US) или `eu.pythonanywhere.com` (EU) |
+
+`PA_HOST` должен совпадать с регионом аккаунта: если вы логинитесь на `eu.pythonanywhere.com`, в секрете — `eu.pythonanywhere.com`.
+
+### Релизный цикл (день за днём)
+
+1. Фичи мержатся в `dev`, тестируются.
+2. PR **`dev` → `main`** (обычно squash merge) → push в `main`.
+3. Actions запускает **Deploy to PythonAnywhere**.
+4. В логе job: ответ hook (JSON со `steps`) и строка `Reload requested`.
+5. Откройте сайт и пробегитесь по [Smoke-чеклисту](#smoke-чеклист).
+
+Ручной прогон без merge: Actions → **Deploy to PythonAnywhere** → **Run workflow**.
+
+### Безопасность
+
+- `DEPLOY_SECRET` и `PA_API_TOKEN` — только в `.env` на PA и в GitHub Secrets; **не** в git, не в WSGI, не в Issues/PR.
+- Без `DEPLOY_SECRET` на сервере endpoint отвечает **404** (выключен).
+- Неверный Bearer → **401** (сравнение timing-safe).
+- Endpoint не логинит пароли БД; в ответе — stdout/stderr шагов деплоя (без содержимого `.env`).
+- Меняли `DEPLOY_SECRET`? Обновите **и** `.env` на PA (Reload), **и** GitHub Secret.
+
+### Откат
+
+Авто-отката нет. Варианты:
+
+1. Revert-коммит в `main` → снова сработает auto-deploy.
+2. Вручную на PA: `git checkout <хороший-sha>` / `git reset --hard origin/main` после force на GitHub (осторожно) → Reload.
+3. Временно отключить auto-deploy: очистить `DEPLOY_SECRET` в `.env` + Reload (hook → 404); workflow будет падать на шаге hook — либо отключите workflow в Actions.
+
+---
+
+## Обновление кода вручную (fallback)
+
+Если Actions недоступен или нужно чинить прод без GitHub:
 
 ```bash
 cd ~/flask_blog
-git pull
+git checkout main
+git pull origin main
 source .venv/bin/activate
 pip install -r requirements.txt
+python -c "from importlib.metadata import version; assert version('flask') == '3.0.3'"
 flask --app wsgi db-upgrade
-# Reload web app в панели PA
+# Web → Reload
 ```
+
+---
+
+## Частые ошибки
+
+| Симптом | Что проверить |
+|---------|----------------|
+| 502 / 504 | traceback в Web → Log files; не вызывается ли `app.run()` |
+| ModuleNotFoundError | Virtualenv / `sys.path` в WSGI, Python **3.12**; `pip show python-dotenv` |
+| Неверный Flask | `pip show flask` → **3.0.3** |
+| Перезаписан чужой `flask_app.py` | Quickstart Flask — пересоздайте app через **Manual configuration** |
+| Нет места на диске | 512 MiB: `__pycache__`, старые venv, большие логи |
+| Actions: hook **401** / **404** | `DEPLOY_SECRET` в `.env` ≡ GitHub Secret; после правки `.env` — Reload; URL = `https://PA_DOMAIN/internal/deploy` |
+| Actions: hook **500**, шаг `git pull` | ветка `main`, чистое дерево, `git pull` из Bash на PA без ошибок |
+| Actions: hook OK, сайт старый | шаг Reload упал? верны ли `PA_HOST` / `PA_USERNAME` / `PA_DOMAIN` / `PA_API_TOKEN`? |
+| Actions: API reload **не 2xx** | токен API, регион (`www` vs `eu`), имя домена webapp без `https://` |
+| Workflow не стартует | push именно в `main`; файл `.github/workflows/deploy.yml` есть на `main` |
+| Web app «протух» (Beginner) | зайти на сайт / продлить в Web tab после месяца бездействия |
