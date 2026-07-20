@@ -26,6 +26,12 @@ Custom CSS (`app/static/css/app.css`) и JS (`theme.js`) — **только ис
 6. Два экземпляра кнопки темы в разметке; JS вешается на все `.theme-toggle` (`app/static/js/theme.js`).
 7. В шаблонах доступен `current_year` (context processor в `create_app`) — для футера.
 
+## Git / ветки
+
+Integration: `dev`. Релиз: `main`. Task-ветки: `feat/…`, `docs/…`, …
+
+После merge PR **не удалять** ветку на GitHub без архива: переименовать в `merged/<имя>` локально и на `origin` (канон для агента: [`.cursor/rules/git-merged-branches.mdc`](../.cursor/rules/git-merged-branches.mdc)).
+
 ## Проверка
 
 **Автоматически (агент / CI):** только unit-тесты:

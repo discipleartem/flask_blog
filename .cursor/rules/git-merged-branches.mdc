@@ -1,0 +1,42 @@
+---
+description: После merge task-ветки на GitHub — переименовать в merged/*, не удалять
+alwaysApply: true
+---
+
+# Git: ветки `merged/*` (flask_blog)
+
+**Переопределяет** global [`git.mdc`](~/.cursor/rules/git.mdc) §Branches про `merged/*` (там — только локально, без push).
+
+## Политика
+
+После merge PR task-ветки → `dev` (или `dev` → `main`):
+
+1. **Не** удалять ветку на GitHub «в никуда» (кнопка Delete branch / `git push --delete` без архива).
+2. **Переименовать** в `merged/<короткое-имя>` локально **и** на `origin`.
+3. Архив `merged/*` **хранится на GitHub** — это норма для этого репозитория.
+
+Имена: `feat/foo` → `merged/foo`, `docs/bar` → `merged/bar` (префикс `feat/` / `docs/` / … снимается, остаётся kebab-case имя задачи).
+
+## Процедура (агент)
+
+```bash
+# на task-ветке после merge (или с локальной копией tip)
+git branch -m feat/my-task merged/my-task
+git push -u origin merged/my-task
+git push origin --delete feat/my-task   # только старое имя; tip уже на merged/*
+```
+
+Если локальной ветки нет, а remote ещё `origin/feat/my-task`:
+
+```bash
+git fetch origin
+git branch merged/my-task origin/feat/my-task
+git push -u origin merged/my-task
+git push origin --delete feat/my-task
+```
+
+## Запрещено
+
+- Удалять remote task-ветку после merge без создания `origin/merged/…`
+- Делать PR / открывать новую работу с head `merged/…` (архив только для истории)
+- Force-push в `main` / `dev`
