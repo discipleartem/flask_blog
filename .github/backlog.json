@@ -1,0 +1,15 @@
+{
+  "backlogPath": "docs/Backlog.md",
+  "project": {
+    "owner": "discipleartem",
+    "number": 6
+  },
+  "statusMap": {
+    "open": "Backlog",
+    "in_progress": "In progress",
+    "in_review": "In review",
+    "ready": "Ready",
+    "done": "Done"
+  },
+  "labels": ["backlog", "ui", "auth"]
+}
