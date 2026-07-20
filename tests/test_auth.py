@@ -11,11 +11,20 @@ class AuthTests(BlogTestCase):
         response = self.register("bob", "secret1")
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"bob#", response.data)
+        self.assertIn(b'autocomplete="username"', response.data)
+        self.assertIn(b'autocomplete="new-password"', response.data)
+        self.assertIn(b'value="secret1"', response.data)
 
         self.client.get("/auth/logout", follow_redirects=True)
         tag = self.user_tag("bob")
         response = self.login(tag, "secret1")
         self.assertIn(b"bob#", response.data)
+
+    def test_register_form_uses_nickname_autocomplete(self) -> None:
+        response = self.client.get("/auth/register")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'autocomplete="nickname"', response.data)
+        self.assertNotIn(b'autocomplete="username"', response.data)
 
     def test_reserved_admin_name(self) -> None:
         response = self.register("admin", "secret1")
