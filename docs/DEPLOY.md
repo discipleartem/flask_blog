@@ -229,7 +229,9 @@ Workflow: [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml).
   PR / squash-merge в main
             │
             ▼
-  GitHub Actions (push: main)
+  GitHub Actions (push: main) — deploy.yml
+            │
+            ├─ 0. unittest (Python 3.12); при падении deploy не запускается
             │
             ├─ 1. POST https://PA_DOMAIN/internal/deploy
             │      Authorization: Bearer DEPLOY_SECRET
@@ -241,6 +243,8 @@ Workflow: [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml).
                    Authorization: Token PA_API_TOKEN
                    worker подхватывает новый код
 ```
+
+Отдельно CI без деплоя: [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) на `push`/`pull_request` в `main` и `dev`.
 
 Триггеры workflow:
 
@@ -314,10 +318,10 @@ echo "$PYTHONANYWHERE_SITE"
 
 ### Релизный цикл (день за днём)
 
-1. Фичи мержатся в `dev`, тестируются.
+1. Фичи мержатся в `dev`, тестируются (CI `ci.yml` на PR/push).
 2. PR `dev` **→** `main` (обычно squash merge) → push в `main`.
-3. Actions запускает **Deploy to PythonAnywhere**.
-4. В логе job: ответ hook (JSON со `steps`) и строка `Reload requested`.
+3. Actions запускает **Deploy to PythonAnywhere**: сначала job `test`, затем hook + reload.
+4. В логе job `deploy`: ответ hook (JSON со `steps`) и строка `Reload requested`.
 5. Откройте сайт и пробегитесь по [Smoke-чеклисту](#smoke-чеклист).
 
 Ручной прогон без merge: Actions → **Deploy to PythonAnywhere** → **Run workflow**.

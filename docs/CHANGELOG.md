@@ -9,6 +9,8 @@
 
 ### Added
 
+- GitHub Actions CI: unit-тесты (Python 3.12) на `push`/`pull_request` в `main` и `dev` (`.github/workflows/ci.yml`).
+- Deploy на PythonAnywhere gated: job `deploy` после успешного `test` в `.github/workflows/deploy.yml`.
 - Страница успешной регистрации с полным логином `name#NNNN` и сохранением учётки через Credential Management API (`PasswordCredential`), чтобы менеджер паролей предлагал полный тег, а не только имя без дискриминатора.
 - Регистрация через `fetch` (XHR), чтобы Chrome не предлагал сохранить неполный username из HTML-формы.
 - Unit-тесты на страницу успеха регистрации и поле входа `username`.
