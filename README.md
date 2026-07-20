@@ -80,7 +80,7 @@ python -m unittest discover -s tests -v
 
 - [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) — структура, UI (Bootstrap 5), IronBee (Chrome + CDP), миграции, права
 - [docs/DEPLOY.md](docs/DEPLOY.md) — PythonAnywhere **Beginner**, `.env`, auto-deploy при push в `main`
-- [CHANGELOG](https://github.com/discipleartem/flask_blog/releases) — релизы
+- [docs/CHANGELOG.md](docs/CHANGELOG.md) — история изменений
 
 ## Ветки
 
