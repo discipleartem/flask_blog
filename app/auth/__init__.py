@@ -22,11 +22,12 @@ from app.auth.helpers import (
     logout_user,
     parse_tag,
 )
+from app.csrf import validate_csrf
 from app.db import execute, query_one
 
 bp = Blueprint("auth", __name__, url_prefix="/auth")
 
-_PENDING_CREDENTIALS_KEY = "_pending_register_credentials"
+_PENDING_TAG_KEY = "_pending_register_tag"
 
 
 def _wants_json() -> bool:
@@ -37,10 +38,26 @@ def _wants_json() -> bool:
     return best == "application/json"
 
 
+def _csrf_error_response(*, wants_json: bool):
+    """Reject POST without a valid CSRF token."""
+    message = "Сессия устарела. Обновите страницу и попробуйте снова."
+    if wants_json:
+        return jsonify({"ok": False, "error": message}), 400
+    flash(message, "danger")
+    return None
+
+
 @bp.route("/register", methods=("GET", "POST"))
 def register():
     """Create a new user with Discord-style name#discriminator."""
     if request.method == "POST":
+        wants_json = _wants_json()
+        if not validate_csrf():
+            err = _csrf_error_response(wants_json=wants_json)
+            if err is not None:
+                return err
+            return render_template("auth/register.html")
+
         name = (request.form.get("name") or "").strip()
         password = request.form.get("password") or ""
         error: str | None = None
@@ -72,18 +89,14 @@ def register():
             )
             login_user(user_id)
             tag = format_tag(name, discriminator)
-            # One-shot payload for the success page (avoid Chrome saving name without #NNNN
-            # from a classical form navigation).
-            session[_PENDING_CREDENTIALS_KEY] = {
-                "tag": tag,
-                "password": password,
-            }
+            # Tag only — password stays in the browser for PasswordCredential.store.
+            session[_PENDING_TAG_KEY] = tag
             success_url = url_for("auth.register_success")
-            if _wants_json():
+            if wants_json:
                 return jsonify({"ok": True, "redirect": success_url, "tag": tag})
             return redirect(success_url)
 
-        if _wants_json():
+        if wants_json:
             return jsonify({"ok": False, "error": error or "Ошибка регистрации."}), 400
         flash(error or "Ошибка регистрации.", "danger")
 
@@ -92,22 +105,22 @@ def register():
 
 @bp.route("/register/success")
 def register_success():
-    """Show full tag + password once so the password manager can store name#NNNN."""
-    pending = session.pop(_PENDING_CREDENTIALS_KEY, None)
-    if not isinstance(pending, dict) or "tag" not in pending or "password" not in pending:
+    """Show the assigned full login tag (no password in HTML or session)."""
+    tag = session.pop(_PENDING_TAG_KEY, None)
+    if not isinstance(tag, str) or not tag:
         flash("Сначала создайте аккаунт.", "info")
         return redirect(url_for("auth.register"))
-    return render_template(
-        "auth/register_success.html",
-        tag=pending["tag"],
-        password=pending["password"],
-    )
+    return render_template("auth/register_success.html", tag=tag)
 
 
 @bp.route("/login", methods=("GET", "POST"))
 def login():
     """Log in with name#discriminator and password."""
     if request.method == "POST":
+        if not validate_csrf():
+            flash("Сессия устарела. Обновите страницу и попробуйте снова.", "danger")
+            return render_template("auth/login.html")
+
         tag = (request.form.get("tag") or "").strip()
         password = request.form.get("password") or ""
         parsed = parse_tag(tag)

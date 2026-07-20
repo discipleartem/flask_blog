@@ -12,8 +12,8 @@ class AuthTests(BlogTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"bob#", response.data)
         self.assertIn(b'autocomplete="username"', response.data)
-        self.assertIn(b'autocomplete="new-password"', response.data)
-        self.assertIn(b'value="secret1"', response.data)
+        self.assertNotIn(b'value="secret1"', response.data)
+        self.assertNotIn(b"PasswordCredential", response.data)
 
         self.client.get("/auth/logout", follow_redirects=True)
         tag = self.user_tag("bob")
@@ -26,13 +26,15 @@ class AuthTests(BlogTestCase):
         self.assertIn(b'autocomplete="nickname"', response.data)
         self.assertNotIn(b'autocomplete="username"', response.data)
 
-    def test_register_json_redirects_to_success(self) -> None:
+    def test_register_json_stores_tag_only_server_side(self) -> None:
+        token = self.csrf_token()
         response = self.client.post(
             "/auth/register",
-            data={"name": "jsonbob", "password": "secret1"},
+            data={"name": "jsonbob", "password": "secret1", "csrf_token": token},
             headers={
                 "Accept": "application/json",
                 "X-Requested-With": "XMLHttpRequest",
+                "X-CSRF-Token": token,
             },
         )
         self.assertEqual(response.status_code, 200)
@@ -40,11 +42,22 @@ class AuthTests(BlogTestCase):
         self.assertTrue(payload["ok"])
         self.assertIn("/auth/register/success", payload["redirect"])
         self.assertTrue(payload["tag"].startswith("jsonbob#"))
+        self.assertNotIn("password", payload)
 
         success = self.client.get(payload["redirect"])
         self.assertEqual(success.status_code, 200)
         self.assertIn(payload["tag"].encode(), success.data)
-        self.assertIn(b"PasswordCredential", success.data)
+        self.assertNotIn(b'type="password"', success.data)
+        self.assertNotIn(b"PasswordCredential", success.data)
+
+    def test_register_rejects_missing_csrf(self) -> None:
+        response = self.client.post(
+            "/auth/register",
+            data={"name": "nocsrf", "password": "secret1"},
+            headers={"Accept": "application/json", "X-Requested-With": "XMLHttpRequest"},
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(response.get_json()["ok"])
 
     def test_reserved_admin_name(self) -> None:
         response = self.register("admin", "secret1")
