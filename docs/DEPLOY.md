@@ -102,15 +102,17 @@ SECRET_KEY=generate-a-long-random-string
 ADMIN_PASSWORD=your-strong-admin-password
 DATABASE=/home/YOUR_USERNAME/flask_blog/instance/blog.sqlite3
 DEPLOY_SECRET=generate-another-long-random-string
+SESSION_COOKIE_SECURE=1
 ```
 
 
-| Переменная       | Назначение                                                                              |
-| ---------------- | --------------------------------------------------------------------------------------- |
-| `SECRET_KEY`     | Подпись session cookie Flask                                                            |
-| `ADMIN_PASSWORD` | Пароль `admin#0001` при seed БД                                                         |
-| `DATABASE`       | Абсолютный путь к SQLite                                                                |
-| `DEPLOY_SECRET`  | Bearer-токен для `POST /internal/deploy` (auto-deploy). Пусто = endpoint выключен (404) |
+| Переменная              | Назначение                                                                              |
+| ----------------------- | --------------------------------------------------------------------------------------- |
+| `SECRET_KEY`            | Подпись session cookie Flask                                                            |
+| `ADMIN_PASSWORD`        | Пароль `admin#0001` при seed БД                                                         |
+| `DATABASE`              | Абсолютный путь к SQLite                                                                |
+| `DEPLOY_SECRET`         | Bearer-токен для `POST /internal/deploy` (auto-deploy). Пусто = endpoint выключен (404) |
+| `SESSION_COOKIE_SECURE` | `1` на HTTPS (PythonAnywhere); `0`/пусто для локального `http://`                       |
 
 
 `load_dotenv` читает `.env` при старте (`app/config.py`). Уже экспортированные переменные окружения имеют приоритет над `.env`.
