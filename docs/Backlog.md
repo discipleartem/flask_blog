@@ -6,7 +6,7 @@
 
 ## CI + gate для deploy (PythonAnywhere Beginner)
 
-**Статус:** in_review
+**Статус:** done
 **GitHub:** #41
 
 ### Проблема
