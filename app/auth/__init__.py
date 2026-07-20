@@ -52,8 +52,11 @@ def register():
                 (name, discriminator, generate_password_hash(password)),
             )
             login_user(user_id)
-            flash(f"Добро пожаловать, {format_tag(name, discriminator)}!", "success")
-            return redirect(url_for("posts.index"))
+            return render_template(
+                "auth/register_success.html",
+                tag=format_tag(name, discriminator),
+                password=password,
+            )
 
         flash(error or "Ошибка регистрации.", "danger")
 
