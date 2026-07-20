@@ -26,11 +26,24 @@ Custom CSS (`app/static/css/app.css`) и JS (`theme.js`) — **только ис
 6. Два экземпляра кнопки темы в разметке; JS вешается на все `.theme-toggle` (`app/static/js/theme.js`).
 7. В шаблонах доступен `current_year` (context processor в `create_app`) — для футера.
 
-## IronBee DevTools (браузер и проверка)
+## Git / ветки
 
-Для UI/UX и smoke-проверок агент использует **IronBee DevTools**, не встроенный Cursor Browser.
+Integration: `dev`. Релиз: `main`. Task-ветки: `feat/…`, `docs/…`, …
 
-Конфиг: [`.vscode/settings.json`](../.vscode/settings.json)
+После merge PR **не удалять** ветку на GitHub без архива: переименовать в `merged/<имя>` локально и на `origin` (канон для агента: [`.cursor/rules/git-merged-branches.mdc`](../.cursor/rules/git-merged-branches.mdc)).
+
+## Проверка
+
+**Автоматически (агент / CI):** только unit-тесты:
+
+```bash
+source .venv/bin/activate
+python -m unittest discover -s tests -v
+```
+
+**Вручную в браузере** (по необходимости, в т.ч. auth / password manager): регистрация → **Save** на ключике с полным `name#NNNN` → logout → login через предложение браузера (autofill). Агент не гоняет Playwright/CDP-скрипты для этого.
+
+## IronBee DevTools (опционально)
 
 | Настройка | Значение | Смысл |
 |-----------|----------|--------|
@@ -63,7 +76,7 @@ google-chrome \
 Опционально можно держать обёртку в локальном `scripts/dev-chrome.sh` (игнорируется git).
 
 3. В Cursor: **Developer: Reload Window** (чтобы IronBee подхватил settings).
-4. Агент ходит в это окно через IronBee (`navigation_go-to`, viewport resize для mobile/tablet).
+4. По желанию — ручная проверка UI через IronBee или обычный Chrome (см. **Проверка** выше).
 
 На Ubuntu с AppArmor (`apparmor_restrict_unprivileged_userns`) Playwright часто не может сам запустить Chromium — CDP к системному Chrome обходит это.
 

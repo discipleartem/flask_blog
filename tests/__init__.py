@@ -30,18 +30,28 @@ class BlogTestCase(unittest.TestCase):
         self.app_context.pop()
         self._tmpdir.cleanup()
 
-    def register(self, name: str = "alice", password: str = "secret1") -> str:
-        """Register a user and return the flash/tag from redirect chain."""
+    def csrf_token(self) -> str:
+        """Fetch a page to seed CSRF, then read the token from the session."""
+        self.client.get("/auth/login")
+        with self.client.session_transaction() as sess:
+            token = sess.get("_csrf_token")
+        assert isinstance(token, str) and token
+        return token
+
+    def register(self, name: str = "alice", password: str = "secret1"):
+        """Register a user and return the final response after redirects."""
+        token = self.csrf_token()
         return self.client.post(
             "/auth/register",
-            data={"name": name, "password": password},
+            data={"name": name, "password": password, "csrf_token": token},
             follow_redirects=True,
         )
 
     def login(self, tag: str, password: str = "secret1"):
+        token = self.csrf_token()
         return self.client.post(
             "/auth/login",
-            data={"tag": tag, "password": password},
+            data={"tag": tag, "password": password, "csrf_token": token},
             follow_redirects=True,
         )
 

@@ -25,6 +25,11 @@ class Config:
     SCHEMA_PATH = BASE_DIR / "schema.sql"
     MIGRATIONS_DIR = BASE_DIR / "migrations"
 
+    # Session cookie hardening (SECURE=1 behind HTTPS in production).
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = "Lax"
+    SESSION_COOKIE_SECURE = os.environ.get("SESSION_COOKIE_SECURE", "0") == "1"
+
 
 class TestConfig(Config):
     """Isolated in-memory / temp DB for unit tests."""
@@ -33,3 +38,4 @@ class TestConfig(Config):
     SECRET_KEY = "test-secret"
     ADMIN_PASSWORD = "admin-test"
     DEPLOY_SECRET = "test-deploy-token"
+    SESSION_COOKIE_SECURE = False

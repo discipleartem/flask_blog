@@ -1,0 +1,30 @@
+---
+description: Статусы задач в docs/Backlog.md и GitHub Project
+alwaysApply: true
+---
+
+# Backlog status
+
+Канон: [`docs/Backlog.md`](../../docs/Backlog.md) · sync: skill `backlog-github-projects-sync` · map: [`.github/backlog.json`](../../.github/backlog.json).
+
+Ключи `**Статус:**` → колонка Project:
+
+| Ключ | Project |
+|------|---------|
+| `open` | Backlog |
+| `in_progress` | In progress |
+| `in_review` | In review |
+| `ready` | Ready |
+| `done` | Done |
+
+## Когда менять (агент)
+
+| Событие | Статус |
+|---------|--------|
+| Старт реализации задачи из backlog (сразу после git-старта / взятия в работу) | `in_progress` |
+| Создание PR task-ветки → `dev` (integration) | `in_review` |
+| Merge PR в `dev` (или явный запрос пользователя) | `done` |
+
+- Менять статус **в том же коммите** (или сразу следующим), что и событие; затем `python ~/.cursor/skills/backlog-github-projects-sync/scripts/sync_backlog.py`.
+- **Не** ставить `done` только потому, что реализация на ветке закончена — до PR остаётся `in_progress`.
+- Задачи без записи в `Backlog.md` — правило не применять.

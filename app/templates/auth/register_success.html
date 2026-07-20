@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Аккаунт создан · Flask Blog{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-sm-10 col-md-7 col-lg-5 col-xl-4">
+    <h1 class="h3 mb-4 text-center">Аккаунт создан</h1>
+    <div class="card border shadow-sm">
+      <div class="card-body p-3 p-md-4">
+        <p class="mb-3">Ваш полный логин (сохраните его в менеджере паролей браузера):</p>
+        <div class="mb-4">
+          <label class="form-label" for="tag">Логин</label>
+          <input class="form-control" type="text" id="tag" name="username"
+                 value="{{ tag }}" readonly autocomplete="username">
+        </div>
+        <div class="d-grid">
+          <a class="btn btn-dark" href="{{ url_for('posts.index') }}">Перейти к блогу</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

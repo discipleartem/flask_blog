@@ -102,18 +102,28 @@ SECRET_KEY=generate-a-long-random-string
 ADMIN_PASSWORD=your-strong-admin-password
 DATABASE=/home/YOUR_USERNAME/flask_blog/instance/blog.sqlite3
 DEPLOY_SECRET=generate-another-long-random-string
+SESSION_COOKIE_SECURE=1
 ```
 
 
-| Переменная       | Назначение                                                                              |
-| ---------------- | --------------------------------------------------------------------------------------- |
-| `SECRET_KEY`     | Подпись session cookie Flask                                                            |
-| `ADMIN_PASSWORD` | Пароль `admin#0001` при seed БД                                                         |
-| `DATABASE`       | Абсолютный путь к SQLite                                                                |
-| `DEPLOY_SECRET`  | Bearer-токен для `POST /internal/deploy` (auto-deploy). Пусто = endpoint выключен (404) |
+| Переменная              | Назначение                                                                              |
+| ----------------------- | --------------------------------------------------------------------------------------- |
+| `SECRET_KEY`            | Подпись session cookie Flask                                                            |
+| `ADMIN_PASSWORD`        | Пароль `admin#0001` при seed БД                                                         |
+| `DATABASE`              | Абсолютный путь к SQLite                                                                |
+| `DEPLOY_SECRET`         | Bearer-токен для `POST /internal/deploy` (auto-deploy). Пусто = endpoint выключен (404) |
+| `SESSION_COOKIE_SECURE` | `1` на HTTPS (PythonAnywhere); `0`/пусто для локального `http://`                       |
 
 
-`load_dotenv` читает `.env` при старте (`app/config.py`). Уже экспортированные переменные окружения имеют приоритет над `.env`.
+`load_dotenv` читает `.env` при старте (`app/config.py`). По умолчанию **python-dotenv не перезаписывает** переменные, которые уже есть в окружении процесса (`os.environ`).
+
+| Ситуация | Что получит приложение |
+|----------|------------------------|
+| Переменная задана только в `.env` | Значение из `.env` |
+| Переменная уже есть в окружении (export, WSGI, systemd, панель PA «Environment variables») **и** есть в `.env` | Значение из **окружения**; строка в `.env` для этого ключа **игнорируется** |
+| Переменной нет ни в окружении, ни в `.env` | Дефолт из `Config` в `app/config.py` (например `SECRET_KEY=dev-change-me`) |
+
+Практически: если на сервере один раз экспортировали `SECRET_KEY=old`, а в `.env` написали новый ключ — приложение продолжит брать `old`, пока не уберёте переменную из окружения или не перезапустите процесс без неё. Менять секреты удобнее **только в `.env`** (и не дублировать те же имена в окружении WSGI/shell), либо наоборот — только в панели окружения, без копии в `.env`.
 
 Сгенерировать секреты (в Bash на PA или локально):
 
