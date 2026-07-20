@@ -34,12 +34,16 @@ Integration: `dev`. Релиз: `main`. Task-ветки: `feat/…`, `docs/…`,
 
 ## Проверка
 
-**Автоматически (агент / CI):** только unit-тесты:
+**Автоматически (агент / CI):** только unit-тесты.
+
+Локально:
 
 ```bash
 source .venv/bin/activate
 python -m unittest discover -s tests -v
 ```
+
+В GitHub Actions: [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) на `push`/`pull_request` в `main` и `dev`. Деплой на PythonAnywhere ([`deploy.yml`](../.github/workflows/deploy.yml)) на `main` идёт только после успешного того же прогона.
 
 **Вручную в браузере** (по необходимости, в т.ч. auth / password manager): регистрация → **Save** на ключике с полным `name#NNNN` → logout → login через предложение браузера (autofill). Агент не гоняет Playwright/CDP-скрипты для этого.
 
@@ -107,7 +111,7 @@ app/
 migrations/        # numbered *.sql
 schema.sql         # source of truth
 .env.example       # шаблон секретов (реальный .env в .gitignore)
-.github/workflows/ # deploy.yml — push main → PA
+.github/workflows/ # ci.yml (unittest); deploy.yml — push main → PA (после test)
 .vscode/
   settings.json    # IronBee CDP, Python interpreter, terminal+venv
   launch.json      # debugpy → flask run
