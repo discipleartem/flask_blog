@@ -26,6 +26,26 @@ class AuthTests(BlogTestCase):
         self.assertIn(b'autocomplete="nickname"', response.data)
         self.assertNotIn(b'autocomplete="username"', response.data)
 
+    def test_register_json_redirects_to_success(self) -> None:
+        response = self.client.post(
+            "/auth/register",
+            data={"name": "jsonbob", "password": "secret1"},
+            headers={
+                "Accept": "application/json",
+                "X-Requested-With": "XMLHttpRequest",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        payload = response.get_json()
+        self.assertTrue(payload["ok"])
+        self.assertIn("/auth/register/success", payload["redirect"])
+        self.assertTrue(payload["tag"].startswith("jsonbob#"))
+
+        success = self.client.get(payload["redirect"])
+        self.assertEqual(success.status_code, 200)
+        self.assertIn(payload["tag"].encode(), success.data)
+        self.assertIn(b"PasswordCredential", success.data)
+
     def test_reserved_admin_name(self) -> None:
         response = self.register("admin", "secret1")
         self.assertIn("зарезервировано".encode(), response.data)

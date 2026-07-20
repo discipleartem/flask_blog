@@ -2,7 +2,16 @@
 
 from __future__ import annotations
 
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask import (
+    Blueprint,
+    flash,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+)
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from app.auth.helpers import (
@@ -16,6 +25,16 @@ from app.auth.helpers import (
 from app.db import execute, query_one
 
 bp = Blueprint("auth", __name__, url_prefix="/auth")
+
+_PENDING_CREDENTIALS_KEY = "_pending_register_credentials"
+
+
+def _wants_json() -> bool:
+    """True when the client asks for a JSON register response."""
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return True
+    best = request.accept_mimetypes.best_match(("application/json", "text/html"))
+    return best == "application/json"
 
 
 @bp.route("/register", methods=("GET", "POST"))
@@ -52,15 +71,37 @@ def register():
                 (name, discriminator, generate_password_hash(password)),
             )
             login_user(user_id)
-            return render_template(
-                "auth/register_success.html",
-                tag=format_tag(name, discriminator),
-                password=password,
-            )
+            tag = format_tag(name, discriminator)
+            # One-shot payload for the success page (avoid Chrome saving name without #NNNN
+            # from a classical form navigation).
+            session[_PENDING_CREDENTIALS_KEY] = {
+                "tag": tag,
+                "password": password,
+            }
+            success_url = url_for("auth.register_success")
+            if _wants_json():
+                return jsonify({"ok": True, "redirect": success_url, "tag": tag})
+            return redirect(success_url)
 
+        if _wants_json():
+            return jsonify({"ok": False, "error": error or "Ошибка регистрации."}), 400
         flash(error or "Ошибка регистрации.", "danger")
 
     return render_template("auth/register.html")
+
+
+@bp.route("/register/success")
+def register_success():
+    """Show full tag + password once so the password manager can store name#NNNN."""
+    pending = session.pop(_PENDING_CREDENTIALS_KEY, None)
+    if not isinstance(pending, dict) or "tag" not in pending or "password" not in pending:
+        flash("Сначала создайте аккаунт.", "info")
+        return redirect(url_for("auth.register"))
+    return render_template(
+        "auth/register_success.html",
+        tag=pending["tag"],
+        password=pending["password"],
+    )
 
 
 @bp.route("/login", methods=("GET", "POST"))
