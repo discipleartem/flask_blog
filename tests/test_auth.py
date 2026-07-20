@@ -59,6 +59,18 @@ class AuthTests(BlogTestCase):
         self.assertEqual(response.status_code, 400)
         self.assertFalse(response.get_json()["ok"])
 
+    def test_login_accepts_username_field_name(self) -> None:
+        self.register("fieldname", "secret1")
+        tag = self.user_tag("fieldname")
+        self.client.get("/auth/logout", follow_redirects=True)
+        token = self.csrf_token()
+        response = self.client.post(
+            "/auth/login",
+            data={"username": tag, "password": "secret1", "csrf_token": token},
+            follow_redirects=True,
+        )
+        self.assertIn(tag.encode(), response.data)
+
     def test_reserved_admin_name(self) -> None:
         response = self.register("admin", "secret1")
         self.assertIn("зарезервировано".encode(), response.data)

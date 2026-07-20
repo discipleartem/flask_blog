@@ -121,7 +121,7 @@ def login():
             flash("Сессия устарела. Обновите страницу и попробуйте снова.", "danger")
             return render_template("auth/login.html")
 
-        tag = (request.form.get("tag") or "").strip()
+        tag = (request.form.get("tag") or request.form.get("username") or "").strip()
         password = request.form.get("password") or ""
         parsed = parse_tag(tag)
         error: str | None = None

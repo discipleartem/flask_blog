@@ -75,6 +75,13 @@ npx -y playwright@1.60.0 install chromium
 
 Mobile/tablet: `interaction_resize-viewport` в том же окне Chrome.
 
+### Проверка auth / password manager (user case)
+
+1. Регистрация → на success сохранить учётку в Chrome (**Save** на ключике) с полным `name#NNNN`.
+2. Logout → `/auth/login`.
+3. **Вход только через autofill:** клик по полю логина → выбрать предложение браузера (не вводить с клавиатуры). Поле логина: `name="username"`, `autocomplete="username"`.
+4. Локальный сценарий (CDP + пауза на ключик): `scripts/verify-auth-pm-flow.py` (каталог `scripts/` в `.gitignore`).
+
 ## Структура
 
 ```
