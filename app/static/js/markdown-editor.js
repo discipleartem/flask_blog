@@ -63,7 +63,7 @@
       '<label class="form-label small" for="md-code-lang-custom">Или укажите язык</label>' +
       '<input type="text" class="form-control form-control-sm mb-2" id="md-code-lang-custom" ' +
       'placeholder="например: sql, bash, rust" value="python" autocomplete="off">' +
-      '<p class="form-text small mb-3 mb-0">Отступы пробелами: Python — 4;<br>HTML / JS / CSS — 2.</p>' +
+      '<p class="form-text small mb-3 mb-0">Отступы пробелами: Python — 4;<br>HTML / JS / CSS — 2.<br>При вставке выделенного кода отступы нормализуются.</p>' +
       '<div class="d-flex justify-content-end gap-2">' +
       '<button type="button" class="btn btn-outline-secondary btn-sm" data-action="cancel">Отмена</button>' +
       '<button type="button" class="btn btn-dark btn-sm" data-action="insert">Вставить</button>' +
@@ -145,7 +145,15 @@
     var selected = cm.getSelection();
     var indent = CODE_INDENT[lang] || 4;
     var pad = new Array(indent + 1).join(" ");
-    var body = selected || pad;
+    var body;
+    if (selected) {
+      body =
+        window.FlaskBlogSyntax && window.FlaskBlogSyntax.reindent
+          ? window.FlaskBlogSyntax.reindent(selected, lang)
+          : selected;
+    } else {
+      body = pad;
+    }
     var block = "```" + lang + "\n" + body + "\n```";
     cm.replaceSelection(block);
     if (!selected) {

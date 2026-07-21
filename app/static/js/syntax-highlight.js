@@ -213,9 +213,33 @@
     return INDENT_SPACES[kind] || INDENT_SPACES.generic;
   }
 
+  function gcd(a, b) {
+    var x = Math.abs(a);
+    var y = Math.abs(b);
+    while (y) {
+      var t = y;
+      y = x % y;
+      x = t;
+    }
+    return x;
+  }
+
+  function leadingSpaceCount(line) {
+    var m = /^( *)/.exec(line);
+    return m ? m[1].length : 0;
+  }
+
+  function isFormattedLang(kind) {
+    return (
+      kind === "python" ||
+      kind === "html" ||
+      kind === "javascript" ||
+      kind === "css"
+    );
+  }
+
   /**
    * Табы → пробелы по ширине отступа языка (PEP 8 / распространённый стиль web).
-   * Уже стоящие пробелы не трогаем.
    */
   function expandTabsToSpaces(source, tabWidth) {
     var width = tabWidth > 0 ? tabWidth : 4;
@@ -242,10 +266,87 @@
     return out.join("\n");
   }
 
+  /**
+   * Автоформат отступов для python/html/js/css:
+   * dedent → уровни по НОД текущих отступов → целевая ширина (4 или 2).
+   */
+  function reindentSource(source, lang) {
+    var kind = normalizeLang(lang);
+    var target = indentWidthFor(kind);
+    var text = expandTabsToSpaces(source, target);
+
+    if (!isFormattedLang(kind)) {
+      return text;
+    }
+
+    var lines = text.split("\n");
+    var counts = [];
+    var i;
+    for (i = 0; i < lines.length; i++) {
+      if (lines[i].trim() === "") {
+        continue;
+      }
+      counts.push(leadingSpaceCount(lines[i]));
+    }
+    if (!counts.length) {
+      return text;
+    }
+
+    var minIndent = Math.min.apply(null, counts);
+    var relatives = [];
+    for (i = 0; i < counts.length; i++) {
+      relatives.push(counts[i] - minIndent);
+    }
+
+    var unit = 0;
+    for (i = 0; i < relatives.length; i++) {
+      if (relatives[i] > 0) {
+        unit = unit === 0 ? relatives[i] : gcd(unit, relatives[i]);
+      }
+    }
+    if (unit === 0) {
+      unit = target;
+    } else if (unit === 1) {
+      var all2 = true;
+      var all4 = true;
+      for (i = 0; i < relatives.length; i++) {
+        if (relatives[i] % 2 !== 0) {
+          all2 = false;
+        }
+        if (relatives[i] % 4 !== 0) {
+          all4 = false;
+        }
+      }
+      if (all4) {
+        unit = 4;
+      } else if (all2) {
+        unit = 2;
+      }
+    }
+
+    var out = [];
+    for (i = 0; i < lines.length; i++) {
+      var line = lines[i];
+      if (line.trim() === "") {
+        out.push("");
+        continue;
+      }
+      var lead = leadingSpaceCount(line);
+      var rel = lead - minIndent;
+      var levels =
+        unit === 1 ? Math.round(rel / target) : Math.round(rel / unit);
+      if (levels < 0) {
+        levels = 0;
+      }
+      var content = line.replace(/^ */, "");
+      out.push(new Array(levels * target + 1).join(" ") + content);
+    }
+    return out.join("\n");
+  }
+
   function highlightSource(source, lang) {
     var kind = normalizeLang(lang);
-    var width = indentWidthFor(kind);
-    var text = expandTabsToSpaces(source, width);
+    var text = reindentSource(source, kind);
 
     if (kind === "html") {
       return highlightHtml(text);
@@ -292,10 +393,11 @@
 
   function highlightRoot(root) {
     var scope = root && root.querySelectorAll ? root : document;
-    var nodes = scope.querySelectorAll("pre code[class*='language-'], pre code:not([class])");
+    var nodes = scope.querySelectorAll(
+      "pre code[class*='language-'], pre code:not([class])"
+    );
     for (var i = 0; i < nodes.length; i++) {
       var el = nodes[i];
-      // Без class — тоже подсветим универсально
       if (!el.className) {
         el.className = "language-generic";
       }
@@ -307,6 +409,8 @@
     highlight: highlightRoot,
     highlightElement: highlightCodeElement,
     highlightSource: highlightSource,
+    reindent: reindentSource,
+    indentWidth: indentWidthFor,
   };
 
   if (document.readyState === "loading") {
