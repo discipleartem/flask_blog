@@ -14,3 +14,8 @@ alwaysApply: true
 - Browser: **только** IronBee; запрещены Cursor built-in browser и другие browser MCP/skills.
 - Backend: минимум **один** evidence path — HTTP **или** log **или** SQLite.
 - Multi-step (>2–3 вызова) — предпочитать `execute` / `callTool` batch.
+
+<!--
+NOTE: IronBee VS Code extension may regenerate this file on Reload Window.
+Canonical short policy also lives in 00-project.mdc §Verify. Prefer MCP schemas for tool catalogs.
+-->

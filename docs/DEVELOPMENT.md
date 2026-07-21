@@ -106,7 +106,8 @@ google-chrome \
 
 Опционально можно держать обёртку в локальном `scripts/dev-chrome.sh` (игнорируется git).
 
-3. В Cursor: **Developer: Reload Window** (чтобы IronBee подхватил settings).
+3. В Cursor: **Developer: Reload Window** (чтобы IronBee подхватил settings).  
+   Расширение может **перезаписать** `.cursor/rules/ironbee-devtools-use.mdc` полным каталогом tools — канон policy для агента в [`00-project.mdc`](../.cursor/rules/00-project.mdc) §Verify; how-to — в MCP. При раздувании файла вернуть slim из git (`git checkout -- .cursor/rules/ironbee-devtools-use.mdc`) или оставить как есть: агент опирается на `00-project`.
 4. По желанию — ручная проверка UI через IronBee или обычный Chrome (см. **Проверка** выше).
 
 На Ubuntu с AppArmor (`apparmor_restrict_unprivileged_userns`) Playwright часто не может сам запустить Chromium — CDP к системному Chrome обходит это.

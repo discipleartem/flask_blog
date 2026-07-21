@@ -22,6 +22,8 @@ alwaysApply: true
 
 **Конец реализации:** Read + выполнить skill `flask-blog-docs-after-task` (до «готово» / push / PR); страховка — hook `stop`. Skip — критерии в skill.
 
+**Verify (IronBee):** один раз в конце против running app; browser — только IronBee MCP; backend — HTTP или log или SQLite; skip для docs/CI. Каталоги tools — в MCP, не в rules. (Файл `ironbee-devtools-use.mdc` расширение может перезаписать при Reload — policy выше остаётся каноном.)
+
 ## Архитектурные запреты
 
 - **Другие СУБД** (Postgres, MySQL, …) — не подключать без явного запроса; БД проекта — **SQLite3**
