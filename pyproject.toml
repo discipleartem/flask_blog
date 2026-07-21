@@ -13,6 +13,8 @@ authors = [{ name = "Artem" }]
 dependencies = [
     "Flask==3.0.3",
     "python-dotenv==1.2.2",
+    "Markdown==3.10.2",
+    "nh3==0.3.6",
 ]
 
 [project.optional-dependencies]

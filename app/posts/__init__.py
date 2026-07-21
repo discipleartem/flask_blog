@@ -9,6 +9,9 @@ from app.db import execute, query_all, query_one
 
 bp = Blueprint("posts", __name__)
 
+# Формы Post всегда сохраняют Markdown (клиентский body_format игнорируется).
+_BODY_FORMAT = "markdown"
+
 
 @bp.route("/")
 def index():
@@ -57,17 +60,17 @@ def create():
     """Create a post."""
     if request.method == "POST":
         title = (request.form.get("title") or "").strip()
-        body = (request.form.get("body") or "").strip()
-        error = _validate_post(title, body)
+        body_source = (request.form.get("body_source") or "").strip()
+        error = _validate_post(title, body_source)
         if error:
             flash(error, "danger")
         else:
             post_id = execute(
                 """
-                INSERT INTO posts (title, body, author_id)
-                VALUES (?, ?, ?)
+                INSERT INTO posts (title, body_source, body_format, author_id)
+                VALUES (?, ?, ?, ?)
                 """,
-                (title, body, g.user["id"]),
+                (title, body_source, _BODY_FORMAT, g.user["id"]),
             )
             flash("Статья опубликована.", "success")
             return redirect(url_for("posts.detail", post_id=post_id))
@@ -86,18 +89,19 @@ def edit(post_id: int):
 
     if request.method == "POST":
         title = (request.form.get("title") or "").strip()
-        body = (request.form.get("body") or "").strip()
-        error = _validate_post(title, body)
+        body_source = (request.form.get("body_source") or "").strip()
+        error = _validate_post(title, body_source)
         if error:
             flash(error, "danger")
         else:
             execute(
                 """
                 UPDATE posts
-                SET title = ?, body = ?, updated_at = datetime('now')
+                SET title = ?, body_source = ?, body_format = ?,
+                    updated_at = datetime('now')
                 WHERE id = ?
                 """,
-                (title, body, post_id),
+                (title, body_source, _BODY_FORMAT, post_id),
             )
             flash("Статья обновлена.", "success")
             return redirect(url_for("posts.detail", post_id=post_id))
@@ -119,11 +123,11 @@ def delete(post_id: int):
     return redirect(url_for("posts.index"))
 
 
-def _validate_post(title: str, body: str) -> str | None:
+def _validate_post(title: str, body_source: str) -> str | None:
     if not title:
         return "Укажите заголовок."
     if len(title) > 200:
         return "Заголовок: максимум 200 символов."
-    if not body:
+    if not body_source:
         return "Текст статьи не может быть пустым."
     return None
