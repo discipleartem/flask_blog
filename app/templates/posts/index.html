@@ -4,15 +4,15 @@
 <div class="row justify-content-center">
   <div class="col-12 col-xl-10 col-xxl-9">
 
-    <section class="hero rounded-3 mb-4 mb-md-5">
+    <section class="hero mb-4 mb-md-5">
       <h1 class="hero-brand">Flask Blog</h1>
-      <p class="hero-lead mb-4">Короткие тексты. Чистый монохром. Без лишнего шума.</p>
+      <p class="hero-lead mb-4">Тексты без шума. Удобное чтение днём и ночью.</p>
       <div class="d-flex flex-wrap gap-2">
         {% if g.user %}
-          <a class="btn btn-dark" href="{{ url_for('posts.create') }}">Написать</a>
+          <a class="btn btn-dark btn-lg" href="{{ url_for('posts.create') }}">Написать</a>
         {% else %}
-          <a class="btn btn-dark" href="{{ url_for('auth.login') }}">Войти</a>
-          <a class="btn btn-outline-secondary" href="{{ url_for('auth.register') }}">Регистрация</a>
+          <a class="btn btn-dark btn-lg" href="{{ url_for('auth.login') }}">Войти</a>
+          <a class="btn btn-outline-secondary btn-lg" href="{{ url_for('auth.register') }}">Регистрация</a>
         {% endif %}
       </div>
     </section>
@@ -22,7 +22,7 @@
       {% if posts %}
         <div class="list-group list-group-flush border-top">
           {% for post in posts %}
-          <a class="list-group-item list-group-item-action bg-transparent px-0 py-3 border-bottom"
+          <a class="list-group-item list-group-item-action bg-transparent px-0 py-3 py-md-4 border-bottom"
              href="{{ url_for('posts.detail', post_id=post['id']) }}">
             <div class="title-link mb-1">{{ post['title'] }}</div>
             <div class="text-secondary small">
@@ -33,7 +33,7 @@
           {% endfor %}
         </div>
       {% else %}
-        <p class="text-secondary py-4 mb-0">Пока нет статей. Будьте первым.</p>
+        <p class="empty-state mb-0">Пока нет статей. Будьте первым.</p>
       {% endif %}
     </section>
 
