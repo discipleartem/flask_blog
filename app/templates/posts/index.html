@@ -37,13 +37,10 @@
               {% if excerpt %}
               <p class="feed-excerpt text-secondary mb-3">{{ excerpt }}</p>
               {% endif %}
-              <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 text-secondary small">
-                <div class="d-flex flex-wrap align-items-center gap-2">
-                  <span class="user-tag">{{ post['author_name'] }}#{{ post['author_disc'] }}</span>
-                  <span aria-hidden="true">·</span>
-                  <time datetime="{{ post['created_at'] }}">{{ post['created_at'] }}</time>
-                </div>
-                <span class="feed-more">Читать</span>
+              <div class="d-flex flex-wrap align-items-center gap-2 text-secondary small">
+                <span class="user-tag">{{ post['author_name'] }}#{{ post['author_disc'] }}</span>
+                <span aria-hidden="true">·</span>
+                <time datetime="{{ post['created_at'] }}">{{ post['created_at'] }}</time>
               </div>
             </div>
           </a>
