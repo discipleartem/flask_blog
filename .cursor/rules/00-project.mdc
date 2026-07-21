@@ -23,7 +23,7 @@ alwaysApply: true
 **Конец реализации:** Read + выполнить skill `flask-blog-docs-after-task` (до «готово» / push / PR); страховка — hook `stop`. Skip — критерии в skill.
 
 **Verify (IronBee):** один раз в конце против running app; browser — только IronBee MCP; backend — HTTP или log или SQLite; skip для docs/CI. How-to tools — в MCP.  
-Файл `.cursor/rules/ironbee-devtools-use.mdc` пишет расширение IronBee при activate/Reload (не править, в `.gitignore`); policy выше — канон проекта.
+`.cursor/rules/ironbee-devtools-use.mdc` — **не трогать** (пишет расширение IronBee; в `.gitignore`). Policy выше — канон проекта.
 
 ## Архитектурные запреты
 
