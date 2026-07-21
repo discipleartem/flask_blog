@@ -4,6 +4,7 @@
 
 Версия Flask зафиксирована под ограничения [PythonAnywhere](docs/DEPLOY.md): **Python 3.12 + Flask 3.0.3**.
 
+[![Version 0.3.0](https://img.shields.io/badge/version-0.3.0-blue.svg)](docs/CHANGELOG.md)
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/)
 [![Flask 3.0.3](https://img.shields.io/badge/flask-3.0.3-black.svg)](https://flask.palletsprojects.com/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
@@ -13,12 +14,13 @@
 
 ## Возможности
 
-- Регистрация / вход без email: `name#discriminator`
+- Регистрация / вход без email: `name#discriminator` (успех регистрации + password manager)
 - CRUD статей и плоских комментариев (автор — свои; admin — все)
+- Markdown-редактор (EasyMDE), серверный рендер и preview; подсветка кода на витрине
 - Один admin (`admin#0001`, имя `admin` зарезервировано)
 - Светлая / тёмная тема (переключатель солнце / луна)
 - Чистый SQL + `schema.sql` + самописные миграции
-- Деплой на [PythonAnywhere](docs/DEPLOY.md)
+- CI (GitHub Actions) и авто-деплой на [PythonAnywhere](docs/DEPLOY.md)
 
 ## Стек
 
