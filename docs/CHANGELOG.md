@@ -30,6 +30,7 @@
 
 ### Docs
 
+- Backlog #44 (Markdown-редактор) закрыт после merge в `dev` (#45).
 - `DEVELOPMENT.md`: контент Markdown (рендер, preview, подсветка, копирование кода), структура `content_render` / static JS.
 - `SESSION_COOKIE_SECURE` для HTTPS-деплоя (`.env.example`, `DEPLOY.md`).
 - Уточнён приоритет окружения над `.env` при `load_dotenv` (уже заданные переменные процесса не перезаписываются).
