@@ -2,15 +2,32 @@
 
 from __future__ import annotations
 
-from flask import Blueprint, abort, flash, g, redirect, render_template, request, url_for
+from flask import Blueprint, abort, flash, g, jsonify, redirect, render_template, request, url_for
 
 from app.auth.helpers import is_owner_or_admin, login_required
+from app.content_render import render_to_html
 from app.db import execute, query_all, query_one
 
 bp = Blueprint("posts", __name__)
 
 # Формы Post всегда сохраняют Markdown (клиентский body_format игнорируется).
 _BODY_FORMAT = "markdown"
+_PREVIEW_MAX_CHARS = 100_000
+
+
+@bp.route("/markdown/preview", methods=("POST",))
+@login_required
+def markdown_preview():
+    """Предпросмотр Markdown тем же пайплайном, что и витрина."""
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        abort(400)
+    source = data.get("source", "")
+    if not isinstance(source, str):
+        abort(400)
+    if len(source) > _PREVIEW_MAX_CHARS:
+        abort(413)
+    return jsonify({"html": str(render_to_html(source, "markdown"))})
 
 
 @bp.route("/")

@@ -21,7 +21,7 @@
 
 Формы Post/Comment сохраняют Markdown: сервер всегда пишет `body_format=markdown`, поле формы — `body_source` (клиентский `body_format` игнорируется).
 
-Витрина: фильтр Jinja `render_content` → `render_to_html` (Markdown/plain/html → nh3 → `Markup`). Не использовать `| safe` по сырой колонке из БД. JS нужен только для редактора EasyMDE; показ страницы без JS. Preview EasyMDE выключен (итог — после сохранения). Тулбар «Блок кода»: пресеты Python / HTML / JS / CSS или свой язык (` ```lang `).
+Витрина: фильтр Jinja `render_content` → `render_to_html` (Markdown/plain/html → nh3 → `Markup`). Не использовать `| safe` по сырой колонке из БД. JS нужен только для редактора EasyMDE; показ страницы без JS. Предпросмотр в тулбаре идёт через `POST /markdown/preview` (тот же серверный рендер). Тулбар «Блок кода»: пресеты Python / HTML / JS / CSS или свой язык (` ```lang `).
 
 ## UI / UX
 

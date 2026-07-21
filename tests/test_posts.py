@@ -98,3 +98,21 @@ class PostsTests(BlogTestCase):
         detail = self.client.get(f"/posts/{post['id']}")
         self.assertNotIn(b"<script>", detail.data)
         self.assertIn(b"<strong>ok</strong>", detail.data)
+
+    def test_markdown_preview_endpoint(self) -> None:
+        self.register("writer", "secret1")
+        response = self.client.post(
+            "/markdown/preview",
+            json={"source": "Hello **bold**"},
+        )
+        self.assertEqual(response.status_code, 200)
+        payload = response.get_json()
+        self.assertIn("<strong>bold</strong>", payload["html"])
+        self.assertNotIn("**bold**", payload["html"])
+
+    def test_markdown_preview_requires_login(self) -> None:
+        response = self.client.post(
+            "/markdown/preview",
+            json={"source": "x"},
+        )
+        self.assertIn(response.status_code, (302, 401))

@@ -1,6 +1,6 @@
 /**
  * EasyMDE on .js-markdown-editor textareas.
- * Preview / side-by-side disabled — display uses server-side render.
+ * Preview uses server /markdown/preview (same render as the public page).
  */
 (function () {
   "use strict";
@@ -156,6 +156,13 @@
     title: "Блок кода",
   };
 
+  var previewButton = {
+    name: "preview",
+    action: EasyMDE.togglePreview,
+    className: "fa fa-eye no-disable",
+    title: "Предпросмотр",
+  };
+
   var toolbar = [
     "bold",
     "italic",
@@ -168,8 +175,39 @@
     "link",
     codeBlockButton,
     "|",
+    previewButton,
+    "|",
     "guide",
   ];
+
+  var previewUrl = "/markdown/preview";
+
+  function serverPreviewRender(plainText, preview) {
+    preview.innerHTML = '<p class="text-secondary small mb-0">Загрузка…</p>';
+    fetch(previewUrl, {
+      method: "POST",
+      credentials: "same-origin",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ source: plainText }),
+    })
+      .then(function (response) {
+        if (!response.ok) {
+          throw new Error("preview failed");
+        }
+        return response.json();
+      })
+      .then(function (data) {
+        preview.innerHTML = data && data.html ? data.html : "";
+      })
+      .catch(function () {
+        preview.innerHTML =
+          '<p class="text-danger small mb-0">Не удалось загрузить предпросмотр.</p>';
+      });
+    return "Загрузка…";
+  }
 
   document.querySelectorAll("textarea.js-markdown-editor").forEach(function (el) {
     new EasyMDE({
@@ -180,6 +218,7 @@
       forceSync: true,
       toolbar: toolbar,
       minHeight: el.rows && el.rows <= 4 ? "100px" : "200px",
+      previewRender: serverPreviewRender,
     });
   });
 })();
