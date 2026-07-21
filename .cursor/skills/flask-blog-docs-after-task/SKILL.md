@@ -1,25 +1,25 @@
 ---
 name: flask-blog-docs-after-task
 description: >-
-  MUST run automatically at end of flask_blog implementation tasks: updates
-  ARCHITECTURE, DEVELOPMENT, CHANGELOG, AGENTS before finalize commit. Triggered
-  by flask-blog-workflow rule and stop hook; also when user asks to update docs.
+  MUST run at end of flask_blog implementation: update ARCHITECTURE, DEVELOPMENT,
+  CHANGELOG, AGENTS per mapping table, then commit. Triggers: end of
+  implementation before done/push/PR; stop hook; user asks to update docs.
   Skip only for docs-only or no-behavior changes.
 ---
 
 # flask_blog — документация после задачи
 
-Канон: [`task-cycle.mdc`](~/.cursor/rules/task-cycle.mdc) ш.3 · [`AGENTS.md`](../../../AGENTS.md) §После изменения поведения · [`docs-context.mdc`](../../rules/docs-context.mdc).
+Канон: [`task-cycle.mdc`](~/.cursor/rules/task-cycle.mdc) ш.3 · pointer в [`00-project.mdc`](../../rules/00-project.mdc). Scoping: [`AGENTS.md`](../../../AGENTS.md), [`docs-context.mdc`](../../rules/docs-context.mdc).
 
 Backlog/статусы — skill [`backlog-github-projects-sync`](~/.cursor/skills/backlog-github-projects-sync/SKILL.md) + [`backlog-status.mdc`](../../rules/backlog-status.mdc).  
-Post-merge rename — [`git-merged-branches.mdc`](../../rules/git-merged-branches.mdc).
+Post-merge rename — skill [`flask-blog-git-merged-archive`](../flask-blog-git-merged-archive/SKILL.md).
 
 ## Когда выполнять
 
 **Автоматически** в конце реализации — без запроса пользователя:
 
-1. Правило [`flask-blog-workflow.mdc`](../../rules/flask-blog-workflow.mdc): перед финальным «готово» / push / PR — Read этот skill и выполнить.
-2. Hook `stop` ([`.cursor/hooks/docs-after-task-stop.py`](../../hooks/docs-after-task-stop.py)): если agent завершил turn на `feat|fix|chore` с app-изменениями без docs-sync — один auto follow-up с этим skill.
+1. Перед финальным «готово» / push / PR — Read этот skill и выполнить ([`00-project.mdc`](../../rules/00-project.mdc)).
+2. Hook `stop` ([`.cursor/hooks/docs-after-task-stop.py`](../../hooks/docs-after-task-stop.py)): если agent завершил turn на `feat|fix|chore` с app-изменениями без docs-sync — один auto follow-up.
 
 После **завершения реализации** (все подзадачи), **перед** commit финализации / verify / push·PR.
 
@@ -28,7 +28,7 @@ Post-merge rename — [`git-merged-branches.mdc`](../../rules/git-merged-branche
 - Задача **только** `docs/` / `.cursor/rules/` / skills (без смены поведения приложения)
 - Косметика / рефакторинг без смены API, схемы, маршрутов, UI-контракта
 - Diff docs после шага 2 пустой — commit docs не нужен
-- Hook не сработал и критериев «пропустить» нет — **всё равно** выполнить skill вручную по workflow-правилу
+- Hook не сработал и критериев «пропустить» нет — **всё равно** выполнить skill вручную
 
 ## Алгоритм
 
@@ -40,7 +40,7 @@ Post-merge rename — [`git-merged-branches.mdc`](../../rules/git-merged-branche
    - код + docs уместно → один `feat:`/`fix:` …  
    - только docs → `docs: …` (EN, Conventional Commits)  
    - пустой diff → commit пропустить
-6. Дальше — verify / push / PR по project workflow (не этот skill).
+6. Дальше — verify / push / PR по project (не этот skill).
 
 ## Какой файл обновлять
 
@@ -53,7 +53,7 @@ Post-merge rename — [`git-merged-branches.mdc`](../../rules/git-merged-branche
 | Заметные фичи / фиксы | [`docs/CHANGELOG.md`](../../../docs/CHANGELOG.md) |
 | Новый тип задачи для scoping | [`AGENTS.md`](../../../AGENTS.md) (+ при необходимости [`docs/README.md`](../../../docs/README.md)) |
 | Запреты стека | [`.cursor/rules/00-project.mdc`](../../rules/00-project.mdc) (+ тематический `*.mdc`) |
-| Алгоритм scoping / куда писать docs | [`docs-context.mdc`](../../rules/docs-context.mdc) |
+| Алгоритм scoping | [`docs-context.mdc`](../../rules/docs-context.mdc) |
 
 Не копировать таблицы ARCHITECTURE в rules. Индекс docs: [`docs/README.md`](../../../docs/README.md).
 
@@ -67,4 +67,4 @@ Post-merge rename — [`git-merged-branches.mdc`](../../rules/git-merged-branche
 ## После merge в `dev` (не этот skill целиком)
 
 1. Backlog: `done` → sync → CHANGELOG (если ещё нет) → **удалить** секцию из `Backlog.md` — skill backlog-sync.
-2. Ветки: `feat|docs/…` → `merged/…`, **checkout `dev`** — [`git-merged-branches.mdc`](../../rules/git-merged-branches.mdc).
+2. Ветки: `feat|docs/…` → `merged/…`, **checkout `dev`** — skill `flask-blog-git-merged-archive`.

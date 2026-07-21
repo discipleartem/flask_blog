@@ -18,7 +18,9 @@ alwaysApply: true
 
 Команды проекта — только в `.venv` (global `venv.mdc`).
 
-Навигация по задаче (меньше токенов): [`AGENTS.md`](../../AGENTS.md) → [`docs/ARCHITECTURE.md`](../../docs/ARCHITECTURE.md) / [`docs/README.md`](../../docs/README.md). Scoping: `docs-context.mdc`. После реализации → skill `flask-blog-docs-after-task`.
+**Контекст:** [`AGENTS.md`](../../AGENTS.md) → одна строка таблицы → указанные docs/пути. Scoping: `docs-context.mdc`.
+
+**Конец реализации:** Read + выполнить skill `flask-blog-docs-after-task` (до «готово» / push / PR); страховка — hook `stop`. Skip — критерии в skill.
 
 ## Архитектурные запреты
 
@@ -34,9 +36,12 @@ alwaysApply: true
 | Тема | Rule |
 |------|------|
 | Docs-first / scoping | `docs-context.mdc` |
-| Конец задачи → docs | `flask-blog-workflow.mdc` + skill `flask-blog-docs-after-task` + hook `stop` |
+| Docs after task | skill `flask-blog-docs-after-task` + hook `stop` |
+| Post-merge `merged/*` | `git-merged-branches.mdc` + skill `flask-blog-git-merged-archive` |
 | Flask 3.0.3, factory, blueprints | `flask-3.mdc` |
 | SQL, `schema.sql`, миграции | `database.mdc` |
 | Session auth / права | `auth.mdc` |
 | Bootstrap 5, шаблоны, static | `ui-bootstrap.mdc` |
 | Unit-тесты | `testing.mdc` |
+| Backlog статусы | `backlog-status.mdc` |
+| Verify (IronBee) | `ironbee-devtools-use.mdc` |

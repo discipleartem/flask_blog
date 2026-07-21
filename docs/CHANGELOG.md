@@ -30,15 +30,16 @@
 
 ### Docs
 
+- Рефакторинг Cursor rules/skills (context engineering): slim alwaysApply (IronBee policy, docs-context scoping-only); удалён `flask-blog-workflow.mdc` (pointer в `00-project`); skill `flask-blog-git-merged-archive`; mapping docs только в `flask-blog-docs-after-task`; сужены globs `auth`/`database`; `backlog-status` / `git-merged-branches` не alwaysApply.
 - Docs-first карта для экономии токенов: `AGENTS.md` (роутер), `docs/README.md`, `docs/ARCHITECTURE.md`; правило `docs-context.mdc`; дедуп структуры/прав из `DEVELOPMENT.md` (backlog #47).
-- Skill `flask-blog-docs-after-task` + правило `flask-blog-workflow.mdc` + hook `stop`: автозапуск обновления docs в конце реализации.
-- Тематические rules (`flask-3`, `auth`, `database`, …) ссылаются на ARCHITECTURE вместо дублей карт/прав; алгоритмы изменения схемы/маршрутов и обновления docs — в `docs-context.mdc` / AGENTS.
+- Skill `flask-blog-docs-after-task` + hook `stop`: автозапуск обновления docs в конце реализации.
+- Тематические rules (`flask-3`, `auth`, `database`, …) ссылаются на ARCHITECTURE вместо дублей карт/прав; алгоритмы scoping — в `docs-context.mdc` / AGENTS.
 - Backlog #44 (Markdown-редактор) закрыт после merge в `dev` (#45).
 - `DEVELOPMENT.md`: контент Markdown (рендер, preview, подсветка, копирование кода), структура `content_render` / static JS.
 - `SESSION_COOKIE_SECURE` для HTTPS-деплоя (`.env.example`, `DEPLOY.md`).
 - Уточнён приоритет окружения над `.env` при `load_dotenv` (уже заданные переменные процесса не перезаписываются).
 - В `DEVELOPMENT.md` — политика unit-тестов и ручной проверки auth UI.
-- После merge task-ветки на GitHub не удалять: переименовать в `merged/*` (правило `.cursor/rules/git-merged-branches.mdc`).
+- После merge task-ветки на GitHub не удалять: переименовать в `merged/*` (правило + skill `flask-blog-git-merged-archive`).
 
 ## [0.2.0] — 2026-07-19
 

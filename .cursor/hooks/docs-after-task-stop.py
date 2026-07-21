@@ -31,7 +31,8 @@ COMPLETION_HINT = re.compile(
 
 FOLLOWUP = (
     "Перед завершением задачи обязательно выполни skill "
-    "`.cursor/skills/flask-blog-docs-after-task/SKILL.md`: "
+    "`.cursor/skills/flask-blog-docs-after-task/SKILL.md` "
+    "(pointer в `.cursor/rules/00-project.mdc`): "
     "прочитай skill целиком (Read), обнови релевантные docs/CHANGELOG/AGENTS "
     "по таблице skill и закоммить по его правилам. "
     "Не пропускай этот шаг и не жди отдельной просьбы пользователя."
