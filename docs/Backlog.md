@@ -20,5 +20,6 @@
 - На формах создания/редактирования Comment — тот же подход.
 - Канон в БД: `body_source` + `body_format`; для этих форм сервер всегда сохраняет `body_format=markdown` (клиентский format игнорируется).
 - Витрина: HTML через серверный `render_to_html` + санитизация XSS (nh3); не сырой Markdown и не `| safe` по колонке из БД.
-- Preview EasyMDE выключен (итог разметки — после сохранения на сервере).
+- Preview в тулбаре EasyMDE через `POST /markdown/preview` (тот же серверный рендер, что на витрине).
+- Подсветка fenced-блоков на витрине/preview (`syntax-highlight.js`: python/html/js/css/bash + generic); автоотступы; кнопки копирования plain и Markdown с тостом.
 - UI согласован с Bootstrap 5; без React/Vue и прочих SPA-фреймворков.

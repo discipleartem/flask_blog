@@ -139,8 +139,13 @@ body {
 .post-body ol,
 .post-body blockquote,
 .post-body pre,
+.post-body .code-block,
 .post-body table {
   margin-bottom: 1rem;
+}
+
+.post-body .code-block > pre {
+  margin-bottom: 0;
 }
 
 .post-body ul,
@@ -159,8 +164,101 @@ body {
   margin-bottom: 0;
 }
 
+/* Code block + copy buttons */
+.code-block {
+  position: relative;
+  margin: 0 0 1rem;
+}
+
+.code-block > pre {
+  margin-bottom: 0;
+}
+
+.code-copy-actions {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.code-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.85rem;
+  height: 1.85rem;
+  padding: 0;
+  border: 1px solid #3a404a;
+  border-radius: 0.35rem;
+  background: #2a3038;
+  color: #c8cdd6;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.9;
+  transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.code-copy-btn .code-copy-icon {
+  display: block;
+  flex-shrink: 0;
+}
+
+.code-copy-btn .code-copy-md-label {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+
+.code-block:hover .code-copy-btn,
+.code-copy-btn:focus-visible {
+  opacity: 1;
+}
+
+.code-copy-btn:hover {
+  background: #343b45;
+  border-color: #4a515c;
+  color: #e8ebf0;
+}
+
+.code-copy-btn.is-copied {
+  color: #7dcea0;
+  border-color: #3d5a4a;
+  background: #2a3832;
+  opacity: 1;
+}
+
+.code-copy-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 1.5rem;
+  z-index: 1080;
+  transform: translateX(-50%) translateY(0.75rem);
+  padding: 0.6rem 1rem;
+  border-radius: 0.375rem;
+  background: rgba(33, 37, 41, 0.92);
+  color: #fff;
+  font-size: 0.875rem;
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.code-copy-toast.is-visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
 .post-body pre {
   padding: 0.75rem 1rem;
+  padding-top: 2.1rem;
   overflow-x: auto;
   border: 1px solid var(--fb-line);
   border-radius: 0.375rem;
@@ -354,8 +452,13 @@ body {
   color: var(--fb-muted);
 }
 
+.EasyMDEContainer .editor-preview .code-block {
+  margin-bottom: 1rem;
+}
+
 .EasyMDEContainer .editor-preview pre {
   padding: 0.75rem 1rem;
+  padding-top: 2.1rem;
   overflow-x: auto;
   border: 1px solid var(--fb-line);
   border-radius: 0.375rem;

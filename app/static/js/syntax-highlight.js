@@ -506,9 +506,165 @@
     return "generic";
   }
 
+  function plainTextFromCode(codeEl) {
+    if (!codeEl) {
+      return "";
+    }
+    if (typeof codeEl._copyPlain === "string") {
+      return codeEl._copyPlain;
+    }
+    return codeEl.textContent || "";
+  }
+
+  function markdownFenceFromCode(codeEl) {
+    var plain = plainTextFromCode(codeEl).replace(/\s+$/, "");
+    var lang = languageFromClass(codeEl && codeEl.className);
+    if (!lang || lang === "generic") {
+      lang = "";
+    }
+    return "```" + lang + "\n" + plain + "\n```";
+  }
+
+  function showCopyToast(message) {
+    var toast = document.getElementById("code-copy-toast");
+    if (!toast) {
+      toast = document.createElement("div");
+      toast.id = "code-copy-toast";
+      toast.className = "code-copy-toast";
+      toast.setAttribute("role", "status");
+      toast.setAttribute("aria-live", "polite");
+      document.body.appendChild(toast);
+    }
+    toast.textContent = message || "Код скопирован в буфер";
+    toast.classList.add("is-visible");
+    clearTimeout(showCopyToast._timer);
+    showCopyToast._timer = setTimeout(function () {
+      toast.classList.remove("is-visible");
+    }, 2200);
+  }
+
+  function copyPlainText(text) {
+    var value = String(text || "");
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(value);
+    }
+    return new Promise(function (resolve, reject) {
+      var ta = document.createElement("textarea");
+      ta.value = value;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.left = "-9999px";
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        if (!document.execCommand("copy")) {
+          reject(new Error("copy failed"));
+        } else {
+          resolve();
+        }
+      } catch (err) {
+        reject(err);
+      } finally {
+        document.body.removeChild(ta);
+      }
+    });
+  }
+
+  var ICON_COPY =
+    '<svg class="code-copy-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" aria-hidden="true">' +
+    '<rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" stroke-width="1.75"/>' +
+    '<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>' +
+    "</svg>";
+  var ICON_CHECK =
+    '<svg class="code-copy-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" aria-hidden="true">' +
+    '<path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>' +
+    "</svg>";
+  var ICON_MD =
+    '<span class="code-copy-md-label" aria-hidden="true">MD</span>';
+
+  function bindCopyButton(btn, getText, idleHtml, idleTitle, idleLabel, okToast) {
+    btn.addEventListener("click", function () {
+      copyPlainText(getText())
+        .then(function () {
+          btn.classList.add("is-copied");
+          btn.innerHTML = ICON_CHECK;
+          btn.title = "Скопировано";
+          btn.setAttribute("aria-label", "Скопировано");
+          showCopyToast(okToast);
+          clearTimeout(btn._resetTimer);
+          btn._resetTimer = setTimeout(function () {
+            btn.classList.remove("is-copied");
+            btn.innerHTML = idleHtml;
+            btn.title = idleTitle;
+            btn.setAttribute("aria-label", idleLabel);
+          }, 2000);
+        })
+        .catch(function () {
+          showCopyToast("Не удалось скопировать");
+        });
+    });
+  }
+
+  function ensureCopyButton(preEl, codeEl) {
+    if (!preEl || preEl.getAttribute("data-copy-ui") === "1") {
+      return;
+    }
+    preEl.setAttribute("data-copy-ui", "1");
+
+    var wrap = document.createElement("div");
+    wrap.className = "code-block";
+    preEl.parentNode.insertBefore(wrap, preEl);
+    wrap.appendChild(preEl);
+
+    var actions = document.createElement("div");
+    actions.className = "code-copy-actions";
+
+    var btnPlain = document.createElement("button");
+    btnPlain.type = "button";
+    btnPlain.className = "code-copy-btn";
+    btnPlain.setAttribute("aria-label", "Копировать код");
+    btnPlain.title = "Копировать код";
+    btnPlain.innerHTML = ICON_COPY;
+    bindCopyButton(
+      btnPlain,
+      function () {
+        return plainTextFromCode(codeEl);
+      },
+      ICON_COPY,
+      "Копировать код",
+      "Копировать код",
+      "Код скопирован в буфер"
+    );
+
+    var btnMd = document.createElement("button");
+    btnMd.type = "button";
+    btnMd.className = "code-copy-btn code-copy-btn-md";
+    btnMd.setAttribute("aria-label", "Копировать как Markdown");
+    btnMd.title = "Копировать как Markdown";
+    btnMd.innerHTML = ICON_MD;
+    bindCopyButton(
+      btnMd,
+      function () {
+        return markdownFenceFromCode(codeEl);
+      },
+      ICON_MD,
+      "Копировать как Markdown",
+      "Копировать как Markdown",
+      "Markdown скопирован в буфер"
+    );
+
+    actions.appendChild(btnPlain);
+    actions.appendChild(btnMd);
+    wrap.appendChild(actions);
+  }
+
   function highlightCodeElement(codeEl) {
     if (!codeEl || codeEl.nodeType !== 1) {
       return;
+    }
+    var preEl = codeEl.parentElement;
+    if (preEl && preEl.tagName === "PRE") {
+      ensureCopyButton(preEl, codeEl);
     }
     if (codeEl.getAttribute("data-syn") === "1") {
       return;
@@ -516,6 +672,8 @@
     var lang = languageFromClass(codeEl.className);
     var width = indentWidthFor(lang);
     var source = codeEl.textContent || "";
+    var plain = reindentSource(source, lang);
+    codeEl._copyPlain = plain;
     codeEl.innerHTML = highlightSource(source, lang);
     codeEl.setAttribute("data-syn", "1");
     codeEl.setAttribute("data-indent", String(width));

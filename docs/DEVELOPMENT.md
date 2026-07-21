@@ -19,15 +19,29 @@
 | `body_source` | Канон — исходник автора |
 | `body_format` | `plaintext` \| `markdown` \| `html` |
 
-Формы Post/Comment сохраняют Markdown: сервер всегда пишет `body_format=markdown`, поле формы — `body_source` (клиентский `body_format` игнорируется).
+Формы Post/Comment сохраняют Markdown: сервер всегда пишет `body_format=markdown`, поле формы — `body_source` (клиентский `body_format` игнорируется). Миграция схемы: `migrations/002_content_body_fields.sql` (`body` → `body_source` + `body_format`).
 
-Витрина: фильтр Jinja `render_content` → `render_to_html` (Markdown/plain/html → nh3 → `Markup`). Не использовать `| safe` по сырой колонке из БД. JS нужен только для редактора EasyMDE и подсветки кода (`syntax-highlight.js`: python/html/js/css + generic); показ разметки страницы без JS. Предпросмотр в тулбаре идёт через `POST /markdown/preview` (тот же серверный рендер). Тулбар «Блок кода»: пресеты Python / HTML / JS / CSS или свой язык (` ```lang `).
+| Слой | Файлы | Поведение |
+|------|--------|-----------|
+| Рендер | `app/content_render.py`, Jinja-фильтр `render_content` | Markdown / plain / html → nh3 → `Markup`. Без `| safe` по сырой колонке из БД |
+| Редактор | `app/static/js/markdown-editor.js`, vendor EasyMDE | JS обязателен для форм; чтение витрины без JS |
+| Preview | `POST /markdown/preview` | Тот же `render_to_html`, что на витрине; кнопка «глаз» в тулбаре |
+| Код | `app/static/js/syntax-highlight.js`, стили в `app.css` | Подсветка `pre code.language-*`: python, html, javascript, css, bash (+ aliases); иначе generic. Автоотступы (табы→пробелы, структурный indent); на submit — `formatMarkdownFences` |
+
+Тулбар «Блок кода»: пресеты Python / HTML / JS / CSS / Bash или свой язык (` ```lang `).
+
+На витрине и в preview у блоков кода две кнопки копирования (форматирование пробелов/отступов сохраняется):
+
+- иконка «листы» — plain text;
+- **MD** — fenced Markdown (` ```lang ` + код + ` ``` `).
+
+Уведомление: тост «… скопирован в буфер»; на кнопке кратко галочка.
 
 ## UI / UX
 
 **Bootstrap 5 — канон.** Сетка, навбар, формы, кнопки, alerts, collapse, spacing — через компоненты и utility-классы BS5.
 
-Custom CSS (`app/static/css/app.css`) и JS (`theme.js`, `markdown-editor.js`) — **только исключения**: токены светлой/тёмной темы, бренд-типографика (IBM Plex), градиент hero, переключатель `data-bs-theme`, инициализация EasyMDE. Не дублировать layout Bootstrap своими правилами и не подключать другие CSS-фреймворки.
+Custom CSS (`app/static/css/app.css`) и JS (`theme.js`, `markdown-editor.js`, `syntax-highlight.js`) — **только исключения**: токены светлой/тёмной темы, бренд-типографика (IBM Plex), градиент hero, переключатель `data-bs-theme`, EasyMDE, подсветка/копирование кода. Не дублировать layout Bootstrap своими правилами и не подключать другие CSS-фреймворки.
 
 ### Mobile / tablet first
 
@@ -109,18 +123,22 @@ Mobile/tablet: `interaction_resize-viewport` в том же окне Chrome.
 
 ```
 app/
-  __init__.py      # create_app (+ current_year для шаблонов)
+  __init__.py      # create_app (+ current_year, фильтр render_content)
   config.py        # load_dotenv(.env) + Config
   db.py            # sqlite3 helpers + migrations
+  content_render.py  # Markdown/plain/html → nh3
   auth/            # register / login / logout
   users/           # profile + admin CRUD
-  posts/           # feed + CRUD
+  posts/           # feed + CRUD + POST /markdown/preview
   comments/        # CRUD
   deploy/          # POST /internal/deploy (Bearer DEPLOY_SECRET)
   templates/       # Bootstrap 5, mobile/tablet first
   static/
-    css/app.css    # тема, бренд, hero — исключения сверх BS5
+    css/app.css    # тема, бренд, hero, код-блоки — исключения сверх BS5
     js/theme.js    # data-bs-theme + .theme-toggle
+    js/markdown-editor.js
+    js/syntax-highlight.js
+    vendor/easymde/
 migrations/        # numbered *.sql
 schema.sql         # source of truth
 .env.example       # шаблон секретов (реальный .env в .gitignore)
