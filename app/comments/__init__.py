@@ -9,6 +9,9 @@ from app.db import execute, query_one
 
 bp = Blueprint("comments", __name__)
 
+# Формы Comment всегда сохраняют Markdown (клиентский body_format игнорируется).
+_BODY_FORMAT = "markdown"
+
 
 @bp.route("/posts/<int:post_id>/comments", methods=("POST",))
 @login_required
@@ -17,13 +20,16 @@ def create(post_id: int):
     post = query_one("SELECT id FROM posts WHERE id = ?", (post_id,))
     if post is None:
         abort(404)
-    body = (request.form.get("body") or "").strip()
-    if not body:
+    body_source = (request.form.get("body_source") or "").strip()
+    if not body_source:
         flash("Комментарий не может быть пустым.", "danger")
         return redirect(url_for("posts.detail", post_id=post_id))
     execute(
-        "INSERT INTO comments (post_id, user_id, body) VALUES (?, ?, ?)",
-        (post_id, g.user["id"], body),
+        """
+        INSERT INTO comments (post_id, user_id, body_source, body_format)
+        VALUES (?, ?, ?, ?)
+        """,
+        (post_id, g.user["id"], body_source, _BODY_FORMAT),
     )
     flash("Комментарий добавлен.", "success")
     return redirect(url_for("posts.detail", post_id=post_id))
@@ -42,17 +48,17 @@ def edit(comment_id: int):
         abort(403)
 
     if request.method == "POST":
-        body = (request.form.get("body") or "").strip()
-        if not body:
+        body_source = (request.form.get("body_source") or "").strip()
+        if not body_source:
             flash("Комментарий не может быть пустым.", "danger")
         else:
             execute(
                 """
                 UPDATE comments
-                SET body = ?, updated_at = datetime('now')
+                SET body_source = ?, body_format = ?, updated_at = datetime('now')
                 WHERE id = ?
                 """,
-                (body, comment_id),
+                (body_source, _BODY_FORMAT, comment_id),
             )
             flash("Комментарий обновлён.", "success")
             return redirect(url_for("posts.detail", post_id=comment["post_id"]))

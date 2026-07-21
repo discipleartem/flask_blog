@@ -9,6 +9,8 @@
 
 ### Added
 
+- Markdown для Post/Comment: `body_source` + `body_format`, EasyMDE (vendor), серверный рендер (`content_render` + nh3), `POST /markdown/preview`.
+- Подсветка кода на витрине (`syntax-highlight.js`: python/html/js/css/bash), автоотступы fenced-блоков, кнопки копирования plain и Markdown с тостом.
 - GitHub Actions CI: unit-тесты (Python 3.12) на `push`/`pull_request` в `main` и `dev` (`.github/workflows/ci.yml`).
 - Deploy на PythonAnywhere gated: job `deploy` после успешного `test` в `.github/workflows/deploy.yml`.
 - Страница успешной регистрации с полным логином `name#NNNN` и сохранением учётки через Credential Management API (`PasswordCredential`), чтобы менеджер паролей предлагал полный тег, а не только имя без дискриминатора.
@@ -28,6 +30,7 @@
 
 ### Docs
 
+- `DEVELOPMENT.md`: контент Markdown (рендер, preview, подсветка, копирование кода), структура `content_render` / static JS.
 - `SESSION_COOKIE_SECURE` для HTTPS-деплоя (`.env.example`, `DEPLOY.md`).
 - Уточнён приоритет окружения над `.env` при `load_dotenv` (уже заданные переменные процесса не перезаписываются).
 - В `DEVELOPMENT.md` — политика unit-тестов и ручной проверки auth UI.
