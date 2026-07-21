@@ -63,7 +63,7 @@
       '<label class="form-label small" for="md-code-lang-custom">Или укажите язык</label>' +
       '<input type="text" class="form-control form-control-sm mb-2" id="md-code-lang-custom" ' +
       'placeholder="например: sql, bash, rust" value="python" autocomplete="off">' +
-      '<p class="form-text small mb-3 mb-0">Отступы пробелами: Python — 4; HTML / JS / CSS — 2.</p>' +
+      '<p class="form-text small mb-3 mb-0">Отступы пробелами: Python — 4;<br>HTML / JS / CSS — 2.</p>' +
       '<div class="d-flex justify-content-end gap-2">' +
       '<button type="button" class="btn btn-outline-secondary btn-sm" data-action="cancel">Отмена</button>' +
       '<button type="button" class="btn btn-dark btn-sm" data-action="insert">Вставить</button>' +
