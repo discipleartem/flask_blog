@@ -213,31 +213,6 @@
     return INDENT_SPACES[kind] || INDENT_SPACES.generic;
   }
 
-  function gcd(a, b) {
-    var x = Math.abs(a);
-    var y = Math.abs(b);
-    while (y) {
-      var t = y;
-      y = x % y;
-      x = t;
-    }
-    return x;
-  }
-
-  function leadingSpaceCount(line) {
-    var m = /^( *)/.exec(line);
-    return m ? m[1].length : 0;
-  }
-
-  function isFormattedLang(kind) {
-    return (
-      kind === "python" ||
-      kind === "html" ||
-      kind === "javascript" ||
-      kind === "css"
-    );
-  }
-
   /**
    * Табы → пробелы по ширине отступа языка (PEP 8 / распространённый стиль web).
    */
@@ -266,82 +241,179 @@
     return out.join("\n");
   }
 
+  function spaces(n) {
+    return n > 0 ? new Array(n + 1).join(" ") : "";
+  }
+
   /**
-   * Автоформат отступов для python/html/js/css:
-   * dedent → уровни по НОД текущих отступов → целевая ширина (4 или 2).
+   * Python: тело после строки с «:» получает +1 уровень, если отступ не больше заголовка.
+   * else/elif/except/finally — на уровень составного оператора.
+   */
+  function formatPython(source, target) {
+    var lines = expandTabsToSpaces(source, target).split("\n");
+    var out = [];
+    var level = 0;
+    var i;
+
+    for (i = 0; i < lines.length; i++) {
+      var s = lines[i].trim();
+      if (s === "") {
+        out.push("");
+        continue;
+      }
+
+      if (/^(else|elif|except|finally)\b/.test(s)) {
+        level = Math.max(0, level - 1);
+      }
+
+      out.push(spaces(level * target) + s);
+
+      if (/:\s*(#.*)?$/.test(s)) {
+        level += 1;
+      } else if (
+        /^(pass|break|continue)\b/.test(s) ||
+        /^(return|raise)\b/.test(s)
+      ) {
+        level = Math.max(0, level - 1);
+      }
+    }
+    return out.join("\n");
+  }
+
+  /**
+   * JS/CSS: отступы по { }.
+   */
+  function formatBraces(source, target) {
+    var lines = expandTabsToSpaces(source, target).split("\n");
+    var out = [];
+    var level = 0;
+    var i;
+
+    for (i = 0; i < lines.length; i++) {
+      var s = lines[i].trim();
+      if (s === "") {
+        out.push("");
+        continue;
+      }
+
+      var leadingClose = 0;
+      var j = 0;
+      while (j < s.length && (s.charAt(j) === "}" || s.charAt(j) === ")")) {
+        if (s.charAt(j) === "}") {
+          leadingClose += 1;
+        }
+        j += 1;
+      }
+      level = Math.max(0, level - leadingClose);
+
+      out.push(spaces(level * target) + s);
+
+      var opens = 0;
+      var closes = 0;
+      var inStr = null;
+      var esc = false;
+      for (j = 0; j < s.length; j++) {
+        var ch = s.charAt(j);
+        if (inStr) {
+          if (esc) {
+            esc = false;
+          } else if (ch === "\\") {
+            esc = true;
+          } else if (ch === inStr) {
+            inStr = null;
+          }
+          continue;
+        }
+        if (ch === '"' || ch === "'" || ch === "`") {
+          inStr = ch;
+          continue;
+        }
+        if (ch === "{") {
+          opens += 1;
+        } else if (ch === "}") {
+          closes += 1;
+        }
+      }
+      level = Math.max(0, level + opens - (closes - leadingClose));
+    }
+    return out.join("\n");
+  }
+
+  var HTML_VOID = {
+    area: 1,
+    base: 1,
+    br: 1,
+    col: 1,
+    embed: 1,
+    hr: 1,
+    img: 1,
+    input: 1,
+    link: 1,
+    meta: 1,
+    param: 1,
+    source: 1,
+    track: 1,
+    wbr: 1,
+  };
+
+  /**
+   * HTML: простой стек тегов (без полного парсера).
+   */
+  function formatHtml(source, target) {
+    var lines = expandTabsToSpaces(source, target).split("\n");
+    var out = [];
+    var level = 0;
+    var i;
+
+    for (i = 0; i < lines.length; i++) {
+      var s = lines[i].trim();
+      if (s === "") {
+        out.push("");
+        continue;
+      }
+
+      var closeOnly = /^<\/([A-Za-z][\w:-]*)\s*>/.exec(s);
+      if (closeOnly && !/^<[A-Za-z]/.test(s.replace(closeOnly[0], "").trim())) {
+        level = Math.max(0, level - 1);
+        out.push(spaces(level * target) + s);
+        continue;
+      }
+
+      out.push(spaces(level * target) + s);
+
+      var tagRe = /<\/?([A-Za-z][\w:-]*)\b[^>]*>/g;
+      var m;
+      while ((m = tagRe.exec(s))) {
+        var full = m[0];
+        var name = m[1].toLowerCase();
+        if (full.charAt(1) === "/") {
+          level = Math.max(0, level - 1);
+        } else if (!HTML_VOID[name] && !/\/>$/.test(full)) {
+          level += 1;
+        }
+      }
+    }
+    return out.join("\n");
+  }
+
+  /**
+   * Автоформат отступов для python/html/js/css (добавляет недостающие уровни).
    */
   function reindentSource(source, lang) {
     var kind = normalizeLang(lang);
     var target = indentWidthFor(kind);
     var text = expandTabsToSpaces(source, target);
 
-    if (!isFormattedLang(kind)) {
-      return text;
+    if (kind === "python") {
+      return formatPython(text, target);
     }
-
-    var lines = text.split("\n");
-    var counts = [];
-    var i;
-    for (i = 0; i < lines.length; i++) {
-      if (lines[i].trim() === "") {
-        continue;
-      }
-      counts.push(leadingSpaceCount(lines[i]));
+    if (kind === "javascript" || kind === "css") {
+      return formatBraces(text, target);
     }
-    if (!counts.length) {
-      return text;
+    if (kind === "html") {
+      return formatHtml(text, target);
     }
-
-    var minIndent = Math.min.apply(null, counts);
-    var relatives = [];
-    for (i = 0; i < counts.length; i++) {
-      relatives.push(counts[i] - minIndent);
-    }
-
-    var unit = 0;
-    for (i = 0; i < relatives.length; i++) {
-      if (relatives[i] > 0) {
-        unit = unit === 0 ? relatives[i] : gcd(unit, relatives[i]);
-      }
-    }
-    if (unit === 0) {
-      unit = target;
-    } else if (unit === 1) {
-      var all2 = true;
-      var all4 = true;
-      for (i = 0; i < relatives.length; i++) {
-        if (relatives[i] % 2 !== 0) {
-          all2 = false;
-        }
-        if (relatives[i] % 4 !== 0) {
-          all4 = false;
-        }
-      }
-      if (all4) {
-        unit = 4;
-      } else if (all2) {
-        unit = 2;
-      }
-    }
-
-    var out = [];
-    for (i = 0; i < lines.length; i++) {
-      var line = lines[i];
-      if (line.trim() === "") {
-        out.push("");
-        continue;
-      }
-      var lead = leadingSpaceCount(line);
-      var rel = lead - minIndent;
-      var levels =
-        unit === 1 ? Math.round(rel / target) : Math.round(rel / unit);
-      if (levels < 0) {
-        levels = 0;
-      }
-      var content = line.replace(/^ */, "");
-      out.push(new Array(levels * target + 1).join(" ") + content);
-    }
-    return out.join("\n");
+    return text;
   }
 
   function highlightSource(source, lang) {
@@ -411,6 +483,15 @@
     highlightSource: highlightSource,
     reindent: reindentSource,
     indentWidth: indentWidthFor,
+    formatMarkdownFences: function (markdown) {
+      return String(markdown || "").replace(
+        /```(python|py|html|htm|javascript|js|css)[ \t]*\n([\s\S]*?)```/gi,
+        function (_all, lang, body) {
+          var formatted = reindentSource(body.replace(/\s+$/, ""), lang);
+          return "```" + lang + "\n" + formatted + "\n```";
+        }
+      );
+    },
   };
 
   if (document.readyState === "loading") {

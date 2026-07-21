@@ -231,7 +231,7 @@
   }
 
   document.querySelectorAll("textarea.js-markdown-editor").forEach(function (el) {
-    new EasyMDE({
+    var easyMDE = new EasyMDE({
       element: el,
       spellChecker: false,
       status: false,
@@ -244,5 +244,25 @@
       indentUnit: 4,
       tabSize: 4,
     });
+
+    var form = el.closest("form");
+    if (form && !form.__mdFormatBound) {
+      form.__mdFormatBound = true;
+      form.addEventListener("submit", function () {
+        form.querySelectorAll("textarea.js-markdown-editor").forEach(function (area) {
+          if (area.easyMDE) {
+            area.easyMDE.codemirror.save();
+          }
+          if (window.FlaskBlogSyntax && window.FlaskBlogSyntax.formatMarkdownFences) {
+            var formatted = window.FlaskBlogSyntax.formatMarkdownFences(area.value);
+            area.value = formatted;
+            if (area.easyMDE) {
+              area.easyMDE.value(formatted);
+            }
+          }
+        });
+      });
+    }
+    el.easyMDE = easyMDE;
   });
 })();
