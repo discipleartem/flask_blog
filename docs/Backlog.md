@@ -7,7 +7,7 @@
 
 ## Markdown-редактор для Post и Comment
 
-**Статус:** in_progress
+**Статус:** in_review
 **GitHub:** #44
 
 ### Проблема
