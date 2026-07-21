@@ -30,7 +30,7 @@
 
 ### Docs
 
-- Рефакторинг Cursor rules/skills (context engineering): slim alwaysApply (IronBee policy, docs-context scoping-only); удалён `flask-blog-workflow.mdc` (pointer в `00-project`); skill `flask-blog-git-merged-archive`; mapping docs только в `flask-blog-docs-after-task`; сужены globs `auth`/`database`; `backlog-status` / `git-merged-branches` не alwaysApply. Канон IronBee verify — в `00-project` (расширение может перезаписать `ironbee-devtools-use.mdc` при Reload).
+- Рефакторинг Cursor rules/skills (context engineering): slim alwaysApply (IronBee policy в `00-project`, docs-context scoping-only); удалён `flask-blog-workflow.mdc`; skill `flask-blog-git-merged-archive`; mapping docs только в `flask-blog-docs-after-task`; сужены globs `auth`/`database`; `backlog-status` / `git-merged-branches` не alwaysApply. `ironbee-devtools-use.mdc` — артефакт расширения (`.gitignore`), не править вручную.
 - Docs-first карта для экономии токенов: `AGENTS.md` (роутер), `docs/README.md`, `docs/ARCHITECTURE.md`; правило `docs-context.mdc`; дедуп структуры/прав из `DEVELOPMENT.md` (backlog #47).
 - Skill `flask-blog-docs-after-task` + hook `stop`: автозапуск обновления docs в конце реализации.
 - Тематические rules (`flask-3`, `auth`, `database`, …) ссылаются на ARCHITECTURE вместо дублей карт/прав; алгоритмы scoping — в `docs-context.mdc` / AGENTS.
