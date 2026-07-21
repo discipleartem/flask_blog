@@ -13,4 +13,4 @@ alwaysApply: true
 4. Индекс: [`docs/README.md`](../../docs/README.md).
 5. Широкий explore / Task по репо — только если роутер не дал путей.
 
-Куда писать docs после реализации — skill [`flask-blog-docs-after-task`](../skills/flask-blog-docs-after-task/SKILL.md). Не копировать карты ARCHITECTURE в rules.
+Куда писать docs после реализации — skill [`flask-blog-docs-after-task`](../skills/flask-blog-docs-after-task/SKILL.md) (**gate перед PR в `dev`**). Не копировать карты ARCHITECTURE в rules.

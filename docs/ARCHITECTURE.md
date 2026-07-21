@@ -50,7 +50,7 @@
 
 1. `before_request`: `load_logged_in_user` → `g.user` из `session["user_id"]` (или `None`).
 2. Шаблоны: `csrf_token`, `current_year` (context processor).
-3. Контент на витрине: фильтр `render_content` (`app/content_render.py` + nh3), не сырой `| safe` из БД.
+3. Контент на витрине: фильтры `render_content` / `plain_excerpt` (`app/content_render.py` + nh3), не сырой `| safe` из БД.
 4. Login: cookie session; без JWT. Deploy-hook: Bearer `DEPLOY_SECRET` (не user-auth).
 
 ## Права
@@ -70,7 +70,7 @@ Identity: `name#NNNN`. Имя `admin` зарезервировано. Seed: `adm
 | `__init__.py` | App factory |
 | `config.py` | Config + `.env` |
 | `db.py` | sqlite3 helpers, миграции |
-| `content_render.py` | Markdown/plain/html → безопасный HTML |
+| `content_render.py` | Markdown/plain/html → безопасный HTML; `plain_excerpt` для ленты |
 | `csrf.py` | CSRF token helpers |
 | `auth/` | register/login/logout + helpers |
 | `posts/` | лента, CRUD постов, markdown preview |

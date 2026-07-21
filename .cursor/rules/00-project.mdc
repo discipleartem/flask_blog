@@ -20,7 +20,7 @@ alwaysApply: true
 
 **Контекст:** [`AGENTS.md`](../../AGENTS.md) → одна строка таблицы → указанные docs/пути. Scoping: `docs-context.mdc`.
 
-**Конец реализации:** Read + выполнить skill `flask-blog-docs-after-task` (до «готово» / push / PR); страховка — hook `stop`. Skip — критерии в skill.
+**Конец реализации:** Read + выполнить skill `flask-blog-docs-after-task` (docs → commit → backlog `in_review`/sync). **Gate:** до PR task → `dev` skill обязателен; порядок: docs-after-task → verify → push → PR. Страховка — hook `stop`. Skip — критерии в skill.
 
 **Verify (IronBee):** один раз в конце против running app; browser — только IronBee MCP; backend — HTTP или log или SQLite; skip для docs/CI. How-to tools — в MCP.  
 `.cursor/rules/ironbee-devtools-use.mdc` — **не трогать** (пишет расширение IronBee; в `.gitignore`). Policy выше — канон проекта.

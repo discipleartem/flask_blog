@@ -49,4 +49,4 @@ Custom CSS / JS — **только исключения**, когда Bootstrap 
 
 - `base.html` — CDN Bootstrap **5.3.x** (CSS + `bootstrap.bundle.min.js`).
 - Страницы расширяют `base.html`; не подключать Bootstrap повторно.
-- Монохромная палитра сохраняется через токены в `app.css` + классы BS (`btn-dark`, `btn-outline-secondary`, `text-secondary`).
+- Монохром **не** обязателен: day = тёплый paper/beige + графит; night = gunmetal/chrome + soft off-white — токены `--fb-*` в `app.css`, классы BS (`btn-dark`, `btn-outline-secondary`, `text-secondary`). Приоритет — читаемость light/dark.

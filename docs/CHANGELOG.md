@@ -7,10 +7,22 @@
 
 ## [Unreleased]
 
+### Added
+
+- Jinja-фильтр `plain_excerpt` (`app/content_render.py`) — краткий plain-text превью для ленты постов.
+
+### Changed
+
+- UI: тёплая paper/beige дневная и gunmetal/chrome ночная темы; sticky nav с active links; комфорт чтения (`.post-body`); формы и users без `table-light` / лишних `shadow-sm`.
+- UI: комментарии на странице поста — отдельные surface-карточки с `gap` и акцентной левой границей (читаемее в light/dark).
+- UI: лента на главной — карточки статей с иерархией заголовок → excerpt → мета и hover, вместо плоского `list-group`.
+- UI: чтение средней статьи — ритм абзацев/списков, blockquote на surface; в ленте clamp заголовка и excerpt до 3 строк (карточка целиком — ссылка на пост).
+
 ### Docs
 
 - Skill `flask-blog-git-release-sync`: синхронизация `dev` ← `main` после релиза (конфликты CHANGELOG/version — в пользу `main`).
-
+- DEVELOPMENT §UI / §Контент, ARCHITECTURE и `ui-bootstrap.mdc`: warm/chrome dual theme, лента/комментарии, фильтр `plain_excerpt`.
+- Gate: skill `flask-blog-docs-after-task` обязателен перед PR task → `dev` (порядок docs → verify → push → PR); обновлены `00-project`, `docs-context`, `backlog-status`, `task-cycle`, `git-commit-pr`.
 ## [0.3.0] — 2026-07-21
 
 ### Added

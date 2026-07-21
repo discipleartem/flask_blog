@@ -34,9 +34,10 @@ def create_app(config_object: type[Config] | None = None) -> Flask:
 
     app.before_request(load_logged_in_user)
 
-    from app.content_render import render_content
+    from app.content_render import plain_excerpt, render_content
 
     app.add_template_filter(render_content, "render_content")
+    app.add_template_filter(plain_excerpt, "plain_excerpt")
 
     @app.context_processor
     def inject_template_globals() -> dict[str, object]:

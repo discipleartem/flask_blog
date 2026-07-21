@@ -12,21 +12,21 @@
     <article class="mb-5">
       <header class="mb-4 pb-3 border-bottom">
         <h1 class="post-title mb-3">{{ post['title'] }}</h1>
-        <p class="text-secondary small mb-0">
+        <div class="d-flex flex-wrap align-items-center gap-2 text-secondary small">
           <span class="user-tag">{{ post['author_name'] }}#{{ post['author_disc'] }}</span>
-          <span class="mx-1">·</span>
+          <span aria-hidden="true">·</span>
           <time datetime="{{ post['created_at'] }}">{{ post['created_at'] }}</time>
           {% if post['updated_at'] != post['created_at'] %}
-          <span class="mx-1">·</span>
+          <span aria-hidden="true">·</span>
           <span>обновлено {{ post['updated_at'] }}</span>
           {% endif %}
-        </p>
+        </div>
       </header>
 
       <div class="post-body mb-4">{{ post['body_source'] | render_content(post['body_format']) }}</div>
 
       {% if g.user and (g.user['is_admin'] or g.user['id'] == post['author_id']) %}
-      <div class="d-flex flex-wrap gap-2">
+      <div class="d-flex flex-wrap gap-2 pt-1">
         <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('posts.edit', post_id=post['id']) }}">Редактировать</a>
         <form method="post" action="{{ url_for('posts.delete', post_id=post['id']) }}"
               onsubmit="return confirm('Удалить статью?');">
@@ -45,24 +45,28 @@
       </div>
 
       {% if comments %}
-      <ul class="list-group list-group-flush mb-4">
+      <ul class="list-unstyled d-flex flex-column gap-3 gap-md-4 mb-4">
         {% for c in comments %}
-        <li class="list-group-item bg-transparent px-0 py-3">
-          <div class="text-secondary small mb-2">
-            <span class="user-tag">{{ c['author_name'] }}#{{ c['author_disc'] }}</span>
-            <span class="mx-1">·</span>
-            <time datetime="{{ c['created_at'] }}">{{ c['created_at'] }}</time>
+        <li class="comment-item card border">
+          <div class="card-body p-3 p-md-4">
+            <div class="d-flex flex-wrap align-items-baseline justify-content-between gap-2 mb-2">
+              <div class="text-secondary small">
+                <span class="user-tag fw-medium text-body">{{ c['author_name'] }}#{{ c['author_disc'] }}</span>
+                <span class="mx-1" aria-hidden="true">·</span>
+                <time datetime="{{ c['created_at'] }}">{{ c['created_at'] }}</time>
+              </div>
+              {% if g.user and (g.user['is_admin'] or g.user['id'] == c['user_id']) %}
+              <div class="d-flex gap-3">
+                <a class="small link-secondary text-decoration-none" href="{{ url_for('comments.edit', comment_id=c['id']) }}">Изменить</a>
+                <form method="post" action="{{ url_for('comments.delete', comment_id=c['id']) }}"
+                      onsubmit="return confirm('Удалить комментарий?');">
+                  <button type="submit" class="btn btn-link btn-sm p-0 link-danger text-decoration-none">Удалить</button>
+                </form>
+              </div>
+              {% endif %}
+            </div>
+            <div class="post-body post-body-sm mb-0">{{ c['body_source'] | render_content(c['body_format']) }}</div>
           </div>
-          <div class="post-body post-body-sm mb-2">{{ c['body_source'] | render_content(c['body_format']) }}</div>
-          {% if g.user and (g.user['is_admin'] or g.user['id'] == c['user_id']) %}
-          <div class="d-flex gap-3">
-            <a class="small link-secondary text-decoration-none" href="{{ url_for('comments.edit', comment_id=c['id']) }}">Изменить</a>
-            <form method="post" action="{{ url_for('comments.delete', comment_id=c['id']) }}"
-                  onsubmit="return confirm('Удалить комментарий?');">
-              <button type="submit" class="btn btn-link btn-sm p-0 link-danger text-decoration-none">Удалить</button>
-            </form>
-          </div>
-          {% endif %}
         </li>
         {% endfor %}
       </ul>
@@ -71,7 +75,7 @@
       {% endif %}
 
       {% if g.user %}
-      <div class="card border shadow-sm">
+      <div class="card border">
         <div class="card-body p-3 p-md-4">
           <form method="post" action="{{ url_for('comments.create', post_id=post['id']) }}">
             <label class="form-label" for="body_source">Ваш комментарий</label>
@@ -84,7 +88,7 @@
         </div>
       </div>
       {% else %}
-      <div class="alert alert-light border mb-0" role="status">
+      <div class="alert alert-secondary border mb-0" role="status">
         <a class="alert-link" href="{{ url_for('auth.login') }}">Войдите</a>, чтобы оставить комментарий.
       </div>
       {% endif %}

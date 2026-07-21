@@ -37,4 +37,4 @@
 
 ## После изменения поведения
 
-Mapping «куда писать» + commit — skill [`.cursor/skills/flask-blog-docs-after-task/SKILL.md`](.cursor/skills/flask-blog-docs-after-task/SKILL.md) (**автоматически** в конце реализации; hook `stop`). Scoping: [`.cursor/rules/docs-context.mdc`](.cursor/rules/docs-context.mdc). Не копировать карты ARCHITECTURE в rules.
+Skill [`.cursor/skills/flask-blog-docs-after-task/SKILL.md`](.cursor/skills/flask-blog-docs-after-task/SKILL.md): mapping «куда писать» + commit + backlog `in_review` (**обязательно до PR в `dev`**; hook `stop`). Scoping: [`.cursor/rules/docs-context.mdc`](.cursor/rules/docs-context.mdc). Не копировать карты ARCHITECTURE в rules.
