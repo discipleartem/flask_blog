@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "hooks": {
+    "stop": [
+      {
+        "command": ".cursor/hooks/docs-after-task-stop.py",
+        "loop_limit": 1,
+        "timeout": 30
+      }
+    ]
+  }
+}

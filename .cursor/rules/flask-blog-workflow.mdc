@@ -1,0 +1,20 @@
+---
+description: Конец task-ветки — обязательно docs-after-task
+alwaysApply: true
+---
+
+# flask_blog — workflow (конец задачи)
+
+## Документация после реализации (обязательно)
+
+После завершения реализации (код/схема/тесты поведения), **до** финального ответа пользователю, push/PR и заявления «готово»:
+
+1. **Read** [`.cursor/skills/flask-blog-docs-after-task/SKILL.md`](../skills/flask-blog-docs-after-task/SKILL.md) целиком.
+2. **Выполнить** skill (обновить релевантные docs + CHANGELOG; commit по правилам skill).
+3. Только затем — verify / push / PR по запросу.
+
+**Не ждать** явной просьбы пользователя обновить документацию. Пропуск допустим только по критериям «Когда пропустить» в skill (docs-only / нет смены поведения / пустой diff docs).
+
+Автодогон: hook `stop` → [`.cursor/hooks/docs-after-task-stop.py`](../hooks/docs-after-task-stop.py) (один follow-up, если на `feat|fix|chore` есть app-изменения без docs-sync).
+
+Канон scoping: [`docs-context.mdc`](docs-context.mdc) · Task cycle ш.3: [`task-cycle.mdc`](~/.cursor/rules/task-cycle.mdc).

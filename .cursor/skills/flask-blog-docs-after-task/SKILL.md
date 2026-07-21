@@ -1,10 +1,10 @@
 ---
 name: flask-blog-docs-after-task
 description: >-
-  Updates flask_blog docs after feature work (ARCHITECTURE, DEVELOPMENT,
-  CHANGELOG, AGENTS) before the finalize commit. Use after implementation on a
-  task branch, when behavior/API/schema/UI contract changed, or when the user
-  asks to update documentation. Skip for docs-only or no-behavior changes.
+  MUST run automatically at end of flask_blog implementation tasks: updates
+  ARCHITECTURE, DEVELOPMENT, CHANGELOG, AGENTS before finalize commit. Triggered
+  by flask-blog-workflow rule and stop hook; also when user asks to update docs.
+  Skip only for docs-only or no-behavior changes.
 ---
 
 # flask_blog — документация после задачи
@@ -16,6 +16,11 @@ Post-merge rename — [`git-merged-branches.mdc`](../../rules/git-merged-branche
 
 ## Когда выполнять
 
+**Автоматически** в конце реализации — без запроса пользователя:
+
+1. Правило [`flask-blog-workflow.mdc`](../../rules/flask-blog-workflow.mdc): перед финальным «готово» / push / PR — Read этот skill и выполнить.
+2. Hook `stop` ([`.cursor/hooks/docs-after-task-stop.py`](../../hooks/docs-after-task-stop.py)): если agent завершил turn на `feat|fix|chore` с app-изменениями без docs-sync — один auto follow-up с этим skill.
+
 После **завершения реализации** (все подзадачи), **перед** commit финализации / verify / push·PR.
 
 ## Когда пропустить
@@ -23,6 +28,7 @@ Post-merge rename — [`git-merged-branches.mdc`](../../rules/git-merged-branche
 - Задача **только** `docs/` / `.cursor/rules/` / skills (без смены поведения приложения)
 - Косметика / рефакторинг без смены API, схемы, маршрутов, UI-контракта
 - Diff docs после шага 2 пустой — commit docs не нужен
+- Hook не сработал и критериев «пропустить» нет — **всё равно** выполнить skill вручную по workflow-правилу
 
 ## Алгоритм
 

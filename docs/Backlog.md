@@ -20,7 +20,7 @@
 - Есть `docs/README.md` (индекс) и `docs/ARCHITECTURE.md` (маршруты, схема, карта `app/`, права) — плотные таблицы, без howto.
 - `DEVELOPMENT.md` не дублирует структуру/права: ссылки на ARCHITECTURE.
 - Короткое alwaysApply-правило `docs-context.mdc` + ссылка в `00-project.mdc`.
-- Project skill `flask-blog-docs-after-task`: автообновление docs после реализации (таблица куда писать + CHANGELOG); связан с `docs-context` / AGENTS / backlog-sync.
+- Project skill `flask-blog-docs-after-task`: автозапуск в конце реализации (`flask-blog-workflow.mdc` + hook `stop`); таблица куда писать + CHANGELOG; связан с `docs-context` / AGENTS / backlog-sync.
 - README §Документация указывает AGENTS / индекс / ARCHITECTURE.
 - CHANGELOG (Unreleased / Docs) отражает обновление.
 - Sync backlog ↔ GitHub Project выполнен (`**GitHub:** #N` в секции).

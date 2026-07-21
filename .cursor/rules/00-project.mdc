@@ -34,7 +34,7 @@ alwaysApply: true
 | Тема | Rule |
 |------|------|
 | Docs-first / scoping | `docs-context.mdc` |
-| Docs после задачи | skill `flask-blog-docs-after-task` |
+| Конец задачи → docs | `flask-blog-workflow.mdc` + skill `flask-blog-docs-after-task` + hook `stop` |
 | Flask 3.0.3, factory, blueprints | `flask-3.mdc` |
 | SQL, `schema.sql`, миграции | `database.mdc` |
 | Session auth / права | `auth.mdc` |

@@ -15,7 +15,10 @@ alwaysApply: true
 
 ## После изменений (docs)
 
-**Автоматически после реализации задачи** — skill [`flask-blog-docs-after-task`](../skills/flask-blog-docs-after-task/SKILL.md) (до commit финализации).
+**Автоматически после реализации задачи** (обязательно, без просьбы пользователя):
+
+1. Read + выполнить skill [`flask-blog-docs-after-task`](../skills/flask-blog-docs-after-task/SKILL.md) — см. [`flask-blog-workflow.mdc`](flask-blog-workflow.mdc).
+2. Страховка: hook `stop` → `.cursor/hooks/docs-after-task-stop.py` (один follow-up).
 
 | Изменение | Обновить |
 |-----------|----------|
