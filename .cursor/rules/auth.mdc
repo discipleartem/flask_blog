@@ -1,0 +1,38 @@
+---
+description: Auth — Flask cookie session без JWT; identity name#NNNN
+globs: app/auth/**/*.py,app/**/*.py
+alwaysApply: false
+---
+
+# Аутентификация и авторизация
+
+## Принцип
+
+**Flask signed cookie session** — в сессии хранится `user_id` после login/register.
+
+**Запрещено:** JWT, OAuth-токены как основной login, API Bearer-auth для пользовательского входа, отдельные token-stores «вместо session».
+
+```python
+# ❌ BAD
+return jsonify({"access_token": jwt.encode(...)})
+
+# ✅ GOOD
+session.clear()
+session["user_id"] = user["id"]
+```
+
+## Идентичность
+
+- Формат: `name#discriminator` (4 цифры), в стиле Discord
+- Имя `admin` зарезервировано при регистрации
+- Seed: `admin#0001` с `is_admin=1`
+
+## Права (кратко)
+
+| Действие | Автор | Admin |
+|----------|-------|-------|
+| Свои посты/комментарии CRUD | да | да |
+| Чужие посты/комментарии | нет | да |
+| Список / удаление пользователей | нет | да (не последнего admin) |
+
+Хелперы и декораторы — в `app/auth/`; не дублировать проверки JWT/header-токенов.

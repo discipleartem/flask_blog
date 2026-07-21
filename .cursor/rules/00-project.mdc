@@ -1,0 +1,38 @@
+---
+description: Стек и архитектурные ограничения flask_blog (Python/Flask/БД/UI)
+alwaysApply: true
+---
+
+# flask_blog — project stack
+
+## Runtime
+
+| Компонент | Версия / выбор |
+|-----------|----------------|
+| Python | **3.12** (`requires-python = ">=3.12"`) |
+| Flask | **3.0.3** (пин в `pyproject.toml`) |
+| БД | **SQLite3** + **чистый SQL** (без ORM) |
+| Auth | Cookie **session** (`user_id`), **без JWT** |
+| UI | **Bootstrap 5** (серверные Jinja-шаблоны) |
+| Тесты | **только unit** (`unittest`, каталог `tests/`) |
+
+Команды проекта — только в `.venv` (global `venv.mdc`).
+
+## Архитектурные запреты
+
+- **Другие СУБД** (Postgres, MySQL, …) — не подключать без явного запроса; БД проекта — **SQLite3**
+- **ORM** (SQLAlchemy, Peewee, …) — не подключать; доступ через stdlib `sqlite3` / хелперы в `app/db.py`
+- **JWT / Bearer-токены для login** — не использовать; только Flask signed cookie session
+- **Front-end фреймворки** (React, Vue, Angular, Svelte, …) — не использовать; UI = Jinja2 + Bootstrap 5
+- **Не unit-тесты в CI/репо** — не добавлять pytest, e2e/Playwright-сюиты, integration-фреймворки как замену `unittest`
+- Не поднимать версию Flask / Python без явного запроса
+
+## Детали (отдельные rules)
+
+| Тема | Rule |
+|------|------|
+| Flask 3.0.3, factory, blueprints | `flask-3.mdc` |
+| SQL, `schema.sql`, миграции | `database.mdc` |
+| Session auth / права | `auth.mdc` |
+| Bootstrap 5, шаблоны, static | `ui-bootstrap.mdc` |
+| Unit-тесты | `testing.mdc` |

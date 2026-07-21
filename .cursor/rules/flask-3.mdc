@@ -1,0 +1,42 @@
+---
+description: Flask 3.0.3 — app factory, blueprints, стиль кода проекта
+globs: app/**/*.py,wsgi.py,tests/**/*.py
+alwaysApply: false
+---
+
+# Flask 3.0.3
+
+Версия закреплена в `pyproject.toml` / `00-project.mdc`. Не поднимать без явного запроса.
+
+## Структура
+
+- **App factory:** `create_app()` в `app/__init__.py`; точка входа `wsgi.py`
+- **Blueprints:** `app/auth`, `posts`, `comments`, `users`, `deploy` — маршруты только в bp
+- **Конфиг:** `app/config.py` + env (`.env`); секреты не в коде
+- **Данные:** чистый SQL через `app/db.py` — не «модели ORM» (см. `database.mdc`)
+- **Auth:** cookie session + декораторы в `app/auth/` (см. `auth.mdc`)
+- **UI:** Jinja2 + Bootstrap 5 (см. `ui-bootstrap.mdc`)
+
+## Стиль
+
+- Type hints на параметрах и возвратах; docstrings на русском
+- Функции предпочтительнее классов (кроме нужды в состоянии); view = функция на blueprint
+- Guard clauses / ранний `return`; happy path в конце
+- Имена: `snake_case` файлы/функции; описательные флаги (`is_admin`, `has_permission`)
+- Логирование: `current_app.logger` / `app.logger`, не `print` в прод-путях
+
+## Запрос / ответ
+
+- `before_request` / `teardown_appcontext` — как уже в factory и `init_db_app`
+- Flash + redirect для форм; не строить JWT/JSON-login API
+- CSRF и session — существующие хелперы проекта; не дублировать своими middleware
+
+## Запрещено / не тащить «из гайдов»
+
+- Flask-SQLAlchemy, Flask-Caching, connection pools «для Postgres»
+- Gunicorn/uWSGI как обязательный локальный стек (прод — PythonAnywhere, см. `docs/DEPLOY.md`)
+- Интеграционные/e2e-сюиты вместо unit (`testing.mdc`)
+
+## Тесты
+
+Flask test client внутри **`unittest`** (`tests/`); временная БД / `create_app` — как в существующих тестах.

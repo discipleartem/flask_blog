@@ -1,0 +1,31 @@
+---
+description: Тестирование — только unittest; без pytest/e2e-сюит в репо
+globs: tests/**/*.py,**/*test*.py,.github/workflows/**/*.{yml,yaml}
+alwaysApply: false
+---
+
+# Тестирование
+
+## Принцип
+
+**Только unit-тесты** на stdlib `unittest` в каталоге `tests/`.
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+CI (`.github/workflows/ci.yml`, `deploy.yml`) запускает ту же команду.
+
+## Запрещено в репозитории / CI
+
+- pytest, nose, hypothesis как основной раннер
+- E2E / browser-сюиты (Playwright, Selenium, Cypress) как автоматические тесты проекта
+- Отдельный слой «integration tests» вместо unit
+
+Ручная проверка в браузере и runtime-verify агента (IronBee) — не часть тестового набора; в `tests/` их не оформлять.
+
+## Практика
+
+- Новые проверки — `tests/test_*.py`, классы `unittest.TestCase`
+- Тесты быстрые, изолированные (временная БД / app factory — как в существующих тестах)
+- Не подключать test-зависимости в `pyproject.toml` без явного запроса
