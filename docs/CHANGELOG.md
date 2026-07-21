@@ -7,6 +7,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Jinja-фильтр `plain_excerpt` (`app/content_render.py`) — краткий plain-text превью для ленты постов.
+
 ### Changed
 
 - UI: тёплая paper/beige дневная и gunmetal/chrome ночная темы; sticky nav с active links; комфорт чтения (`.post-body`); формы и users без `table-light` / лишних `shadow-sm`.
@@ -17,7 +21,7 @@
 ### Docs
 
 - Skill `flask-blog-git-release-sync`: синхронизация `dev` ← `main` после релиза (конфликты CHANGELOG/version — в пользу `main`).
-- DEVELOPMENT §UI и `ui-bootstrap.mdc`: описание warm/chrome dual theme вместо строгого монохрома.
+- DEVELOPMENT §UI / §Контент, ARCHITECTURE и `ui-bootstrap.mdc`: warm/chrome dual theme, лента/комментарии, фильтр `plain_excerpt`.
 ## [0.3.0] — 2026-07-21
 
 ### Added

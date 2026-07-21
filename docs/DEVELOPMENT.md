@@ -23,7 +23,7 @@
 
 | Слой | Файлы | Поведение |
 |------|--------|-----------|
-| Рендер | `app/content_render.py`, Jinja-фильтр `render_content` | Markdown / plain / html → nh3 → `Markup`. Без `| safe` по сырой колонке из БД |
+| Рендер | `app/content_render.py`, Jinja-фильтры `render_content`, `plain_excerpt` | Markdown / plain / html → nh3 → `Markup`. Лента: `plain_excerpt` — краткий plain-text из `body_source`. Без `| safe` по сырой колонке из БД |
 | Редактор | `app/static/js/markdown-editor.js`, vendor EasyMDE | JS обязателен для форм; чтение витрины без JS |
 | Preview | `POST /markdown/preview` | Тот же `render_to_html`, что на витрине; кнопка «глаз» в тулбаре |
 | Код | `app/static/js/syntax-highlight.js`, стили в `app.css` | Подсветка `pre code.language-*`: python, html, javascript, css, bash (+ aliases); иначе generic. Автоотступы (табы→пробелы, структурный indent); на submit — `formatMarkdownFences` |
@@ -44,6 +44,8 @@
 Custom CSS (`app/static/css/app.css`) и JS (`theme.js`, `markdown-editor.js`, `syntax-highlight.js`) — **только исключения**: токены светлой/тёмной темы, бренд-типографика (IBM Plex), градиент hero, переключатель `data-bs-theme`, EasyMDE, подсветка/копирование кода. Не дублировать layout Bootstrap своими правилами и не подключать другие CSS-фреймворки.
 
 **Темы (чтение day/night):** light — тёплый paper/beige фон и мягкий графит; dark — gunmetal / metallic chrome и soft off-white. Токены `--fb-*` в `app.css`; `btn-dark` перекрашен под палитру. Приоритет — контраст и комфорт длинного чтения (`.post-body`), не чистый ч/б.
+
+**Лента / пост / комментарии:** главная — surface-карточки (`.feed-item`), заголовок → excerpt (`plain_excerpt`) → мета; карточка целиком — ссылка на пост. Страница поста — reading column (`.post-body`: абзацы, списки, blockquote). Комментарии — отдельные карточки (`.comment-item`) с `gap`, не плоский список с `border-bottom`.
 
 ### Mobile / tablet first
 
