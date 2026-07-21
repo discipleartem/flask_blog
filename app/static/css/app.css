@@ -155,7 +155,7 @@ body {
 .post-body pre,
 .post-body .code-block,
 .post-body table {
-  margin-bottom: 1rem;
+  margin-bottom: 1.15rem;
 }
 
 .post-body .code-block > pre {
@@ -167,11 +167,30 @@ body {
   padding-left: 1.5rem;
 }
 
+.post-body li + li {
+  margin-top: 0.4rem;
+}
+
+.post-body li > p {
+  margin-bottom: 0.45rem;
+}
+
+.post-body li > p:last-child {
+  margin-bottom: 0;
+}
+
 .post-body blockquote {
   margin-left: 0;
-  padding: 0.35rem 0 0.35rem 1rem;
-  border-left: 3px solid var(--fb-line);
-  color: var(--fb-muted);
+  padding: 0.85rem 1rem;
+  border-left: 3px solid color-mix(in srgb, var(--fb-ink) 28%, var(--fb-line));
+  border-radius: 0 0.4rem 0.4rem 0;
+  background: color-mix(in srgb, var(--fb-surface) 70%, var(--fb-bg));
+  color: var(--fb-ink);
+}
+
+[data-bs-theme="dark"] .post-body blockquote {
+  background: #1e2229;
+  border-left-color: color-mix(in srgb, var(--fb-accent) 55%, var(--fb-line));
 }
 
 .post-body blockquote > :last-child {
@@ -461,9 +480,11 @@ body {
 
 .EasyMDEContainer .editor-preview blockquote {
   margin-left: 0;
-  padding: 0.35rem 0 0.35rem 1rem;
-  border-left: 3px solid var(--fb-line);
-  color: var(--fb-muted);
+  padding: 0.85rem 1rem;
+  border-left: 3px solid color-mix(in srgb, var(--fb-ink) 28%, var(--fb-line));
+  border-radius: 0 0.4rem 0.4rem 0;
+  background: color-mix(in srgb, var(--fb-surface) 70%, var(--fb-bg));
+  color: var(--fb-ink);
 }
 
 .EasyMDEContainer .editor-preview .code-block {
@@ -521,6 +542,10 @@ body {
   line-height: 1.3;
   letter-spacing: -0.02em;
   margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 @media (min-width: 768px) {
@@ -548,6 +573,11 @@ body {
   text-underline-offset: 0.18em;
 }
 
+.feed-item:hover .feed-more,
+.feed-item:focus-visible .feed-more {
+  color: var(--fb-ink);
+}
+
 [data-bs-theme="dark"] .feed-item {
   background: #1e2229;
   border-color: #454b54 !important;
@@ -566,9 +596,14 @@ body {
   line-height: 1.55;
   max-width: 42rem;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.feed-more {
+  color: var(--fb-muted);
+  white-space: nowrap;
 }
 
 .meta {
