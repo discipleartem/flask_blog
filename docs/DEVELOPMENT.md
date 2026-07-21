@@ -7,14 +7,27 @@
 | Python | 3.12 | `.venv` |
 | Flask | **3.0.3** | ограничение PythonAnywhere; не поднимать до 3.1+ |
 | Bootstrap | **5.3.x** | единственный UI-фреймворк; CDN в `base.html` |
+| Markdown | Python-Markdown + nh3 | рендер/санитизация на сервере (`app/content_render.py`) |
+| Редактор | EasyMDE **2.18.0** | vendor в `app/static/vendor/easymde/` (не CDN) |
 
 Зависимости: [`pyproject.toml`](../pyproject.toml) (основной) и [`requirements.txt`](../requirements.txt) (для PA / `pip install -r`).
+
+## Контент Post / Comment
+
+| Поле | Смысл |
+|------|--------|
+| `body_source` | Канон — исходник автора |
+| `body_format` | `plaintext` \| `markdown` \| `html` |
+
+Формы Post/Comment сохраняют Markdown: сервер всегда пишет `body_format=markdown`, поле формы — `body_source` (клиентский `body_format` игнорируется).
+
+Витрина: фильтр Jinja `render_content` → `render_to_html` (Markdown/plain/html → nh3 → `Markup`). Не использовать `| safe` по сырой колонке из БД. JS нужен только для редактора EasyMDE; показ страницы без JS. Preview EasyMDE выключен (итог — после сохранения).
 
 ## UI / UX
 
 **Bootstrap 5 — канон.** Сетка, навбар, формы, кнопки, alerts, collapse, spacing — через компоненты и utility-классы BS5.
 
-Custom CSS (`app/static/css/app.css`) и JS (`theme.js`) — **только исключения**: токены светлой/тёмной темы, бренд-типографика (IBM Plex), градиент hero, переключатель `data-bs-theme`. Не дублировать layout Bootstrap своими правилами и не подключать другие CSS-фреймворки.
+Custom CSS (`app/static/css/app.css`) и JS (`theme.js`, `markdown-editor.js`) — **только исключения**: токены светлой/тёмной темы, бренд-типографика (IBM Plex), градиент hero, переключатель `data-bs-theme`, инициализация EasyMDE. Не дублировать layout Bootstrap своими правилами и не подключать другие CSS-фреймворки.
 
 ### Mobile / tablet first
 
