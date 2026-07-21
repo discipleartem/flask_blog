@@ -37,4 +37,11 @@
 
 ## После изменения поведения
 
-Если менялись маршруты, таблицы БД или назначение модулей — обновить **только** затронутые таблицы в [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md). Не копировать архитектуру в rules.
+| Изменение | Куда писать |
+|-----------|-------------|
+| Маршруты, модули, права, поток запроса | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) |
+| Схема БД | `schema.sql` + миграция + ARCHITECTURE §Данные |
+| Запреты стека | `.cursor/rules/00-project.mdc` (+ тематический `*.mdc`) |
+| Howto (UI, IronBee, PA) | `DEVELOPMENT.md` / `DEPLOY.md` |
+
+Не копировать карты ARCHITECTURE в rules. Алгоритм: [`.cursor/rules/docs-context.mdc`](.cursor/rules/docs-context.mdc).

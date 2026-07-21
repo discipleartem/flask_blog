@@ -18,7 +18,7 @@ alwaysApply: true
 
 Команды проекта — только в `.venv` (global `venv.mdc`).
 
-Навигация по задаче (меньше токенов): [`AGENTS.md`](../../AGENTS.md) → [`docs/README.md`](../../docs/README.md).
+Навигация по задаче (меньше токенов): [`AGENTS.md`](../../AGENTS.md) → [`docs/ARCHITECTURE.md`](../../docs/ARCHITECTURE.md) / [`docs/README.md`](../../docs/README.md). Алгоритм scoping и обновления docs: `docs-context.mdc`.
 
 ## Архитектурные запреты
 

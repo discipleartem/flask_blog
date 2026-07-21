@@ -6,6 +6,8 @@ alwaysApply: false
 
 # UI / UX — Bootstrap 5
 
+Операционные детали (контент-редактор, IronBee): [`docs/DEVELOPMENT.md`](../../docs/DEVELOPMENT.md). Scoping: [`AGENTS.md`](../../AGENTS.md).
+
 ## Принцип
 
 **Bootstrap 5 — единственный UI-стек.** Серверные шаблоны Jinja2 + CDN BS5. Встроенная сетка и утилиты закрывают адаптив phone / tablet / desktop — отдельный front-end фреймворк не нужен.

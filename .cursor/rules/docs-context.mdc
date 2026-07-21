@@ -1,11 +1,25 @@
 ---
-description: Docs-first — сначала AGENTS.md, не сканировать репо
+description: Docs-first — алгоритм scoping и обновления карты
 alwaysApply: true
 ---
 
 # Docs-first (токены)
 
-1. Перед широким поиском / explore — открыть [`AGENTS.md`](../../AGENTS.md), выбрать строку таблицы.
-2. Читать **только** указанные docs и пути кода; не весь `app/` и не весь `docs/`.
-3. Канон карты (маршруты, схема, модули): [`docs/ARCHITECTURE.md`](../../docs/ARCHITECTURE.md).
-4. Индекс docs: [`docs/README.md`](../../docs/README.md).
+## Scoping (до кода)
+
+1. Открыть [`AGENTS.md`](../../AGENTS.md) → **одна** строка таблицы.
+2. Читать только указанные docs/rules и пути; не весь `app/`, не весь `docs/`.
+3. Карта (маршруты, схема, модули, права): [`docs/ARCHITECTURE.md`](../../docs/ARCHITECTURE.md).
+4. Индекс: [`docs/README.md`](../../docs/README.md).
+5. Широкий explore / Task по репо — только если роутер не дал путей.
+
+## После изменений (docs)
+
+| Изменение | Обновить |
+|-----------|----------|
+| Маршруты / модули / права / поток запроса | таблицы в `ARCHITECTURE.md` |
+| Схема БД | `schema.sql` + миграция + §Данные в `ARCHITECTURE.md` |
+| Стек / запреты | `00-project.mdc` (+ тематический `*.mdc`) |
+| Операционный howto (UI, IronBee, PA) | `DEVELOPMENT.md` / `DEPLOY.md` |
+
+Не копировать карты и таблицы прав из ARCHITECTURE в rules — в rules только запреты и алгоритмы.
