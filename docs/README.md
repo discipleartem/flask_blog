@@ -10,4 +10,5 @@
 | [Backlog.md](Backlog.md) | Активные задачи (не история) |
 | [CHANGELOG.md](CHANGELOG.md) | История изменений |
 
-Ограничения стека (агент): [`.cursor/rules/00-project.mdc`](../.cursor/rules/00-project.mdc).
+Ограничения стека (агент): [`.cursor/rules/00-project.mdc`](../.cursor/rules/00-project.mdc).  
+После реализации задачи агент обновляет docs по skill [`.cursor/skills/flask-blog-docs-after-task/SKILL.md`](../.cursor/skills/flask-blog-docs-after-task/SKILL.md).

@@ -44,4 +44,4 @@
 | Запреты стека | `.cursor/rules/00-project.mdc` (+ тематический `*.mdc`) |
 | Howto (UI, IronBee, PA) | `DEVELOPMENT.md` / `DEPLOY.md` |
 
-Не копировать карты ARCHITECTURE в rules. Алгоритм: [`.cursor/rules/docs-context.mdc`](.cursor/rules/docs-context.mdc).
+Процедура: skill [`.cursor/skills/flask-blog-docs-after-task/SKILL.md`](.cursor/skills/flask-blog-docs-after-task/SKILL.md). Не копировать карты ARCHITECTURE в rules. Scoping: [`.cursor/rules/docs-context.mdc`](.cursor/rules/docs-context.mdc).

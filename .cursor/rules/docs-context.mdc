@@ -15,11 +15,15 @@ alwaysApply: true
 
 ## После изменений (docs)
 
+**Автоматически после реализации задачи** — skill [`flask-blog-docs-after-task`](../skills/flask-blog-docs-after-task/SKILL.md) (до commit финализации).
+
 | Изменение | Обновить |
 |-----------|----------|
 | Маршруты / модули / права / поток запроса | таблицы в `ARCHITECTURE.md` |
 | Схема БД | `schema.sql` + миграция + §Данные в `ARCHITECTURE.md` |
 | Стек / запреты | `00-project.mdc` (+ тематический `*.mdc`) |
 | Операционный howto (UI, IronBee, PA) | `DEVELOPMENT.md` / `DEPLOY.md` |
+| Заметные фичи / фиксы; закрытие backlog | `CHANGELOG.md` (`[Unreleased]`) |
+| Новый тип задачи в роутере | `AGENTS.md` |
 
 Не копировать карты и таблицы прав из ARCHITECTURE в rules — в rules только запреты и алгоритмы.
