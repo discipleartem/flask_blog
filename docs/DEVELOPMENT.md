@@ -57,7 +57,7 @@ Custom CSS (`app/static/css/app.css`) и JS (`theme.js`, `markdown-editor.js`, `
 
 Integration: `dev`. Релиз: `main`. Task-ветки: `feat/…`, `docs/…`, …
 
-После merge PR **не удалять** ветку на GitHub без архива: переименовать в `merged/<имя>` локально и на `origin` (канон для агента: [`.cursor/rules/git-merged-branches.mdc`](../.cursor/rules/git-merged-branches.mdc)).
+После merge PR **не удалять** ветку на GitHub без архива: переименовать в `merged/<имя>` локально и на `origin`, затем **checkout `dev`** (канон: [`.cursor/rules/git-merged-branches.mdc`](../.cursor/rules/git-merged-branches.mdc)).
 
 ## Проверка
 
