@@ -201,6 +201,9 @@
       })
       .then(function (data) {
         preview.innerHTML = data && data.html ? data.html : "";
+        if (window.FlaskBlogSyntax) {
+          window.FlaskBlogSyntax.highlight(preview);
+        }
       })
       .catch(function () {
         preview.innerHTML =

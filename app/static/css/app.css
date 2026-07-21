@@ -173,6 +173,87 @@ body {
   font-size: inherit;
 }
 
+/* Syntax highlight tokens (syntax-highlight.js) */
+:root {
+  --syn-keyword: #0550ae;
+  --syn-string: #0a3069;
+  --syn-comment: #6e7781;
+  --syn-number: #0550ae;
+  --syn-function: #8250df;
+  --syn-tag: #116329;
+  --syn-attr: #0550ae;
+  --syn-builtin: #953800;
+  --syn-decorator: #8250df;
+  --syn-property: #0550ae;
+  --syn-selector: #116329;
+  --syn-punctuation: #656d76;
+  --syn-entity: #953800;
+}
+
+[data-bs-theme="dark"] {
+  --syn-keyword: #79c0ff;
+  --syn-string: #a5d6ff;
+  --syn-comment: #8b949e;
+  --syn-number: #79c0ff;
+  --syn-function: #d2a8ff;
+  --syn-tag: #7ee787;
+  --syn-attr: #79c0ff;
+  --syn-builtin: #ffa657;
+  --syn-decorator: #d2a8ff;
+  --syn-property: #79c0ff;
+  --syn-selector: #7ee787;
+  --syn-punctuation: #8b949e;
+  --syn-entity: #ffa657;
+}
+
+.syn-keyword {
+  color: var(--syn-keyword);
+  font-weight: 600;
+}
+
+.syn-builtin {
+  color: var(--syn-builtin);
+  font-weight: 500;
+}
+
+.syn-string,
+.syn-entity {
+  color: var(--syn-string);
+}
+
+.syn-entity {
+  color: var(--syn-entity);
+}
+
+.syn-comment {
+  color: var(--syn-comment);
+  font-style: italic;
+}
+
+.syn-number {
+  color: var(--syn-number);
+}
+
+.syn-function,
+.syn-decorator {
+  color: var(--syn-function);
+}
+
+.syn-tag,
+.syn-selector {
+  color: var(--syn-tag);
+  font-weight: 600;
+}
+
+.syn-attr,
+.syn-property {
+  color: var(--syn-attr);
+}
+
+.syn-punctuation {
+  color: var(--syn-punctuation);
+}
+
 .post-body code:not(pre code) {
   padding: 0.1em 0.35em;
   border-radius: 0.25rem;

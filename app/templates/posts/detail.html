@@ -94,6 +94,7 @@
 </div>
 {% endblock %}
 {% block scripts %}
+  <script src="{{ url_for('static', filename='js/syntax-highlight.js') }}"></script>
   {% if g.user %}
   <script src="{{ url_for('static', filename='vendor/easymde/easymde.min.js') }}"></script>
   <script src="{{ url_for('static', filename='js/markdown-editor.js') }}"></script>
