@@ -12,7 +12,7 @@
 - UI: тёплая paper/beige дневная и gunmetal/chrome ночная темы; sticky nav с active links; комфорт чтения (`.post-body`); формы и users без `table-light` / лишних `shadow-sm`.
 - UI: комментарии на странице поста — отдельные surface-карточки с `gap` и акцентной левой границей (читаемее в light/dark).
 - UI: лента на главной — карточки статей с иерархией заголовок → excerpt → мета и hover, вместо плоского `list-group`.
-- UI: чтение средней статьи (эталон `/posts/5`) — ритм абзацев/списков, blockquote на surface; в ленте clamp заголовка, excerpt до 3 строк и «Читать».
+- UI: чтение средней статьи — ритм абзацев/списков, blockquote на surface; в ленте clamp заголовка, excerpt до 3 строк и «Читать».
 
 ### Docs
 
