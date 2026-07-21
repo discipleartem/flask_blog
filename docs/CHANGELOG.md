@@ -7,6 +7,8 @@
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-07-21
+
 ### Added
 
 - Markdown для Post/Comment: `body_source` + `body_format`, EasyMDE (vendor), серверный рендер (`content_render` + nh3), `POST /markdown/preview`.
