@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import unittest
 
-from app.content_render import render_to_html
+from app.content_render import plain_excerpt, render_to_html
 
 
 class ContentRenderTests(unittest.TestCase):
@@ -44,6 +44,21 @@ class ContentRenderTests(unittest.TestCase):
         html = str(render_to_html("**x**", "unknown"))
         self.assertIn("**x**", html)
         self.assertNotIn("<strong>", html)
+
+    def test_plain_excerpt_strips_markdown_and_truncates(self) -> None:
+        src = "# Title\n\nHello **world** and [link](https://example.com). " + ("word " * 40)
+        excerpt = plain_excerpt(src, max_chars=80)
+        self.assertNotIn("**", excerpt)
+        self.assertNotIn("#", excerpt)
+        self.assertNotIn("https://", excerpt)
+        self.assertIn("Hello", excerpt)
+        self.assertIn("world", excerpt)
+        self.assertTrue(excerpt.endswith("…"))
+        self.assertLessEqual(len(excerpt), 81)
+
+    def test_plain_excerpt_empty(self) -> None:
+        self.assertEqual(plain_excerpt(""), "")
+        self.assertEqual(plain_excerpt("```\ncode\n```"), "")
 
 
 if __name__ == "__main__":

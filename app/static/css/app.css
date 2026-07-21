@@ -516,20 +516,59 @@ body {
 .title-link {
   color: var(--fb-ink);
   font-family: "IBM Plex Serif", Georgia, serif;
-  font-size: 1.2rem;
+  font-size: 1.25rem;
   font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+  margin: 0;
 }
 
 @media (min-width: 768px) {
   .title-link {
-    font-size: 1.35rem;
+    font-size: 1.45rem;
   }
 }
 
-.list-group-item-action:hover .title-link,
-.list-group-item-action:focus .title-link {
+.feed-item {
+  background: var(--fb-surface);
+  border-left: 3px solid color-mix(in srgb, var(--fb-ink) 22%, var(--fb-line)) !important;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.feed-item:hover,
+.feed-item:focus-visible {
+  border-color: color-mix(in srgb, var(--fb-ink) 40%, var(--fb-line)) !important;
+  border-left-color: color-mix(in srgb, var(--fb-ink) 55%, var(--fb-line)) !important;
+  background: color-mix(in srgb, var(--fb-surface) 92%, var(--fb-ink));
+}
+
+.feed-item:hover .title-link,
+.feed-item:focus-visible .title-link {
   text-decoration: underline;
-  text-underline-offset: 0.15em;
+  text-underline-offset: 0.18em;
+}
+
+[data-bs-theme="dark"] .feed-item {
+  background: #1e2229;
+  border-color: #454b54 !important;
+  border-left-color: color-mix(in srgb, var(--fb-accent) 50%, var(--fb-line)) !important;
+}
+
+[data-bs-theme="dark"] .feed-item:hover,
+[data-bs-theme="dark"] .feed-item:focus-visible {
+  background: #242930;
+  border-color: #5a616b !important;
+  border-left-color: var(--fb-accent) !important;
+}
+
+.feed-excerpt {
+  font-size: 0.95rem;
+  line-height: 1.55;
+  max-width: 42rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .meta {
