@@ -43,15 +43,18 @@
 
 Custom CSS (`app/static/css/app.css`) и JS (`theme.js`, `markdown-editor.js`, `syntax-highlight.js`) — **только исключения**: токены светлой/тёмной темы, бренд-типографика (IBM Plex), градиент hero, переключатель `data-bs-theme`, EasyMDE, подсветка/копирование кода. Не дублировать layout Bootstrap своими правилами и не подключать другие CSS-фреймворки.
 
+**Темы (чтение day/night):** light — тёплый paper/beige фон и мягкий графит; dark — gunmetal / metallic chrome и soft off-white. Токены `--fb-*` в `app.css`; `btn-dark` перекрашен под палитру. Приоритет — контраст и комфорт длинного чтения (`.post-body`), не чистый ч/б.
+
 ### Mobile / tablet first
 
 1. Базовая разметка — для phone.
 2. Усиление на `md` (планшет) и `lg`+ (ПК / wide) утилитами BS (`py-md-4`, `navbar-expand-lg`, …).
 3. Контейнер: `container-fluid` + `px-3/px-md-4/px-xl-5` — без узкого `container-xxl`, контент использует ширину ПК / wide.
-4. Sticky footer: `min-vh-100` + `flex-grow-1` на `main` (утилиты BS в `base.html`).
+4. Sticky footer: `min-vh-100` + `flex-grow-1` на `main` (утилиты BS в `base.html`); sticky navbar (`sticky-top` + blur surface).
 5. Переключатель темы — **вне** collapse на mobile/tablet (слева от hamburger); на desktop (`lg+`) — слева от «Войти» / действий пользователя.
 6. Два экземпляра кнопки темы в разметке; JS вешается на все `.theme-toggle` (`app/static/js/theme.js`).
-7. В шаблонах доступен `current_year` (context processor в `create_app`) — для футера.
+7. Active `nav-link` по `request.endpoint` / `request.blueprint`.
+8. В шаблонах доступен `current_year` (context processor в `create_app`) — для футера.
 
 ## Git / ветки
 

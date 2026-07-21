@@ -7,10 +7,14 @@
 
 ## [Unreleased]
 
+### Changed
+
+- UI: тёплая paper/beige дневная и gunmetal/chrome ночная темы; sticky nav с active links; комфорт чтения (`.post-body`); формы и users без `table-light` / лишних `shadow-sm`.
+
 ### Docs
 
 - Skill `flask-blog-git-release-sync`: синхронизация `dev` ← `main` после релиза (конфликты CHANGELOG/version — в пользу `main`).
-
+- DEVELOPMENT §UI и `ui-bootstrap.mdc`: описание warm/chrome dual theme вместо строгого монохрома.
 ## [0.3.0] — 2026-07-21
 
 ### Added
