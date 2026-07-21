@@ -1,6 +1,6 @@
 ---
 description: Auth — cookie session без JWT; права — в ARCHITECTURE
-globs: app/auth/**/*.py,app/**/*.py
+globs: app/auth/**/*.py,app/users/**/*.py
 alwaysApply: false
 ---
 

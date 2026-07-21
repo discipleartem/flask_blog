@@ -1,62 +1,21 @@
 ---
-description: После merge task-ветки на GitHub — переименовать в merged/*, вернуться на dev
-alwaysApply: true
+description: After MERGED / post-merge — archive task branch as merged/* on origin, checkout dev
+alwaysApply: false
 ---
 
 # Git: ветки `merged/*` (flask_blog)
 
-**Переопределяет** global [`git.mdc`](~/.cursor/rules/git.mdc) §Branches про `merged/*` (там — только локально, без push).
+Переопределяет global [`git.mdc`](~/.cursor/rules/git.mdc) default (local-only): в этом репо архив **на GitHub**.
 
 ## Политика
 
-После merge PR task-ветки → `dev` (или `dev` → `main`):
+После merge PR task → `dev` (или `dev` → `main`):
 
-1. **Не** удалять ветку на GitHub «в никуда» (кнопка Delete branch / `git push --delete` без архива).
-2. **Переименовать** в `merged/<короткое-имя>` локально **и** на `origin`.
-3. Архив `merged/*` **хранится на GitHub** — это норма для этого репозитория.
-4. **Обязательно** закончить на integration-ветке: `git checkout dev && git pull --ff-only origin dev` (для merge в `main` — `main`). Не оставлять checkout на task-ветке, `docs/*` follow-up или `merged/*`.
+1. Не удалять remote task-ветку без архива `origin/merged/…`
+2. Переименовать в `merged/<короткое-имя>` локально **и** на `origin`
+3. Закончить на integration: `git checkout dev && git pull --ff-only origin dev`
+4. Не PR / не новая работа с head `merged/…`
 
-Имена: `feat/foo` → `merged/foo`, `docs/bar` → `merged/bar` (префикс `feat/` / `docs/` / … снимается, остаётся kebab-case имя задачи).
+Имена: `feat/foo` → `merged/foo` (префикс снимается).
 
-## Алгоритм агента (после «merged» / PR `MERGED`)
-
-Выполнять **в одном turn**, порядок фиксирован:
-
-```bash
-git fetch origin
-INTEGRATION=dev   # или main, если merge был в main
-TASK=feat/my-task # head PR до merge
-SHORT=my-task     # без префикса feat|/docs|/fix|/chore|
-
-# 1) Сначала на integration (rename чужой ветки удобнее не с неё)
-git checkout "$INTEGRATION"
-git pull --ff-only origin "$INTEGRATION"
-
-# 2) Локальный rename (+ remote archive)
-if git show-ref --verify --quiet "refs/heads/$TASK"; then
-  git branch -m "$TASK" "merged/$SHORT"
-else
-  git branch "merged/$SHORT" "origin/$TASK"   # если локальной уже нет
-fi
-git push -u origin "merged/$SHORT"
-git push origin --delete "$TASK"             # только старое имя; tip уже на merged/*
-
-# 3) Конечное состояние сессии — снова integration
-git checkout "$INTEGRATION"
-git status -sb   # должна быть ## dev...origin/dev (или main)
-```
-
-### Follow-up (backlog `done` / docs)
-
-Если после merge нужен отдельный PR (`docs/…-backlog-done`):
-
-1. Создать ветку **от актуального `dev`**, коммит, push, `gh pr create --base dev`.
-2. **Сразу после push/PR:** `git checkout dev` — не оставлять пользователя на `docs/…`.
-3. Когда этот docs-PR смержен — снова полный алгоритм выше (`docs/foo` → `merged/foo`, checkout `dev`).
-
-## Запрещено
-
-- Удалять remote task-ветку после merge без создания `origin/merged/…`
-- Делать PR / открывать новую работу с head `merged/…` (архив только для истории)
-- Force-push в `main` / `dev`
-- Завершать post-merge turn, оставаясь на task / `docs/*` / `merged/*` вместо `dev` (или `main`)
+**Алгоритм (bash + follow-up docs PR):** skill [`flask-blog-git-merged-archive`](../skills/flask-blog-git-merged-archive/SKILL.md) — Read и выполнить в том же turn после MERGED.

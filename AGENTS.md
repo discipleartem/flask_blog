@@ -37,11 +37,4 @@
 
 ## После изменения поведения
 
-| Изменение | Куда писать |
-|-----------|-------------|
-| Маршруты, модули, права, поток запроса | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) |
-| Схема БД | `schema.sql` + миграция + ARCHITECTURE §Данные |
-| Запреты стека | `.cursor/rules/00-project.mdc` (+ тематический `*.mdc`) |
-| Howto (UI, IronBee, PA) | `DEVELOPMENT.md` / `DEPLOY.md` |
-
-Процедура: skill [`.cursor/skills/flask-blog-docs-after-task/SKILL.md`](.cursor/skills/flask-blog-docs-after-task/SKILL.md) — **запускать автоматически** в конце реализации ([`flask-blog-workflow.mdc`](.cursor/rules/flask-blog-workflow.mdc); hook `stop`). Не копировать карты ARCHITECTURE в rules. Scoping: [`.cursor/rules/docs-context.mdc`](.cursor/rules/docs-context.mdc).
+Mapping «куда писать» + commit — skill [`.cursor/skills/flask-blog-docs-after-task/SKILL.md`](.cursor/skills/flask-blog-docs-after-task/SKILL.md) (**автоматически** в конце реализации; hook `stop`). Scoping: [`.cursor/rules/docs-context.mdc`](.cursor/rules/docs-context.mdc). Не копировать карты ARCHITECTURE в rules.

@@ -1,6 +1,6 @@
 ---
 description: БД — SQLite3, чистый SQL, миграции; обзор таблиц — ARCHITECTURE
-globs: app/**/*.py,schema.sql,migrations/**/*.sql,tests/**/*.py
+globs: app/db.py,schema.sql,migrations/**/*.sql
 alwaysApply: false
 ---
 

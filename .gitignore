@@ -3,6 +3,8 @@
 !.vscode/launch.json
 !.vscode/settings.json
 !.vscode/terminal-init.sh
+# IronBee DevTools writes this on activate/Reload — do not track
+.cursor/rules/ironbee-devtools-use.mdc
 __pycache__/
 *.py[cod]
 *$py.class

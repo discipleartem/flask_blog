@@ -1,5 +1,5 @@
 ---
-description: Docs-first — алгоритм scoping и обновления карты
+description: Docs-first — алгоритм scoping (меньше токенов)
 alwaysApply: true
 ---
 
@@ -13,20 +13,4 @@ alwaysApply: true
 4. Индекс: [`docs/README.md`](../../docs/README.md).
 5. Широкий explore / Task по репо — только если роутер не дал путей.
 
-## После изменений (docs)
-
-**Автоматически после реализации задачи** (обязательно, без просьбы пользователя):
-
-1. Read + выполнить skill [`flask-blog-docs-after-task`](../skills/flask-blog-docs-after-task/SKILL.md) — см. [`flask-blog-workflow.mdc`](flask-blog-workflow.mdc).
-2. Страховка: hook `stop` → `.cursor/hooks/docs-after-task-stop.py` (один follow-up).
-
-| Изменение | Обновить |
-|-----------|----------|
-| Маршруты / модули / права / поток запроса | таблицы в `ARCHITECTURE.md` |
-| Схема БД | `schema.sql` + миграция + §Данные в `ARCHITECTURE.md` |
-| Стек / запреты | `00-project.mdc` (+ тематический `*.mdc`) |
-| Операционный howto (UI, IronBee, PA) | `DEVELOPMENT.md` / `DEPLOY.md` |
-| Заметные фичи / фиксы; закрытие backlog | `CHANGELOG.md` (`[Unreleased]`) |
-| Новый тип задачи в роутере | `AGENTS.md` |
-
-Не копировать карты и таблицы прав из ARCHITECTURE в rules — в rules только запреты и алгоритмы.
+Куда писать docs после реализации — skill [`flask-blog-docs-after-task`](../skills/flask-blog-docs-after-task/SKILL.md). Не копировать карты ARCHITECTURE в rules.
