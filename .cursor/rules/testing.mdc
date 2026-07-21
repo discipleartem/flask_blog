@@ -6,6 +6,8 @@ alwaysApply: false
 
 # Тестирование
 
+Автопроверка агента/CI — только unit ниже. Ручной браузер / IronBee — [`docs/DEVELOPMENT.md`](../../docs/DEVELOPMENT.md) §Проверка. Scoping: [`AGENTS.md`](../../AGENTS.md).
+
 ## Принцип
 
 **Только unit-тесты** на stdlib `unittest` в каталоге `tests/`.

@@ -78,7 +78,10 @@ python -m unittest discover -s tests -v
 
 ## Документация
 
-- [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) — структура, UI (Bootstrap 5), IronBee (Chrome + CDP), миграции, права
+- [AGENTS.md](AGENTS.md) — вход для агента: тип задачи → docs → пути кода (экономия контекста)
+- [docs/README.md](docs/README.md) — индекс документации
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — модули, маршруты, схема, права
+- [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) — UI (Bootstrap 5), контент/Markdown, IronBee, проверки
 - [docs/DEPLOY.md](docs/DEPLOY.md) — PythonAnywhere **Beginner**, `.env`, auto-deploy при push в `main`
 - [docs/CHANGELOG.md](docs/CHANGELOG.md) — история изменений
 

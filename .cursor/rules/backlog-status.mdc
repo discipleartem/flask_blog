@@ -29,3 +29,4 @@ alwaysApply: true
 - После `done` и sync: итог задачи — в [`docs/CHANGELOG.md`](../../docs/CHANGELOG.md); секцию `## …` из `Backlog.md` убрать (в backlog только будущие/активные задачи).
 - **Не** ставить `done` только потому, что реализация на ветке закончена — до PR остаётся `in_progress`.
 - Задачи без записи в `Backlog.md` — правило не применять.
+- Scoping реализации — [`AGENTS.md`](../../AGENTS.md) / `docs-context.mdc` (не сканировать репо вместо backlog AC).

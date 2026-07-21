@@ -1,5 +1,5 @@
 ---
-description: Flask 3.0.3 — app factory, blueprints, стиль кода проекта
+description: Flask 3.0.3 — factory, blueprints, стиль; карта — ARCHITECTURE
 globs: app/**/*.py,wsgi.py,tests/**/*.py
 alwaysApply: false
 ---
@@ -8,14 +8,14 @@ alwaysApply: false
 
 Версия закреплена в `pyproject.toml` / `00-project.mdc`. Не поднимать без явного запроса.
 
-## Структура
+Карта слоёв, blueprints и маршрутов: [`docs/ARCHITECTURE.md`](../../docs/ARCHITECTURE.md). Scoping: [`AGENTS.md`](../../AGENTS.md).
 
-- **App factory:** `create_app()` в `app/__init__.py`; точка входа `wsgi.py`
-- **Blueprints:** `app/auth`, `posts`, `comments`, `users`, `deploy` — маршруты только в bp
-- **Конфиг:** `app/config.py` + env (`.env`); секреты не в коде
-- **Данные:** чистый SQL через `app/db.py` — не «модели ORM» (см. `database.mdc`)
-- **Auth:** cookie session + декораторы в `app/auth/` (см. `auth.mdc`)
-- **UI:** Jinja2 + Bootstrap 5 (см. `ui-bootstrap.mdc`)
+## Алгоритм правки
+
+1. Маршрут / view — только в соответствующем blueprint (`app/<bp>/`).
+2. Новые маршруты или смена prefix — сразу правка таблицы «Маршруты» в ARCHITECTURE.
+3. Секреты — только env / `.env`; не в коде.
+4. Данные — SQL через `app/db.py` (`database.mdc`); auth — session (`auth.mdc`); UI — Jinja+BS5 (`ui-bootstrap.mdc`).
 
 ## Стиль
 
@@ -27,14 +27,14 @@ alwaysApply: false
 
 ## Запрос / ответ
 
-- `before_request` / `teardown_appcontext` — как уже в factory и `init_db_app`
+- `before_request` / `teardown_appcontext` — как в factory и `init_db_app` (см. ARCHITECTURE §Поток)
 - Flash + redirect для форм; не строить JWT/JSON-login API
-- CSRF и session — существующие хелперы проекта; не дублировать своими middleware
+- CSRF и session — существующие хелперы; не дублировать middleware
 
-## Запрещено / не тащить «из гайдов»
+## Запрещено
 
 - Flask-SQLAlchemy, Flask-Caching, connection pools «для Postgres»
-- Gunicorn/uWSGI как обязательный локальный стек (прод — PythonAnywhere, см. `docs/DEPLOY.md`)
+- Gunicorn/uWSGI как обязательный локальный стек (прод — [`docs/DEPLOY.md`](../../docs/DEPLOY.md))
 - Интеграционные/e2e-сюиты вместо unit (`testing.mdc`)
 
 ## Тесты

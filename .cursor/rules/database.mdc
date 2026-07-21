@@ -1,22 +1,24 @@
 ---
-description: БД — SQLite3, чистый SQL, schema.sql, самописные миграции (без ORM)
+description: БД — SQLite3, чистый SQL, миграции; обзор таблиц — ARCHITECTURE
 globs: app/**/*.py,schema.sql,migrations/**/*.sql,tests/**/*.py
 alwaysApply: false
 ---
 
 # Работа с БД
 
+Обзор таблиц/полей: [`docs/ARCHITECTURE.md`](../../docs/ARCHITECTURE.md) §Данные. SoT DDL: [`schema.sql`](../../schema.sql). Scoping: [`AGENTS.md`](../../AGENTS.md).
+
 ## СУБД
 
-**SQLite3** — единственная БД проекта (файл через `Config.DATABASE`, stdlib-модуль `sqlite3`).
+**SQLite3** — единственная БД (`Config.DATABASE`, stdlib `sqlite3`).
 
-**Запрещено:** Postgres / MySQL / другие серверные СУБД без явного запроса.
+**Запрещено:** Postgres / MySQL / другие СУБД без явного запроса.
 
 ## Принцип
 
-**Чистый SQL** через `sqlite3` и хелперы `app/db.py` (`query_all` / `query_one` / `execute` / `execute_script`).
+**Чистый SQL** через `app/db.py` (`query_all` / `query_one` / `execute` / `execute_script`).
 
-**Запрещено:** ORM (SQLAlchemy, Peewee, Tortoise, …), query-builders как замена SQL, модели таблиц как классы ORM.
+**Запрещено:** ORM, query-builders как замена SQL, модели-таблицы как классы ORM.
 
 ```python
 # ❌ BAD
@@ -26,17 +28,11 @@ session.query(User).filter_by(name=name).first()
 query_one("SELECT * FROM users WHERE name = ?", (name,))
 ```
 
-## `schema.sql`
+## Алгоритм изменения схемы
 
-- Корень репо: `schema.sql` — **source of truth** по таблицам и индексам
-- При изменении схемы: обновить `schema.sql` **и** добавить файл миграции
-- Не расходиться: миграции отражают эволюцию; `schema.sql` — итоговая картина
+1. Обновить [`schema.sql`](../../schema.sql) (итоговая картина).
+2. Добавить новый файл `migrations/NNN_….sql` (не править уже применённые).
+3. Обновить §Данные в [`docs/ARCHITECTURE.md`](../../docs/ARCHITECTURE.md).
+4. Раннер: `run_migrations()` при `create_app()` и `flask --app wsgi db-upgrade`.
 
-## Миграции (самописные)
-
-- Каталог: `migrations/` — нумерованные `*.sql` (`001_….sql`, `002_….sql`, …)
-- Раннер: `run_migrations()` в `app/db.py`; учёт в таблице `schema_migrations`
-- Применение: при `create_app()` и CLI `flask --app wsgi db-upgrade`
-- Новые изменения схемы — **только** новым SQL-файлом в `migrations/`, не правкой уже применённых файлов
-
-Параметризованные запросы (`?`), `PRAGMA foreign_keys = ON` — как в существующих хелперах.
+Параметры: `?`; `PRAGMA foreign_keys = ON` — как в хелперах.

@@ -18,6 +18,8 @@ alwaysApply: true
 
 Команды проекта — только в `.venv` (global `venv.mdc`).
 
+Навигация по задаче (меньше токенов): [`AGENTS.md`](../../AGENTS.md) → [`docs/ARCHITECTURE.md`](../../docs/ARCHITECTURE.md) / [`docs/README.md`](../../docs/README.md). Scoping: `docs-context.mdc`. После реализации → skill `flask-blog-docs-after-task`.
+
 ## Архитектурные запреты
 
 - **Другие СУБД** (Postgres, MySQL, …) — не подключать без явного запроса; БД проекта — **SQLite3**
@@ -31,6 +33,8 @@ alwaysApply: true
 
 | Тема | Rule |
 |------|------|
+| Docs-first / scoping | `docs-context.mdc` |
+| Конец задачи → docs | `flask-blog-workflow.mdc` + skill `flask-blog-docs-after-task` + hook `stop` |
 | Flask 3.0.3, factory, blueprints | `flask-3.mdc` |
 | SQL, `schema.sql`, миграции | `database.mdc` |
 | Session auth / права | `auth.mdc` |

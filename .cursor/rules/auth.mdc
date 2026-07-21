@@ -1,16 +1,18 @@
 ---
-description: Auth — Flask cookie session без JWT; identity name#NNNN
+description: Auth — cookie session без JWT; права — в ARCHITECTURE
 globs: app/auth/**/*.py,app/**/*.py
 alwaysApply: false
 ---
 
 # Аутентификация и авторизация
 
+Таблица прав, identity seed, поток `g.user`: [`docs/ARCHITECTURE.md`](../../docs/ARCHITECTURE.md) (§Права, §Поток). Scoping: [`AGENTS.md`](../../AGENTS.md).
+
 ## Принцип
 
-**Flask signed cookie session** — в сессии хранится `user_id` после login/register.
+**Flask signed cookie session** — в сессии `user_id` после login/register.
 
-**Запрещено:** JWT, OAuth-токены как основной login, API Bearer-auth для пользовательского входа, отдельные token-stores «вместо session».
+**Запрещено:** JWT, OAuth как основной login, API Bearer для пользовательского входа, token-store «вместо session».
 
 ```python
 # ❌ BAD
@@ -21,18 +23,9 @@ session.clear()
 session["user_id"] = user["id"]
 ```
 
-## Идентичность
+## Алгоритм
 
-- Формат: `name#discriminator` (4 цифры), в стиле Discord
-- Имя `admin` зарезервировано при регистрации
-- Seed: `admin#0001` с `is_admin=1`
-
-## Права (кратко)
-
-| Действие | Автор | Admin |
-|----------|-------|-------|
-| Свои посты/комментарии CRUD | да | да |
-| Чужие посты/комментарии | нет | да |
-| Список / удаление пользователей | нет | да (не последнего admin) |
-
-Хелперы и декораторы — в `app/auth/`; не дублировать проверки JWT/header-токенов.
+1. Проверки доступа — декораторы/хелперы в `app/auth/` (`login_required`, admin-checks); не дублировать по views.
+2. Identity: `name#NNNN`; имя `admin` зарезервировано; seed `admin#0001` — см. ARCHITECTURE.
+3. Смена матрицы прав или формата identity — обновить §Права в ARCHITECTURE (не копировать таблицу сюда).
+4. Bearer `DEPLOY_SECRET` — только `app/deploy/`, не user-auth.
