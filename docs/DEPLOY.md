@@ -102,18 +102,28 @@ SECRET_KEY=generate-a-long-random-string
 ADMIN_PASSWORD=your-strong-admin-password
 DATABASE=/home/YOUR_USERNAME/flask_blog/instance/blog.sqlite3
 DEPLOY_SECRET=generate-another-long-random-string
+SESSION_COOKIE_SECURE=1
 ```
 
 
-| Переменная       | Назначение                                                                              |
-| ---------------- | --------------------------------------------------------------------------------------- |
-| `SECRET_KEY`     | Подпись session cookie Flask                                                            |
-| `ADMIN_PASSWORD` | Пароль `admin#0001` при seed БД                                                         |
-| `DATABASE`       | Абсолютный путь к SQLite                                                                |
-| `DEPLOY_SECRET`  | Bearer-токен для `POST /internal/deploy` (auto-deploy). Пусто = endpoint выключен (404) |
+| Переменная              | Назначение                                                                              |
+| ----------------------- | --------------------------------------------------------------------------------------- |
+| `SECRET_KEY`            | Подпись session cookie Flask                                                            |
+| `ADMIN_PASSWORD`        | Пароль `admin#0001` при seed БД                                                         |
+| `DATABASE`              | Абсолютный путь к SQLite                                                                |
+| `DEPLOY_SECRET`         | Bearer-токен для `POST /internal/deploy` (auto-deploy). Пусто = endpoint выключен (404) |
+| `SESSION_COOKIE_SECURE` | `1` на HTTPS (PythonAnywhere); `0`/пусто для локального `http://`                       |
 
 
-`load_dotenv` читает `.env` при старте (`app/config.py`). Уже экспортированные переменные окружения имеют приоритет над `.env`.
+`load_dotenv` читает `.env` при старте (`app/config.py`). По умолчанию **python-dotenv не перезаписывает** переменные, которые уже есть в окружении процесса (`os.environ`).
+
+| Ситуация | Что получит приложение |
+|----------|------------------------|
+| Переменная задана только в `.env` | Значение из `.env` |
+| Переменная уже есть в окружении (export, WSGI, systemd, панель PA «Environment variables») **и** есть в `.env` | Значение из **окружения**; строка в `.env` для этого ключа **игнорируется** |
+| Переменной нет ни в окружении, ни в `.env` | Дефолт из `Config` в `app/config.py` (например `SECRET_KEY=dev-change-me`) |
+
+Практически: если на сервере один раз экспортировали `SECRET_KEY=old`, а в `.env` написали новый ключ — приложение продолжит брать `old`, пока не уберёте переменную из окружения или не перезапустите процесс без неё. Менять секреты удобнее **только в `.env`** (и не дублировать те же имена в окружении WSGI/shell), либо наоборот — только в панели окружения, без копии в `.env`.
 
 Сгенерировать секреты (в Bash на PA или локально):
 
@@ -219,7 +229,9 @@ Workflow: [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml).
   PR / squash-merge в main
             │
             ▼
-  GitHub Actions (push: main)
+  GitHub Actions (push: main) — deploy.yml
+            │
+            ├─ 0. unittest (Python 3.12); при падении deploy не запускается
             │
             ├─ 1. POST https://PA_DOMAIN/internal/deploy
             │      Authorization: Bearer DEPLOY_SECRET
@@ -231,6 +243,8 @@ Workflow: [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml).
                    Authorization: Token PA_API_TOKEN
                    worker подхватывает новый код
 ```
+
+Отдельно CI без деплоя: [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) на `push`/`pull_request` в `main` и `dev`.
 
 Триггеры workflow:
 
@@ -304,10 +318,10 @@ echo "$PYTHONANYWHERE_SITE"
 
 ### Релизный цикл (день за днём)
 
-1. Фичи мержатся в `dev`, тестируются.
+1. Фичи мержатся в `dev`, тестируются (CI `ci.yml` на PR/push).
 2. PR `dev` **→** `main` (обычно squash merge) → push в `main`.
-3. Actions запускает **Deploy to PythonAnywhere**.
-4. В логе job: ответ hook (JSON со `steps`) и строка `Reload requested`.
+3. Actions запускает **Deploy to PythonAnywhere**: сначала job `test`, затем hook + reload.
+4. В логе job `deploy`: ответ hook (JSON со `steps`) и строка `Reload requested`.
 5. Откройте сайт и пробегитесь по [Smoke-чеклисту](#smoke-чеклист).
 
 Ручной прогон без merge: Actions → **Deploy to PythonAnywhere** → **Run workflow**.

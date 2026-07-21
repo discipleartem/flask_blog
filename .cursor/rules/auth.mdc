@@ -1,0 +1,31 @@
+---
+description: Auth — cookie session без JWT; права — в ARCHITECTURE
+globs: app/auth/**/*.py,app/users/**/*.py
+alwaysApply: false
+---
+
+# Аутентификация и авторизация
+
+Таблица прав, identity seed, поток `g.user`: [`docs/ARCHITECTURE.md`](../../docs/ARCHITECTURE.md) (§Права, §Поток). Scoping: [`AGENTS.md`](../../AGENTS.md).
+
+## Принцип
+
+**Flask signed cookie session** — в сессии `user_id` после login/register.
+
+**Запрещено:** JWT, OAuth как основной login, API Bearer для пользовательского входа, token-store «вместо session».
+
+```python
+# ❌ BAD
+return jsonify({"access_token": jwt.encode(...)})
+
+# ✅ GOOD
+session.clear()
+session["user_id"] = user["id"]
+```
+
+## Алгоритм
+
+1. Проверки доступа — декораторы/хелперы в `app/auth/` (`login_required`, admin-checks); не дублировать по views.
+2. Identity: `name#NNNN`; имя `admin` зарезервировано; seed `admin#0001` — см. ARCHITECTURE.
+3. Смена матрицы прав или формата identity — обновить §Права в ARCHITECTURE (не копировать таблицу сюда).
+4. Bearer `DEPLOY_SECRET` — только `app/deploy/`, не user-auth.

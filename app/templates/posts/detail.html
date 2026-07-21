@@ -1,5 +1,10 @@
 {% extends "base.html" %}
 {% block title %}{{ post['title'] }} · Flask Blog{% endblock %}
+{% block extra_head %}
+  {% if g.user %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/easymde/easymde.min.css') }}">
+  {% endif %}
+{% endblock %}
 {% block content %}
 <div class="row justify-content-center">
   <div class="col-12 col-md-10 col-lg-8 col-xl-7">
@@ -18,7 +23,7 @@
         </p>
       </header>
 
-      <div class="post-body mb-4">{{ post['body'] }}</div>
+      <div class="post-body mb-4">{{ post['body_source'] | render_content(post['body_format']) }}</div>
 
       {% if g.user and (g.user['is_admin'] or g.user['id'] == post['author_id']) %}
       <div class="d-flex flex-wrap gap-2">
@@ -48,7 +53,7 @@
             <span class="mx-1">·</span>
             <time datetime="{{ c['created_at'] }}">{{ c['created_at'] }}</time>
           </div>
-          <div class="post-body post-body-sm mb-2">{{ c['body'] }}</div>
+          <div class="post-body post-body-sm mb-2">{{ c['body_source'] | render_content(c['body_format']) }}</div>
           {% if g.user and (g.user['is_admin'] or g.user['id'] == c['user_id']) %}
           <div class="d-flex gap-3">
             <a class="small link-secondary text-decoration-none" href="{{ url_for('comments.edit', comment_id=c['id']) }}">Изменить</a>
@@ -69,8 +74,8 @@
       <div class="card border shadow-sm">
         <div class="card-body p-3 p-md-4">
           <form method="post" action="{{ url_for('comments.create', post_id=post['id']) }}">
-            <label class="form-label" for="body">Ваш комментарий</label>
-            <textarea class="form-control" id="body" name="body" rows="3" required
+            <label class="form-label" for="body_source">Ваш комментарий</label>
+            <textarea class="form-control js-markdown-editor" id="body_source" name="body_source" rows="3" required
                       placeholder="Напишите комментарий…"></textarea>
             <div class="d-flex justify-content-end mt-3">
               <button type="submit" class="btn btn-dark">Отправить</button>
@@ -87,4 +92,11 @@
 
   </div>
 </div>
+{% endblock %}
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/syntax-highlight.js') }}"></script>
+  {% if g.user %}
+  <script src="{{ url_for('static', filename='vendor/easymde/easymde.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/markdown-editor.js') }}"></script>
+  {% endif %}
 {% endblock %}

@@ -1,0 +1,21 @@
+---
+description: After MERGED / post-merge — archive task branch as merged/* on origin, checkout dev
+alwaysApply: false
+---
+
+# Git: ветки `merged/*` (flask_blog)
+
+Переопределяет global [`git.mdc`](~/.cursor/rules/git.mdc) default (local-only): в этом репо архив **на GitHub**.
+
+## Политика
+
+После merge PR task → `dev` (или `dev` → `main`):
+
+1. Не удалять remote task-ветку без архива `origin/merged/…`
+2. Переименовать в `merged/<короткое-имя>` локально **и** на `origin`
+3. Закончить на integration: `git checkout dev && git pull --ff-only origin dev`
+4. Не PR / не новая работа с head `merged/…`
+
+Имена: `feat/foo` → `merged/foo` (префикс снимается).
+
+**Алгоритм (bash + follow-up docs PR):** skill [`flask-blog-git-merged-archive`](../skills/flask-blog-git-merged-archive/SKILL.md) — Read и выполнить в том же turn после MERGED.

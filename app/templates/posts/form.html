@@ -1,5 +1,8 @@
 {% extends "base.html" %}
 {% block title %}{% if post %}Редактировать{% else %}Новая статья{% endif %} · Flask Blog{% endblock %}
+{% block extra_head %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/easymde/easymde.min.css') }}">
+{% endblock %}
 {% block content %}
 <div class="row justify-content-center">
   <div class="col-12 col-md-10 col-lg-8 col-xl-7">
@@ -13,8 +16,8 @@
                    value="{{ post['title'] if post else '' }}">
           </div>
           <div class="mb-4">
-            <label class="form-label" for="body">Текст</label>
-            <textarea class="form-control" id="body" name="body" rows="12" required>{{ post['body'] if post else '' }}</textarea>
+            <label class="form-label" for="body_source">Текст</label>
+            <textarea class="form-control js-markdown-editor" id="body_source" name="body_source" rows="12" required>{{ post['body_source'] if post else '' }}</textarea>
           </div>
           <div class="d-flex flex-wrap gap-2">
             <button type="submit" class="btn btn-dark">{% if post %}Сохранить{% else %}Опубликовать{% endif %}</button>
@@ -27,4 +30,9 @@
     </div>
   </div>
 </div>
+{% endblock %}
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/syntax-highlight.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendor/easymde/easymde.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/markdown-editor.js') }}"></script>
 {% endblock %}

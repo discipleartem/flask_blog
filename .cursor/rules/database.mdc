@@ -1,0 +1,38 @@
+---
+description: БД — SQLite3, чистый SQL, миграции; обзор таблиц — ARCHITECTURE
+globs: app/db.py,schema.sql,migrations/**/*.sql
+alwaysApply: false
+---
+
+# Работа с БД
+
+Обзор таблиц/полей: [`docs/ARCHITECTURE.md`](../../docs/ARCHITECTURE.md) §Данные. SoT DDL: [`schema.sql`](../../schema.sql). Scoping: [`AGENTS.md`](../../AGENTS.md).
+
+## СУБД
+
+**SQLite3** — единственная БД (`Config.DATABASE`, stdlib `sqlite3`).
+
+**Запрещено:** Postgres / MySQL / другие СУБД без явного запроса.
+
+## Принцип
+
+**Чистый SQL** через `app/db.py` (`query_all` / `query_one` / `execute` / `execute_script`).
+
+**Запрещено:** ORM, query-builders как замена SQL, модели-таблицы как классы ORM.
+
+```python
+# ❌ BAD
+session.query(User).filter_by(name=name).first()
+
+# ✅ GOOD
+query_one("SELECT * FROM users WHERE name = ?", (name,))
+```
+
+## Алгоритм изменения схемы
+
+1. Обновить [`schema.sql`](../../schema.sql) (итоговая картина).
+2. Добавить новый файл `migrations/NNN_….sql` (не править уже применённые).
+3. Обновить §Данные в [`docs/ARCHITECTURE.md`](../../docs/ARCHITECTURE.md).
+4. Раннер: `run_migrations()` при `create_app()` и `flask --app wsgi db-upgrade`.
+
+Параметры: `?`; `PRAGMA foreign_keys = ON` — как в хелперах.

@@ -1,14 +1,18 @@
 ---
-description: UI/UX — Bootstrap 5 first; custom CSS/JS только в исключениях; mobile/tablet first
+description: UI/UX — Bootstrap 5 + Jinja; без FE-фреймворков; custom CSS/JS только в исключениях
 globs: app/templates/**/*.html,app/static/**/*.{css,js}
 alwaysApply: false
 ---
 
 # UI / UX — Bootstrap 5
 
+Операционные детали (контент-редактор, IronBee): [`docs/DEVELOPMENT.md`](../../docs/DEVELOPMENT.md). Scoping: [`AGENTS.md`](../../AGENTS.md).
+
 ## Принцип
 
-**Bootstrap 5 — единственный UI-фреймворк.** Разметка, сетка, навбар, формы, кнопки, утилиты, collapse, alerts — через компоненты и utility-классы BS5.
+**Bootstrap 5 — единственный UI-стек.** Серверные шаблоны Jinja2 + CDN BS5. Встроенная сетка и утилиты закрывают адаптив phone / tablet / desktop — отдельный front-end фреймворк не нужен.
+
+Разметка, навбар, формы, кнопки, collapse, alerts — через компоненты и utility-классы BS5.
 
 Custom CSS / JS — **только исключения**, когда Bootstrap не покрывает задачу:
 
@@ -19,7 +23,11 @@ Custom CSS / JS — **только исключения**, когда Bootstrap 
 | Декор, которого нет в BS | градиент hero, тонкие разделители постов |
 | Минимальный JS темы | `theme.js` (localStorage + `data-bs-theme`) |
 
-**Запрещено:** дублировать сетку/spacing/display Bootstrap своими правилами; писать layout «с нуля»; подключать другие CSS-фреймворки; раздувать `app.css`.
+**Запрещено:**
+
+- Front-end фреймворки и SPA-сборки (React, Vue, Angular, Svelte, Next, Vite-app, …)
+- Другие CSS-фреймворки (Tailwind, Bulma, Foundation, …) вместо / вместе с BS5
+- Дублировать сетку/spacing/display Bootstrap своими правилами; layout «с нуля»; раздувать `app.css`
 
 Перед новым CSS/JS: можно ли решить utility/компонентом BS5? Если да — без custom.
 

@@ -60,10 +60,11 @@ def load_logged_in_user() -> None:
 
 
 def login_user(user_id: int) -> None:
-    """Store user id in the session cookie."""
+    """Store user id in the session cookie and attach g.user."""
     session.clear()
     session["user_id"] = user_id
     session.permanent = True
+    g.user = query_one("SELECT * FROM users WHERE id = ?", (user_id,))
 
 
 def logout_user() -> None:

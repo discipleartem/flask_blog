@@ -34,10 +34,19 @@ def create_app(config_object: type[Config] | None = None) -> Flask:
 
     app.before_request(load_logged_in_user)
 
+    from app.content_render import render_content
+
+    app.add_template_filter(render_content, "render_content")
+
     @app.context_processor
-    def inject_template_globals() -> dict[str, int]:
+    def inject_template_globals() -> dict[str, object]:
         """Глобальные переменные шаблонов."""
-        return {"current_year": datetime.now().year}
+        from app.csrf import ensure_csrf_token
+
+        return {
+            "current_year": datetime.now().year,
+            "csrf_token": ensure_csrf_token,
+        }
 
     with app.app_context():
         init_db(app)

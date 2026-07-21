@@ -122,14 +122,381 @@ body {
 }
 
 .post-body {
-  white-space: pre-wrap;
   line-height: 1.7;
   font-size: 1.05rem;
+}
+
+.post-body > :first-child {
+  margin-top: 0;
+}
+
+.post-body > :last-child {
+  margin-bottom: 0;
+}
+
+.post-body p,
+.post-body ul,
+.post-body ol,
+.post-body blockquote,
+.post-body pre,
+.post-body .code-block,
+.post-body table {
+  margin-bottom: 1rem;
+}
+
+.post-body .code-block > pre {
+  margin-bottom: 0;
+}
+
+.post-body ul,
+.post-body ol {
+  padding-left: 1.5rem;
+}
+
+.post-body blockquote {
+  margin-left: 0;
+  padding: 0.35rem 0 0.35rem 1rem;
+  border-left: 3px solid var(--fb-line);
+  color: var(--fb-muted);
+}
+
+.post-body blockquote > :last-child {
+  margin-bottom: 0;
+}
+
+/* Code block + copy buttons */
+.code-block {
+  position: relative;
+  margin: 0 0 1rem;
+}
+
+.code-block > pre {
+  margin-bottom: 0;
+}
+
+.code-copy-actions {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.code-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.85rem;
+  height: 1.85rem;
+  padding: 0;
+  border: 1px solid #3a404a;
+  border-radius: 0.35rem;
+  background: #2a3038;
+  color: #c8cdd6;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.9;
+  transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.code-copy-btn .code-copy-icon {
+  display: block;
+  flex-shrink: 0;
+}
+
+.code-copy-btn .code-copy-md-label {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+
+.code-block:hover .code-copy-btn,
+.code-copy-btn:focus-visible {
+  opacity: 1;
+}
+
+.code-copy-btn:hover {
+  background: #343b45;
+  border-color: #4a515c;
+  color: #e8ebf0;
+}
+
+.code-copy-btn.is-copied {
+  color: #7dcea0;
+  border-color: #3d5a4a;
+  background: #2a3832;
+  opacity: 1;
+}
+
+.code-copy-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 1.5rem;
+  z-index: 1080;
+  transform: translateX(-50%) translateY(0.75rem);
+  padding: 0.6rem 1rem;
+  border-radius: 0.375rem;
+  background: rgba(33, 37, 41, 0.92);
+  color: #fff;
+  font-size: 0.875rem;
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.code-copy-toast.is-visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.post-body pre {
+  padding: 0.75rem 1rem;
+  padding-top: 2.1rem;
+  overflow-x: auto;
+  border: 1px solid var(--fb-line);
+  border-radius: 0.375rem;
+  background: var(--fb-surface);
+  font-size: 0.9em;
+  white-space: pre;
+  tab-size: 4;
+  -moz-tab-size: 4;
+}
+
+.post-body pre code {
+  display: block;
+  font-size: inherit;
+  white-space: inherit;
+  tab-size: inherit;
+  -moz-tab-size: inherit;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+}
+
+.post-body pre code.language-python,
+.post-body pre code[data-indent="4"] {
+  tab-size: 4;
+  -moz-tab-size: 4;
+}
+
+.post-body pre code.language-javascript,
+.post-body pre code.language-html,
+.post-body pre code.language-css,
+.post-body pre code.language-bash,
+.post-body pre code.language-sh,
+.post-body pre code.language-shell,
+.post-body pre code[data-indent="2"] {
+  tab-size: 2;
+  -moz-tab-size: 2;
+}
+
+/* Syntax highlight tokens (syntax-highlight.js) */
+:root {
+  --syn-keyword: #0550ae;
+  --syn-string: #0a3069;
+  --syn-comment: #6e7781;
+  --syn-number: #0550ae;
+  --syn-function: #8250df;
+  --syn-tag: #116329;
+  --syn-attr: #0550ae;
+  --syn-builtin: #953800;
+  --syn-decorator: #8250df;
+  --syn-property: #0550ae;
+  --syn-selector: #116329;
+  --syn-punctuation: #656d76;
+  --syn-entity: #953800;
+}
+
+[data-bs-theme="dark"] {
+  --syn-keyword: #79c0ff;
+  --syn-string: #a5d6ff;
+  --syn-comment: #8b949e;
+  --syn-number: #79c0ff;
+  --syn-function: #d2a8ff;
+  --syn-tag: #7ee787;
+  --syn-attr: #79c0ff;
+  --syn-builtin: #ffa657;
+  --syn-decorator: #d2a8ff;
+  --syn-property: #79c0ff;
+  --syn-selector: #7ee787;
+  --syn-punctuation: #8b949e;
+  --syn-entity: #ffa657;
+}
+
+.syn-keyword {
+  color: var(--syn-keyword);
+  font-weight: 600;
+}
+
+.syn-builtin {
+  color: var(--syn-builtin);
+  font-weight: 500;
+}
+
+.syn-string,
+.syn-entity {
+  color: var(--syn-string);
+}
+
+.syn-entity {
+  color: var(--syn-entity);
+}
+
+.syn-comment {
+  color: var(--syn-comment);
+  font-style: italic;
+}
+
+.syn-number {
+  color: var(--syn-number);
+}
+
+.syn-function,
+.syn-decorator {
+  color: var(--syn-function);
+}
+
+.syn-tag,
+.syn-selector {
+  color: var(--syn-tag);
+  font-weight: 600;
+}
+
+.syn-attr,
+.syn-property {
+  color: var(--syn-attr);
+}
+
+.syn-punctuation {
+  color: var(--syn-punctuation);
+}
+
+.post-body code:not(pre code) {
+  padding: 0.1em 0.35em;
+  border-radius: 0.25rem;
+  background: var(--fb-surface);
+  border: 1px solid var(--fb-line);
+  font-size: 0.9em;
+}
+
+.post-body a {
+  color: var(--fb-ink);
+  text-underline-offset: 0.15em;
 }
 
 .post-body-sm {
   font-size: 1rem;
   line-height: 1.6;
+}
+
+/* EasyMDE — align with Bootstrap theme tokens */
+.EasyMDEContainer .CodeMirror {
+  border-color: var(--bs-border-color);
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
+}
+
+.EasyMDEContainer .editor-toolbar {
+  border-color: var(--bs-border-color);
+  background: var(--bs-body-bg);
+}
+
+.EasyMDEContainer .editor-toolbar button {
+  color: var(--bs-body-color) !important;
+}
+
+.EasyMDEContainer .editor-toolbar button:hover,
+.EasyMDEContainer .editor-toolbar button.active {
+  background: var(--bs-secondary-bg) !important;
+  border-color: transparent !important;
+}
+
+/* Quote lines in source editor (preview off) */
+.EasyMDEContainer .CodeMirror .cm-quote {
+  color: var(--fb-muted);
+  font-style: italic;
+}
+
+.EasyMDEContainer .CodeMirror pre.CodeMirror-line:has(.cm-quote) {
+  border-left: 3px solid var(--fb-line);
+  margin-left: 0.15rem;
+  padding-left: 0.65rem !important;
+  background: color-mix(in srgb, var(--fb-muted) 12%, transparent);
+}
+
+[data-bs-theme="dark"] .EasyMDEContainer .CodeMirror {
+  color: var(--bs-body-color);
+}
+
+.EasyMDEContainer .editor-preview,
+.EasyMDEContainer .editor-preview-side {
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  border-color: var(--bs-border-color);
+}
+
+.EasyMDEContainer .editor-preview {
+  padding: 0.75rem 1rem;
+}
+
+.EasyMDEContainer .editor-preview blockquote {
+  margin-left: 0;
+  padding: 0.35rem 0 0.35rem 1rem;
+  border-left: 3px solid var(--fb-line);
+  color: var(--fb-muted);
+}
+
+.EasyMDEContainer .editor-preview .code-block {
+  margin-bottom: 1rem;
+}
+
+.EasyMDEContainer .editor-preview pre {
+  padding: 0.75rem 1rem;
+  padding-top: 2.1rem;
+  overflow-x: auto;
+  border: 1px solid var(--fb-line);
+  border-radius: 0.375rem;
+  background: var(--fb-surface);
+  font-size: 0.9em;
+  white-space: pre;
+  tab-size: 4;
+  -moz-tab-size: 4;
+}
+
+.EasyMDEContainer .editor-preview pre code {
+  white-space: inherit;
+  tab-size: inherit;
+  -moz-tab-size: inherit;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+}
+
+/* Language picker for fenced code blocks */
+.md-code-lang-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1080;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: color-mix(in srgb, #000 45%, transparent);
+}
+
+.md-code-lang-modal[hidden] {
+  display: none !important;
+}
+
+.md-code-lang-dialog {
+  width: min(22rem, 100%);
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
 }
 
 .title-link {
