@@ -23,8 +23,9 @@ alwaysApply: true
 |---------|--------|
 | Старт реализации задачи из backlog (сразу после git-старта / взятия в работу) | `in_progress` |
 | Создание PR task-ветки → `dev` (integration) | `in_review` |
-| Merge PR в `dev` (или явный запрос пользователя) | `done` |
+| Merge PR в `dev` (или явный запрос пользователя) | `done` → sync → запись в `CHANGELOG.md` → **удалить** секцию задачи из `Backlog.md` |
 
 - Менять статус **в том же коммите** (или сразу следующим), что и событие; затем `python ~/.cursor/skills/backlog-github-projects-sync/scripts/sync_backlog.py`.
+- После `done` и sync: итог задачи — в [`docs/CHANGELOG.md`](../../docs/CHANGELOG.md); секцию `## …` из `Backlog.md` убрать (в backlog только будущие/активные задачи).
 - **Не** ставить `done` только потому, что реализация на ветке закончена — до PR остаётся `in_progress`.
 - Задачи без записи в `Backlog.md` — правило не применять.
