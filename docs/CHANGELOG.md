@@ -7,6 +7,10 @@
 
 ## [Unreleased]
 
+### Docs
+
+- Skill `flask-blog-git-release-sync`: синхронизация `dev` ← `main` после релиза (конфликты CHANGELOG/version — в пользу `main`).
+
 ## [0.3.0] — 2026-07-21
 
 ### Added

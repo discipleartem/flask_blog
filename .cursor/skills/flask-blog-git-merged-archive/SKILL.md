@@ -37,9 +37,11 @@ git checkout "$INTEGRATION"
 git status -sb
 ```
 
-## Follow-up (backlog `done` / docs)
+## Follow-up
 
-Если нужен отдельный PR (`docs/…-backlog-done`):
+**Release → `main`:** сначала sync `dev` ← `main` — skill [`flask-blog-git-release-sync`](../flask-blog-git-release-sync/SKILL.md), затем архив `release/…` этим skill.
+
+**Backlog `done` / docs** — если нужен отдельный PR (`docs/…-backlog-done`):
 
 1. Ветка **от актуального `dev`**, коммит, push, `gh pr create --base dev`
 2. Сразу после push/PR: `git checkout dev`
