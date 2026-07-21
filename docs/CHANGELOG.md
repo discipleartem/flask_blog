@@ -30,6 +30,7 @@
 
 ### Docs
 
+- Backlog #47 (Обновление документации) закрыт после merge в `dev` (#48).
 - Docs-first карта для экономии токенов: `AGENTS.md` (роутер), `docs/README.md`, `docs/ARCHITECTURE.md`; правило `docs-context.mdc`; дедуп структуры/прав из `DEVELOPMENT.md` (backlog #47).
 - Skill `flask-blog-docs-after-task` + правило `flask-blog-workflow.mdc` + hook `stop`: автозапуск обновления docs в конце реализации.
 - Тематические rules (`flask-3`, `auth`, `database`, …) ссылаются на ARCHITECTURE вместо дублей карт/прав; алгоритмы изменения схемы/маршрутов и обновления docs — в `docs-context.mdc` / AGENTS.
