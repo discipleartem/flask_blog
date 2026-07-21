@@ -1,0 +1,11 @@
+---
+description: Docs-first — сначала AGENTS.md, не сканировать репо
+alwaysApply: true
+---
+
+# Docs-first (токены)
+
+1. Перед широким поиском / explore — открыть [`AGENTS.md`](../../AGENTS.md), выбрать строку таблицы.
+2. Читать **только** указанные docs и пути кода; не весь `app/` и не весь `docs/`.
+3. Канон карты (маршруты, схема, модули): [`docs/ARCHITECTURE.md`](../../docs/ARCHITECTURE.md).
+4. Индекс docs: [`docs/README.md`](../../docs/README.md).

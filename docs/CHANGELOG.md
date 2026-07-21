@@ -30,6 +30,7 @@
 
 ### Docs
 
+- Docs-first карта для экономии токенов: `AGENTS.md` (роутер), `docs/README.md`, `docs/ARCHITECTURE.md`; правило `docs-context.mdc`; дедуп структуры/прав из `DEVELOPMENT.md` (backlog #47).
 - Backlog #44 (Markdown-редактор) закрыт после merge в `dev` (#45).
 - `DEVELOPMENT.md`: контент Markdown (рендер, preview, подсветка, копирование кода), структура `content_render` / static JS.
 - `SESSION_COOKIE_SECURE` для HTTPS-деплоя (`.env.example`, `DEPLOY.md`).

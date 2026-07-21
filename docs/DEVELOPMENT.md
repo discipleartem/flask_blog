@@ -119,60 +119,18 @@ npx -y playwright@1.60.0 install chromium
 
 Mobile/tablet: `interaction_resize-viewport` в том же окне Chrome.
 
-## Структура
+## Структура / auth / права
 
-```
-app/
-  __init__.py      # create_app (+ current_year, фильтр render_content)
-  config.py        # load_dotenv(.env) + Config
-  db.py            # sqlite3 helpers + migrations
-  content_render.py  # Markdown/plain/html → nh3
-  auth/            # register / login / logout
-  users/           # profile + admin CRUD
-  posts/           # feed + CRUD + POST /markdown/preview
-  comments/        # CRUD
-  deploy/          # POST /internal/deploy (Bearer DEPLOY_SECRET)
-  templates/       # Bootstrap 5, mobile/tablet first
-  static/
-    css/app.css    # тема, бренд, hero, код-блоки — исключения сверх BS5
-    js/theme.js    # data-bs-theme + .theme-toggle
-    js/markdown-editor.js
-    js/syntax-highlight.js
-    vendor/easymde/
-migrations/        # numbered *.sql
-schema.sql         # source of truth
-.env.example       # шаблон секретов (реальный .env в .gitignore)
-.github/workflows/ # ci.yml (unittest); deploy.yml — push main → PA (после test)
-.vscode/
-  settings.json    # IronBee CDP, Python interpreter, terminal+venv
-  launch.json      # debugpy → flask run
-  terminal-init.sh # activate .venv в integrated terminal
-tests/             # unittest
-wsgi.py
-```
+Карта модулей, маршрутов, схемы БД и прав: [ARCHITECTURE.md](ARCHITECTURE.md). Вход агента: [`../AGENTS.md`](../AGENTS.md).
+
+Локальные пути IDE (не в архитектурной карте): `.vscode/settings.json` (IronBee CDP, interpreter), `launch.json`, `terminal-init.sh`.
 
 ## Миграции
 
-Файлы в `migrations/` применяются по имени (сортировка). Таблица `schema_migrations` хранит уже применённые файлы.
+Файлы в `migrations/` применяются по имени (сортировка). Таблица `schema_migrations` хранит уже применённые файлы. SoT таблиц: [`schema.sql`](../schema.sql).
 
 ```bash
 flask --app wsgi db-upgrade
 ```
 
 Миграции также запускаются при `create_app()`.
-
-## Auth
-
-- Cookie session (`user_id`), без JWT
-- Идентичность: `name#discriminator` (4 цифры)
-- Имя `admin` зарезервировано для регистрации
-- Seed: `admin#0001` с `is_admin=1`
-
-## Права
-
-| Действие | Автор | Admin |
-|----------|-------|-------|
-| Свои посты/комментарии CRUD | да | да |
-| Чужие посты/комментарии | нет | да |
-| Список пользователей | нет | да |
-| Удаление пользователей | нет | да (не последнего admin) |
