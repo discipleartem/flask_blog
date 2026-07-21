@@ -11,4 +11,4 @@
 | [CHANGELOG.md](CHANGELOG.md) | История изменений |
 
 Ограничения стека (агент): [`.cursor/rules/00-project.mdc`](../.cursor/rules/00-project.mdc).  
-После реализации задачи агент **автоматически** обновляет docs (skill [flask-blog-docs-after-task](../.cursor/skills/flask-blog-docs-after-task/SKILL.md); правило `flask-blog-workflow.mdc`; hook `stop`).
+После реализации задачи агент **автоматически** обновляет docs (skill [flask-blog-docs-after-task](../.cursor/skills/flask-blog-docs-after-task/SKILL.md); pointer в `00-project.mdc`; hook `stop`).

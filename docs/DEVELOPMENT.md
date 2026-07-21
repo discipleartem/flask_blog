@@ -57,7 +57,7 @@ Custom CSS (`app/static/css/app.css`) и JS (`theme.js`, `markdown-editor.js`, `
 
 Integration: `dev`. Релиз: `main`. Task-ветки: `feat/…`, `docs/…`, …
 
-После merge PR **не удалять** ветку на GitHub без архива: переименовать в `merged/<имя>` локально и на `origin`, затем **checkout `dev`** (канон: [`.cursor/rules/git-merged-branches.mdc`](../.cursor/rules/git-merged-branches.mdc)).
+После merge PR **не удалять** ветку на GitHub без архива: переименовать в `merged/<имя>` локально и на `origin`, затем **checkout `dev`** (канон: [`.cursor/rules/git-merged-branches.mdc`](../.cursor/rules/git-merged-branches.mdc) + skill [`flask-blog-git-merged-archive`](../.cursor/skills/flask-blog-git-merged-archive/SKILL.md)).
 
 ## Проверка
 
@@ -106,7 +106,8 @@ google-chrome \
 
 Опционально можно держать обёртку в локальном `scripts/dev-chrome.sh` (игнорируется git).
 
-3. В Cursor: **Developer: Reload Window** (чтобы IronBee подхватил settings).
+3. В Cursor: **Developer: Reload Window** (чтобы IronBee подхватил settings).  
+   Расширение **всегда** перезаписывает `.cursor/rules/ironbee-devtools-use.mdc` (шаблон из `ironbee-ai.ironbee-devtools-vscode`; настройки «не писать» нет). Файл в `.gitignore`. Канон policy агента — [`00-project.mdc`](../.cursor/rules/00-project.mdc) §Verify; каталоги tools — в MCP.
 4. По желанию — ручная проверка UI через IronBee или обычный Chrome (см. **Проверка** выше).
 
 На Ubuntu с AppArmor (`apparmor_restrict_unprivileged_userns`) Playwright часто не может сам запустить Chromium — CDP к системному Chrome обходит это.
