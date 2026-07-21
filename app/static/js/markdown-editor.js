@@ -14,6 +14,7 @@
     { id: "html", label: "HTML" },
     { id: "javascript", label: "JS" },
     { id: "css", label: "CSS" },
+    { id: "bash", label: "Bash" },
   ];
 
   var LANG_RE = /^[a-zA-Z0-9_+#.-]{1,32}$/;
@@ -22,6 +23,9 @@
     var lang = (raw || "").trim().toLowerCase();
     if (lang === "js") {
       lang = "javascript";
+    }
+    if (lang === "sh" || lang === "shell" || lang === "zsh") {
+      lang = "bash";
     }
     if (!lang || !LANG_RE.test(lang)) {
       return "python";
@@ -63,7 +67,7 @@
       '<label class="form-label small" for="md-code-lang-custom">Или укажите язык</label>' +
       '<input type="text" class="form-control form-control-sm mb-2" id="md-code-lang-custom" ' +
       'placeholder="например: sql, bash, rust" value="python" autocomplete="off">' +
-      '<p class="form-text small mb-3 mb-0">Отступы пробелами: Python — 4;<br>HTML / JS / CSS — 2.<br>При вставке выделенного кода отступы нормализуются.</p>' +
+      '<p class="form-text small mb-3 mb-0">Отступы пробелами: Python — 4;<br>HTML / JS / CSS / Bash — 2.<br>При вставке выделенного кода отступы нормализуются.</p>' +
       '<div class="d-flex justify-content-end gap-2">' +
       '<button type="button" class="btn btn-outline-secondary btn-sm" data-action="cancel">Отмена</button>' +
       '<button type="button" class="btn btn-dark btn-sm" data-action="insert">Вставить</button>' +
@@ -138,6 +142,7 @@
     html: 2,
     javascript: 2,
     css: 2,
+    bash: 2,
   };
 
   function insertFencedCode(editor, lang) {

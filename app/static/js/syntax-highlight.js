@@ -1,6 +1,6 @@
 /**
  * Кастомная подсветка синтаксиса для блоков <pre><code class="language-…">.
- * Языки: python, html, javascript/js, css; остальное — универсальный режим.
+ * Языки: python, html, javascript/js, css, bash; остальное — универсальный режим.
  */
 (function (global) {
   "use strict";
@@ -87,6 +87,23 @@
     { type: "keyword", re: /@(?:media|import|keyframes|font-face|supports|charset|layer)\b/g },
     { type: "property", re: /[a-z-]+(?=\s*:)/g },
     { type: "selector", re: /[.#]?[A-Za-z_][\w-]*/g },
+  ];
+
+  var BASH_KEYWORDS =
+    "if|then|else|elif|fi|for|while|until|do|done|case|esac|in|function|select|" +
+    "time|coproc";
+
+  var rulesBash = [
+    { type: "string", re: /\$"(?:\\.|[^"\\])*"|\$'(?:\\.|[^'\\])*'|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/g },
+    { type: "comment", re: /#.*/g },
+    { type: "builtin", re: /\$\{[#]!?[A-Za-z_][\w]*(?::[^}]*)?\}|\$[A-Za-z_][\w]*|\$\d+|\$[@*#?$!-]/g },
+    { type: "number", re: /\b\d+\b/g },
+    { type: "keyword", re: new RegExp("\\b(?:" + BASH_KEYWORDS + ")\\b", "g") },
+    {
+      type: "builtin",
+      re: /\b(?:echo|printf|cd|pwd|export|unset|readonly|source|alias|unalias|read|test|true|false|exit|return|shift|set|trap|wait|eval|exec|command|type|hash|help|let|local|declare|typeset|ulimit|umask|getopts|mapfile|readarray)\b/g,
+    },
+    { type: "function", re: /\b[A-Za-z_][\w]*(?=\s*\(\s*\))/g },
   ];
 
   /** HTML: теги / атрибуты / строки / комментарии / сущности */
@@ -191,6 +208,7 @@
     javascript: 2,
     html: 2,
     css: 2,
+    bash: 2,
     generic: 4,
   };
 
@@ -204,6 +222,9 @@
     }
     if (lang === "py") {
       return "python";
+    }
+    if (lang === "sh" || lang === "shell" || lang === "zsh" || lang === "bash") {
+      return "bash";
     }
     return lang || "generic";
   }
@@ -397,7 +418,41 @@
   }
 
   /**
-   * Автоформат отступов для python/html/js/css (добавляет недостающие уровни).
+   * Bash: then/do увеличивают уровень; fi/done/esac/elif/else уменьшают.
+   */
+  function formatBash(source, target) {
+    var lines = expandTabsToSpaces(source, target).split("\n");
+    var out = [];
+    var level = 0;
+    var i;
+
+    for (i = 0; i < lines.length; i++) {
+      var s = lines[i].trim();
+      if (s === "") {
+        out.push("");
+        continue;
+      }
+
+      if (/^(fi|done|esac|elif|else)\b/.test(s)) {
+        level = Math.max(0, level - 1);
+      }
+
+      out.push(spaces(level * target) + s);
+
+      if (
+        /\bthen\b\s*(#.*)?$/.test(s) ||
+        /\bdo\b\s*(#.*)?$/.test(s) ||
+        /\{\s*(#.*)?$/.test(s) ||
+        (/^case\b/.test(s) && !/\besac\b/.test(s))
+      ) {
+        level += 1;
+      }
+    }
+    return out.join("\n");
+  }
+
+  /**
+   * Автоформат отступов для python/html/js/css/bash (добавляет недостающие уровни).
    */
   function reindentSource(source, lang) {
     var kind = normalizeLang(lang);
@@ -412,6 +467,9 @@
     }
     if (kind === "html") {
       return formatHtml(text, target);
+    }
+    if (kind === "bash") {
+      return formatBash(text, target);
     }
     return text;
   }
@@ -431,6 +489,9 @@
     }
     if (kind === "css") {
       return highlightByRules(text, rulesCss);
+    }
+    if (kind === "bash") {
+      return highlightByRules(text, rulesBash);
     }
     return highlightByRules(text, rulesGeneric);
   }
@@ -485,7 +546,7 @@
     indentWidth: indentWidthFor,
     formatMarkdownFences: function (markdown) {
       return String(markdown || "").replace(
-        /```(python|py|html|htm|javascript|js|css)[ \t]*\n([\s\S]*?)```/gi,
+        /```(python|py|html|htm|javascript|js|css|bash|sh|shell|zsh)[ \t]*\n([\s\S]*?)```/gi,
         function (_all, lang, body) {
           var formatted = reindentSource(body.replace(/\s+$/, ""), lang);
           return "```" + lang + "\n" + formatted + "\n```";

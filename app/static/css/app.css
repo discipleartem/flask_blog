@@ -190,6 +190,9 @@ body {
 .post-body pre code.language-javascript,
 .post-body pre code.language-html,
 .post-body pre code.language-css,
+.post-body pre code.language-bash,
+.post-body pre code.language-sh,
+.post-body pre code.language-shell,
 .post-body pre code[data-indent="2"] {
   tab-size: 2;
   -moz-tab-size: 2;
