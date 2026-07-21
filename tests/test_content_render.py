@@ -13,6 +13,13 @@ class ContentRenderTests(unittest.TestCase):
         self.assertIn("<strong>world</strong>", html)
         self.assertNotIn("**", html)
 
+    def test_fenced_code_keeps_language_class(self) -> None:
+        src = "```python\nprint(1)\n```"
+        html = str(render_to_html(src, "markdown"))
+        self.assertIn('class="language-python"', html)
+        self.assertIn("print(1)", html)
+        self.assertNotIn("```", html)
+
     def test_plaintext_escapes_and_breaks(self) -> None:
         html = str(render_to_html("a <b>x</b>\nline", "plaintext"))
         self.assertIn("&lt;b&gt;", html)

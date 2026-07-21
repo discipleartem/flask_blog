@@ -168,7 +168,16 @@ body {
   font-size: 0.9em;
 }
 
-.post-body code {
+.post-body pre code {
+  display: block;
+  font-size: inherit;
+}
+
+.post-body code:not(pre code) {
+  padding: 0.1em 0.35em;
+  border-radius: 0.25rem;
+  background: var(--fb-surface);
+  border: 1px solid var(--fb-line);
   font-size: 0.9em;
 }
 
@@ -218,6 +227,28 @@ body {
 }
 
 [data-bs-theme="dark"] .EasyMDEContainer .CodeMirror {
+  color: var(--bs-body-color);
+}
+
+/* Language picker for fenced code blocks */
+.md-code-lang-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1080;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: color-mix(in srgb, #000 45%, transparent);
+}
+
+.md-code-lang-modal[hidden] {
+  display: none !important;
+}
+
+.md-code-lang-dialog {
+  width: min(22rem, 100%);
+  background: var(--bs-body-bg);
   color: var(--bs-body-color);
 }
 

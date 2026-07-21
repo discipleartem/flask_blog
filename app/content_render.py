@@ -37,6 +37,7 @@ _ALLOWED_TAGS: set[str] = {
 
 _ALLOWED_ATTRIBUTES: dict[str, set[str]] = {
     "a": {"href", "title"},
+    "code": {"class"},
 }
 
 _URL_SCHEMES: set[str] = {"http", "https", "mailto"}
