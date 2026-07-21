@@ -547,8 +547,15 @@ body {
 }
 
 .comment-item {
-  border-left: 3px solid var(--fb-line);
-  padding-left: 1rem;
+  border-left: 3px solid color-mix(in srgb, var(--fb-ink) 28%, var(--fb-line)) !important;
+  background: var(--fb-surface);
+}
+
+/* Чуть приподнять карточки над фоном ночи — иначе комментарии сливаются */
+[data-bs-theme="dark"] .comment-item {
+  background: #1e2229;
+  border-color: #454b54 !important;
+  border-left-color: color-mix(in srgb, var(--fb-accent) 55%, var(--fb-line)) !important;
 }
 
 .btn-dark {

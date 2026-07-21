@@ -10,6 +10,7 @@
 ### Changed
 
 - UI: тёплая paper/beige дневная и gunmetal/chrome ночная темы; sticky nav с active links; комфорт чтения (`.post-body`); формы и users без `table-light` / лишних `shadow-sm`.
+- UI: комментарии на странице поста — отдельные surface-карточки с `gap` и акцентной левой границей (читаемее в light/dark).
 
 ### Docs
 
