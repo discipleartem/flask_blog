@@ -122,14 +122,79 @@ body {
 }
 
 .post-body {
-  white-space: pre-wrap;
   line-height: 1.7;
   font-size: 1.05rem;
+}
+
+.post-body > :first-child {
+  margin-top: 0;
+}
+
+.post-body > :last-child {
+  margin-bottom: 0;
+}
+
+.post-body p,
+.post-body ul,
+.post-body ol,
+.post-body blockquote,
+.post-body pre,
+.post-body table {
+  margin-bottom: 1rem;
+}
+
+.post-body ul,
+.post-body ol {
+  padding-left: 1.5rem;
+}
+
+.post-body pre {
+  padding: 0.75rem 1rem;
+  overflow-x: auto;
+  border: 1px solid var(--fb-line);
+  border-radius: 0.375rem;
+  background: var(--fb-surface);
+  font-size: 0.9em;
+}
+
+.post-body code {
+  font-size: 0.9em;
+}
+
+.post-body a {
+  color: var(--fb-ink);
+  text-underline-offset: 0.15em;
 }
 
 .post-body-sm {
   font-size: 1rem;
   line-height: 1.6;
+}
+
+/* EasyMDE — align with Bootstrap theme tokens */
+.EasyMDEContainer .CodeMirror {
+  border-color: var(--bs-border-color);
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
+}
+
+.EasyMDEContainer .editor-toolbar {
+  border-color: var(--bs-border-color);
+  background: var(--bs-body-bg);
+}
+
+.EasyMDEContainer .editor-toolbar button {
+  color: var(--bs-body-color) !important;
+}
+
+.EasyMDEContainer .editor-toolbar button:hover,
+.EasyMDEContainer .editor-toolbar button.active {
+  background: var(--bs-secondary-bg) !important;
+  border-color: transparent !important;
+}
+
+[data-bs-theme="dark"] .EasyMDEContainer .CodeMirror {
+  color: var(--bs-body-color);
 }
 
 .title-link {

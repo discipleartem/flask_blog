@@ -1,0 +1,2 @@
+# EasyMDE 2.18.0 — vendored from https://github.com/Ionaru/easy-markdown-editor
+source: https://cdn.jsdelivr.net/npm/easymde@2.18.0/dist/
