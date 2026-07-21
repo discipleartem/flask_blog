@@ -61,8 +61,9 @@
       presets +
       "</div>" +
       '<label class="form-label small" for="md-code-lang-custom">Или укажите язык</label>' +
-      '<input type="text" class="form-control form-control-sm mb-3" id="md-code-lang-custom" ' +
+      '<input type="text" class="form-control form-control-sm mb-2" id="md-code-lang-custom" ' +
       'placeholder="например: sql, bash, rust" value="python" autocomplete="off">' +
+      '<p class="form-text small mb-3 mb-0">Отступы пробелами: Python — 4; HTML / JS / CSS — 2.</p>' +
       '<div class="d-flex justify-content-end gap-2">' +
       '<button type="button" class="btn btn-outline-secondary btn-sm" data-action="cancel">Отмена</button>' +
       '<button type="button" class="btn btn-dark btn-sm" data-action="insert">Вставить</button>' +
@@ -132,15 +133,24 @@
     input.select();
   }
 
+  var CODE_INDENT = {
+    python: 4,
+    html: 2,
+    javascript: 2,
+    css: 2,
+  };
+
   function insertFencedCode(editor, lang) {
     var cm = editor.codemirror;
     var selected = cm.getSelection();
-    var body = selected || "";
+    var indent = CODE_INDENT[lang] || 4;
+    var pad = new Array(indent + 1).join(" ");
+    var body = selected || pad;
     var block = "```" + lang + "\n" + body + "\n```";
     cm.replaceSelection(block);
     if (!selected) {
       var cur = cm.getCursor();
-      cm.setCursor({ line: cur.line - 1, ch: 0 });
+      cm.setCursor({ line: cur.line - 1, ch: pad.length });
     }
     cm.focus();
   }
@@ -222,6 +232,9 @@
       toolbar: toolbar,
       minHeight: el.rows && el.rows <= 4 ? "100px" : "200px",
       previewRender: serverPreviewRender,
+      indentWithTabs: false,
+      indentUnit: 4,
+      tabSize: 4,
     });
   });
 })();

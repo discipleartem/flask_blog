@@ -186,6 +186,14 @@
     { type: "function", re: /\b[A-Za-z_]\w*(?=\s*\()/g },
   ];
 
+  var INDENT_SPACES = {
+    python: 4,
+    javascript: 2,
+    html: 2,
+    css: 2,
+    generic: 4,
+  };
+
   function normalizeLang(raw) {
     var lang = (raw || "").toLowerCase().replace(/^language-/, "");
     if (lang === "js" || lang === "jsx" || lang === "ts" || lang === "tsx") {
@@ -200,21 +208,58 @@
     return lang || "generic";
   }
 
+  function indentWidthFor(lang) {
+    var kind = normalizeLang(lang);
+    return INDENT_SPACES[kind] || INDENT_SPACES.generic;
+  }
+
+  /**
+   * Табы → пробелы по ширине отступа языка (PEP 8 / распространённый стиль web).
+   * Уже стоящие пробелы не трогаем.
+   */
+  function expandTabsToSpaces(source, tabWidth) {
+    var width = tabWidth > 0 ? tabWidth : 4;
+    var lines = String(source).split("\n");
+    var out = [];
+
+    for (var li = 0; li < lines.length; li++) {
+      var line = lines[li];
+      var rebuilt = "";
+      var col = 0;
+      for (var i = 0; i < line.length; i++) {
+        var ch = line.charAt(i);
+        if (ch === "\t") {
+          var n = width - (col % width);
+          rebuilt += new Array(n + 1).join(" ");
+          col += n;
+        } else {
+          rebuilt += ch;
+          col += 1;
+        }
+      }
+      out.push(rebuilt);
+    }
+    return out.join("\n");
+  }
+
   function highlightSource(source, lang) {
     var kind = normalizeLang(lang);
+    var width = indentWidthFor(kind);
+    var text = expandTabsToSpaces(source, width);
+
     if (kind === "html") {
-      return highlightHtml(source);
+      return highlightHtml(text);
     }
     if (kind === "python") {
-      return highlightByRules(source, rulesPython);
+      return highlightByRules(text, rulesPython);
     }
     if (kind === "javascript") {
-      return highlightByRules(source, rulesJs);
+      return highlightByRules(text, rulesJs);
     }
     if (kind === "css") {
-      return highlightByRules(source, rulesCss);
+      return highlightByRules(text, rulesCss);
     }
-    return highlightByRules(source, rulesGeneric);
+    return highlightByRules(text, rulesGeneric);
   }
 
   function languageFromClass(className) {
@@ -235,9 +280,13 @@
       return;
     }
     var lang = languageFromClass(codeEl.className);
+    var width = indentWidthFor(lang);
     var source = codeEl.textContent || "";
     codeEl.innerHTML = highlightSource(source, lang);
     codeEl.setAttribute("data-syn", "1");
+    codeEl.setAttribute("data-indent", String(width));
+    codeEl.style.tabSize = String(width);
+    codeEl.style.MozTabSize = String(width);
     codeEl.classList.add("syn-ready");
   }
 

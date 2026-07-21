@@ -166,11 +166,33 @@ body {
   border-radius: 0.375rem;
   background: var(--fb-surface);
   font-size: 0.9em;
+  white-space: pre;
+  tab-size: 4;
+  -moz-tab-size: 4;
 }
 
 .post-body pre code {
   display: block;
   font-size: inherit;
+  white-space: inherit;
+  tab-size: inherit;
+  -moz-tab-size: inherit;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+}
+
+.post-body pre code.language-python,
+.post-body pre code[data-indent="4"] {
+  tab-size: 4;
+  -moz-tab-size: 4;
+}
+
+.post-body pre code.language-javascript,
+.post-body pre code.language-html,
+.post-body pre code.language-css,
+.post-body pre code[data-indent="2"] {
+  tab-size: 2;
+  -moz-tab-size: 2;
 }
 
 /* Syntax highlight tokens (syntax-highlight.js) */
@@ -336,6 +358,17 @@ body {
   border-radius: 0.375rem;
   background: var(--fb-surface);
   font-size: 0.9em;
+  white-space: pre;
+  tab-size: 4;
+  -moz-tab-size: 4;
+}
+
+.EasyMDEContainer .editor-preview pre code {
+  white-space: inherit;
+  tab-size: inherit;
+  -moz-tab-size: inherit;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
 }
 
 /* Language picker for fenced code blocks */
