@@ -6,7 +6,7 @@ alwaysApply: false
 
 # Backlog status
 
-Канон: [`docs/Backlog.md`](../../docs/Backlog.md) · sync: skill `backlog-github-projects-sync` · map: [`.github/backlog.json`](../../.github/backlog.json).
+Канон: [`docs/Backlog.md`](../../docs/Backlog.md) · sync: skill `backlog-github-projects-sync` · map: [`.github/backlog.json`](../../.github/backlog.json) · API: [`docs/GITHUB-PROJECTS-API.md`](../../docs/GITHUB-PROJECTS-API.md).
 
 Ключи `**Статус:**` → колонка Project:
 
@@ -15,8 +15,9 @@ alwaysApply: false
 | `open` | Backlog |
 | `in_progress` | In progress |
 | `in_review` | In review |
-| `ready` | Ready |
 | `done` | Done |
+
+Опционально `**Приоритет:**` / `**Priority:**` → поле Project **Priority** (`P0` / `P1` / `P2` на доске №6; `priorityMap` в `.github/backlog.json`).
 
 ## Когда менять (агент)
 
