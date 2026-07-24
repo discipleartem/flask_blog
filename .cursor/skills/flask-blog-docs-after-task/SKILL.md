@@ -61,6 +61,7 @@ Post-merge rename — skill [`flask-blog-git-merged-archive`](../flask-blog-git-
 | Схема БД | `schema.sql` + `migrations/` + ARCHITECTURE §Данные |
 | Howto: UI, Markdown/код-блоки, IronBee, локальный запуск | [`docs/DEVELOPMENT.md`](../../../docs/DEVELOPMENT.md) |
 | Деплой / PA / CI hook | [`docs/DEPLOY.md`](../../../docs/DEPLOY.md) |
+| Релиз / GitHub Release / sync skills | [`docs/RELEASE.md`](../../../docs/RELEASE.md), [`docs/github-releases-api.md`](../../../docs/github-releases-api.md) |
 | Заметные фичи / фиксы | [`docs/CHANGELOG.md`](../../../docs/CHANGELOG.md) |
 | Новый тип задачи для scoping | [`AGENTS.md`](../../../AGENTS.md) (+ при необходимости [`docs/README.md`](../../../docs/README.md)) |
 | Запреты стека / gate docs→PR | [`.cursor/rules/00-project.mdc`](../../rules/00-project.mdc) (+ тематический `*.mdc`) |

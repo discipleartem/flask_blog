@@ -39,7 +39,7 @@ git status -sb
 
 ## Follow-up
 
-**Release → `main`:** сначала sync `dev` ← `main` — skill [`flask-blog-git-release-sync`](../flask-blog-git-release-sync/SKILL.md), затем архив `release/…` этим skill.
+**Release → `main`:** полный поток — skill [`flask-blog-git-release`](../flask-blog-git-release/SKILL.md); после merge — sync [`flask-blog-git-release-sync`](../flask-blog-git-release-sync/SKILL.md), затем архив `release/…` этим skill.
 
 ### Backlog `done` / очистка `Backlog.md` (тот же turn)
 
