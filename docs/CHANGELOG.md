@@ -20,6 +20,9 @@
 
 ### Docs
 
+- `docs/GITHUB-PROJECTS-API.md`: возможности Projects v2, GraphQL/REST/`gh`, маппинг Status/Priority на backlog.
+- Backlog: auth/security задачи из обзора (CSRF, `next`, rate limit, session, пароли, prod defaults) с Priority P0–P2; sync → issues #54–#61 на Project «Flask Blog».
+- `backlog.json` / `backlog-status.mdc`: поле Priority; статус `ready` убран из `statusMap`.
 - Backlog #51 (обновление дизайна warm/chrome UI) выполнен и удалён из `Backlog.md` после merge в `dev`.
 - Skill `flask-blog-git-release-sync`: синхронизация `dev` ← `main` после релиза (конфликты CHANGELOG/version — в пользу `main`).
 - DEVELOPMENT §UI / §Контент, ARCHITECTURE и `ui-bootstrap.mdc`: warm/chrome dual theme, лента/комментарии, фильтр `plain_excerpt`.
