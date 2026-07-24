@@ -34,6 +34,7 @@
 - DEVELOPMENT §UI / §Контент, ARCHITECTURE и `ui-bootstrap.mdc`: warm/chrome dual theme, лента/комментарии, фильтр `plain_excerpt`.
 - Gate: skill `flask-blog-docs-after-task` обязателен перед PR task → `dev` (порядок docs → verify → push → PR); обновлены `00-project`, `docs-context`, `backlog-status`, `task-cycle`, `git-commit-pr`.
 - DEVELOPMENT §Контент: GFM tables + scoped CSS; Backlog #63 выполнен и удалён из `Backlog.md` после merge в `dev`.
+- DEVELOPMENT §Контент: Open Graph / Twitter Card; Backlog #67 выполнен и удалён из `Backlog.md` после merge в `dev`.
 
 ## [0.3.0] — 2026-07-21
 
