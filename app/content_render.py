@@ -112,6 +112,8 @@ def plain_excerpt(source: str, max_chars: int = 160) -> str:
     text = re.sub(r"!\[([^\]]*)\]\([^)]*\)", r"\1", text)
     text = re.sub(r"\[([^\]]+)\]\([^)]*\)", r"\1", text)
     text = re.sub(r"(?m)^#{1,6}\s+", "", text)
+    # GFM tables: drop row/separator lines so лента не показывает сырые «| … |»
+    text = re.sub(r"(?m)^[ \t]*\|.*\|[ \t]*$", " ", text)
     text = re.sub(r"[>*_~#`]", " ", text)
     text = re.sub(r"\s+", " ", text).strip()
     if not text:

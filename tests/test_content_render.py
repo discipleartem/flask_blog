@@ -70,6 +70,19 @@ class ContentRenderTests(unittest.TestCase):
         self.assertEqual(plain_excerpt(""), "")
         self.assertEqual(plain_excerpt("```\ncode\n```"), "")
 
+    def test_plain_excerpt_strips_gfm_table(self) -> None:
+        src = (
+            "## 1. Архитектура\n\n"
+            "| Слой | Реализация |\n"
+            "| --- | --- |\n"
+            "| Аутентификация | Cookie session |\n"
+            "| CSRF | Свой токен |\n"
+        )
+        excerpt = plain_excerpt(src, max_chars=200)
+        self.assertEqual(excerpt, "1. Архитектура")
+        self.assertNotIn("|", excerpt)
+        self.assertNotIn("---", excerpt)
+
 
 if __name__ == "__main__":
     unittest.main()

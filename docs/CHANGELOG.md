@@ -21,6 +21,7 @@
 ### Fixed
 
 - GFM markdown tables: границы/thead/zebra в `.post-body` и EasyMDE preview (`app.css`); extension `tables` уже был в `content_render`.
+- Лента: `plain_excerpt` больше не показывает сырые `| col |` строки GFM-таблиц.
 
 ### Docs
 
