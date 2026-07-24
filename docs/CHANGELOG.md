@@ -35,6 +35,7 @@
 - Gate: skill `flask-blog-docs-after-task` обязателен перед PR task → `dev` (порядок docs → verify → push → PR); обновлены `00-project`, `docs-context`, `backlog-status`, `task-cycle`, `git-commit-pr`.
 - DEVELOPMENT §Контент: GFM tables + scoped CSS; Backlog #63 выполнен и удалён из `Backlog.md` после merge в `dev`.
 - DEVELOPMENT §Контент: Open Graph / Twitter Card; Backlog #67 выполнен и удалён из `Backlog.md` после merge в `dev`.
+- Post-merge: skill `flask-blog-git-merged-archive` — docs/backlog cleanup PR сразу squash-merge в том же turn (не оставлять открытый `docs/*-backlog-done`); обновлены `backlog-status.mdc`, `git-merged-branches.mdc`.
 
 ## [0.3.0] — 2026-07-21
 
