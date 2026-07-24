@@ -13,7 +13,7 @@
 
 ## Content: стили GFM-таблиц в markdown
 
-**Статус:** in_progress
+**Статус:** in_review
 **GitHub:** #63
 **Приоритет:** P1
 **Категория:** Content / Markdown
@@ -30,9 +30,9 @@ GFM-таблицы (`| col |`) парсятся в `<table>` на сервере
 
 ### Подзадачи
 
-- [ ] CSS для `.post-body table` и preview
-- [ ] Unit-тест на tables extension
-- [ ] Docs + verify
+- [x] CSS для `.post-body table` и preview
+- [x] Unit-тест на tables extension
+- [x] Docs + verify
 
 ---
 

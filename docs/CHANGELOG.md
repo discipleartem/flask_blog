@@ -18,6 +18,10 @@
 - UI: лента на главной — карточки статей с иерархией заголовок → excerpt → мета и hover, вместо плоского `list-group`.
 - UI: чтение средней статьи — ритм абзацев/списков, blockquote на surface; в ленте clamp заголовка и excerpt до 3 строк (карточка целиком — ссылка на пост).
 
+### Fixed
+
+- GFM markdown tables: границы/thead/zebra в `.post-body` и EasyMDE preview (`app.css`); extension `tables` уже был в `content_render`.
+
 ### Docs
 
 - `docs/GITHUB-PROJECTS-API.md`: возможности Projects v2, GraphQL/REST/`gh`, маппинг Status/Priority на backlog.
@@ -27,6 +31,8 @@
 - Skill `flask-blog-git-release-sync`: синхронизация `dev` ← `main` после релиза (конфликты CHANGELOG/version — в пользу `main`).
 - DEVELOPMENT §UI / §Контент, ARCHITECTURE и `ui-bootstrap.mdc`: warm/chrome dual theme, лента/комментарии, фильтр `plain_excerpt`.
 - Gate: skill `flask-blog-docs-after-task` обязателен перед PR task → `dev` (порядок docs → verify → push → PR); обновлены `00-project`, `docs-context`, `backlog-status`, `task-cycle`, `git-commit-pr`.
+- DEVELOPMENT §Контент: GFM tables + scoped CSS; Backlog #63.
+
 ## [0.3.0] — 2026-07-21
 
 ### Added

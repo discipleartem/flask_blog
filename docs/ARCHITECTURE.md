@@ -70,7 +70,7 @@ Identity: `name#NNNN`. Имя `admin` зарезервировано. Seed: `adm
 | `__init__.py` | App factory |
 | `config.py` | Config + `.env` |
 | `db.py` | sqlite3 helpers, миграции |
-| `content_render.py` | Markdown/plain/html → безопасный HTML; `plain_excerpt` для ленты |
+| `content_render.py` | Markdown/plain/html → безопасный HTML (в т.ч. GFM tables); `plain_excerpt` для ленты |
 | `csrf.py` | CSRF token helpers |
 | `auth/` | register/login/logout + helpers |
 | `posts/` | лента, CRUD постов, markdown preview |
