@@ -5,7 +5,7 @@ from __future__ import annotations
 from flask import Blueprint, abort, flash, g, jsonify, redirect, render_template, request, url_for
 
 from app.auth.helpers import is_owner_or_admin, login_required
-from app.content_render import render_to_html
+from app.content_render import first_markdown_image_url, plain_excerpt, render_to_html
 from app.db import execute, query_all, query_one
 
 bp = Blueprint("posts", __name__)
@@ -13,6 +13,8 @@ bp = Blueprint("posts", __name__)
 # Формы Post всегда сохраняют Markdown (клиентский body_format игнорируется).
 _BODY_FORMAT = "markdown"
 _PREVIEW_MAX_CHARS = 100_000
+_OG_DESCRIPTION_CHARS = 200
+_OG_DEFAULT_IMAGE = "img/og-default.jpg"
 
 
 @bp.route("/markdown/preview", methods=("POST",))
@@ -41,7 +43,12 @@ def index():
         ORDER BY p.created_at DESC, p.id DESC
         """
     )
-    return render_template("posts/index.html", posts=posts)
+    return render_template(
+        "posts/index.html",
+        posts=posts,
+        og_url=url_for("posts.index", _external=True),
+        og_image_url=url_for("static", filename=_OG_DEFAULT_IMAGE, _external=True),
+    )
 
 
 @bp.route("/posts/<int:post_id>")
@@ -68,7 +75,16 @@ def detail(post_id: int):
         """,
         (post_id,),
     )
-    return render_template("posts/detail.html", post=post, comments=comments)
+    body = post["body_source"] or ""
+    default_image = url_for("static", filename=_OG_DEFAULT_IMAGE, _external=True)
+    return render_template(
+        "posts/detail.html",
+        post=post,
+        comments=comments,
+        meta_description=plain_excerpt(body, max_chars=_OG_DESCRIPTION_CHARS),
+        og_url=url_for("posts.detail", post_id=post_id, _external=True),
+        og_image_url=first_markdown_image_url(body) or default_image,
+    )
 
 
 @bp.route("/posts/new", methods=("GET", "POST"))

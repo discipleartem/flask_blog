@@ -7,6 +7,47 @@
 
 ## [Unreleased]
 
+### Added
+
+### Changed
+
+### Fixed
+
+### Docs
+
+## [0.4.0] — 2026-07-24
+
+### Added
+
+- Open Graph / Twitter Card meta на `/` и `/posts/<id>` (`og:title`, `og:description`, `og:url`, `og:image`, `twitter:*`); fallback-картинка `static/img/og-default.jpg`; `first_markdown_image_url` в `content_render`.
+- Jinja-фильтр `plain_excerpt` (`app/content_render.py`) — краткий plain-text превью для ленты постов.
+
+### Changed
+
+- UI: тёплая paper/beige дневная и gunmetal/chrome ночная темы; sticky nav с active links; комфорт чтения (`.post-body`); формы и users без `table-light` / лишних `shadow-sm`.
+- UI: комментарии на странице поста — отдельные surface-карточки с `gap` и акцентной левой границей (читаемее в light/dark).
+- UI: лента на главной — карточки статей с иерархией заголовок → excerpt → мета и hover, вместо плоского `list-group`.
+- UI: чтение средней статьи — ритм абзацев/списков, blockquote на surface; в ленте clamp заголовка и excerpt до 3 строк (карточка целиком — ссылка на пост).
+
+### Fixed
+
+- GFM markdown tables: границы/thead/zebra в `.post-body` и EasyMDE preview (`app.css`); extension `tables` уже был в `content_render`.
+- Лента: `plain_excerpt` больше не показывает сырые `| col |` строки GFM-таблиц.
+
+### Docs
+
+- `docs/RELEASE.md` + `docs/github-releases-api.md`: канон релиза `dev`→`main` и справка GitHub Releases API; skill `flask-blog-git-release` (все поля Release обязательны).
+- `docs/GITHUB-PROJECTS-API.md`: возможности Projects v2, GraphQL/REST/`gh`, маппинг Status/Priority на backlog.
+- Backlog: auth/security задачи из обзора (CSRF, `next`, rate limit, session, пароли, prod defaults) с Priority P0–P2; sync → issues #54–#61 на Project «Flask Blog».
+- `backlog.json` / `backlog-status.mdc`: поле Priority; статус `ready` убран из `statusMap`.
+- Backlog #51 (обновление дизайна warm/chrome UI) выполнен и удалён из `Backlog.md` после merge в `dev`.
+- Skill `flask-blog-git-release-sync`: синхронизация `dev` ← `main` после релиза (конфликты CHANGELOG/version — в пользу `main`).
+- DEVELOPMENT §UI / §Контент, ARCHITECTURE и `ui-bootstrap.mdc`: warm/chrome dual theme, лента/комментарии, фильтр `plain_excerpt`.
+- Gate: skill `flask-blog-docs-after-task` обязателен перед PR task → `dev` (порядок docs → verify → push → PR); обновлены `00-project`, `docs-context`, `backlog-status`, `task-cycle`, `git-commit-pr`.
+- DEVELOPMENT §Контент: GFM tables + scoped CSS; Backlog #63 выполнен и удалён из `Backlog.md` после merge в `dev`.
+- DEVELOPMENT §Контент: Open Graph / Twitter Card; Backlog #67 выполнен и удалён из `Backlog.md` после merge в `dev`.
+- Post-merge: skill `flask-blog-git-merged-archive` — docs/backlog cleanup PR сразу squash-merge в том же turn (не оставлять открытый `docs/*-backlog-done`); обновлены `backlog-status.mdc`, `git-merged-branches.mdc`.
+
 ## [0.3.0] — 2026-07-21
 
 ### Added

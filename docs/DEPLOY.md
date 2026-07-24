@@ -219,6 +219,8 @@ Web → Static files:
 
 ## Auto-deploy через GitHub
 
+Процесс релиза (PR → squash → GitHub Release → sync `dev`): [`RELEASE.md`](RELEASE.md).
+
 Цель: релиз `dev` **→** `main` на GitHub сам выкатывает код на PythonAnywhere без ручного `git pull` и кнопки Reload.
 
 Workflow: [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml).

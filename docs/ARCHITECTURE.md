@@ -50,7 +50,7 @@
 
 1. `before_request`: `load_logged_in_user` → `g.user` из `session["user_id"]` (или `None`).
 2. Шаблоны: `csrf_token`, `current_year` (context processor).
-3. Контент на витрине: фильтр `render_content` (`app/content_render.py` + nh3), не сырой `| safe` из БД.
+3. Контент на витрине: фильтры `render_content` / `plain_excerpt` (`app/content_render.py` + nh3), не сырой `| safe` из БД. Страницы `/` и `/posts/<id>`: Open Graph / Twitter Card meta (`og:*`, `twitter:*`); description из `plain_excerpt`, image — `first_markdown_image_url` или `static/img/og-default.jpg`.
 4. Login: cookie session; без JWT. Deploy-hook: Bearer `DEPLOY_SECRET` (не user-auth).
 
 ## Права
@@ -70,16 +70,17 @@ Identity: `name#NNNN`. Имя `admin` зарезервировано. Seed: `adm
 | `__init__.py` | App factory |
 | `config.py` | Config + `.env` |
 | `db.py` | sqlite3 helpers, миграции |
-| `content_render.py` | Markdown/plain/html → безопасный HTML |
+| `content_render.py` | Markdown/plain/html → безопасный HTML (в т.ч. GFM tables); `plain_excerpt` / `first_markdown_image_url` для ленты и OG |
 | `csrf.py` | CSRF token helpers |
 | `auth/` | register/login/logout + helpers |
-| `posts/` | лента, CRUD постов, markdown preview |
+| `posts/` | лента, CRUD постов, markdown preview, OG meta на index/detail |
 | `comments/` | CRUD комментариев |
 | `users/` | профиль + admin CRUD |
 | `deploy/` | `POST /internal/deploy` |
 | `templates/` | Jinja + Bootstrap 5 |
 | `static/css/app.css` | тема, бренд, код-блоки (исключения сверх BS5) |
 | `static/js/` | `theme.js`, `markdown-editor.js`, `syntax-highlight.js` |
+| `static/img/` | `og-default.jpg` — fallback для `og:image` |
 | `static/vendor/easymde/` | EasyMDE (не CDN) |
 
 Корень репо (рядом): `schema.sql`, `migrations/`, `tests/`, `wsgi.py`, `.github/workflows/`.

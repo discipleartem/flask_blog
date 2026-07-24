@@ -8,8 +8,12 @@
     "open": "Backlog",
     "in_progress": "In progress",
     "in_review": "In review",
-    "ready": "Ready",
     "done": "Done"
+  },
+  "priorityMap": {
+    "p0": "P0",
+    "p1": "P1",
+    "p2": "P2"
   },
   "labels": ["backlog", "ui", "auth"]
 }

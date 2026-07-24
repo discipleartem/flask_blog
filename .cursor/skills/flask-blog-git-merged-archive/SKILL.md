@@ -37,13 +37,35 @@ git checkout "$INTEGRATION"
 git status -sb
 ```
 
-## Follow-up (backlog `done` / docs)
+## Follow-up
 
-Если нужен отдельный PR (`docs/…-backlog-done`):
+**Release → `main`:** полный поток — skill [`flask-blog-git-release`](../flask-blog-git-release/SKILL.md); после merge — sync [`flask-blog-git-release-sync`](../flask-blog-git-release-sync/SKILL.md), затем архив `release/…` этим skill.
 
-1. Ветка **от актуального `dev`**, коммит, push, `gh pr create --base dev`
-2. Сразу после push/PR: `git checkout dev`
-3. После merge docs-PR — снова полный алгоритм выше
+### Backlog `done` / очистка `Backlog.md` (тот же turn)
+
+Если смерженный PR закрывал задачу из [`docs/Backlog.md`](../../../docs/Backlog.md) — **не оставлять** открытый docs-PR и **не** заканчивать turn, пока секция задачи ещё есть на `origin/dev`.
+
+Иначе: пользователь видит «живую» задачу после merge фичи; параллельные правки `Backlog.md` → merge-конфликты.
+
+Алгоритм (после шага архива task-ветки, на актуальном `dev`):
+
+```bash
+git checkout -b docs/<short>-backlog-done   # от origin/dev
+# 1) **Статус:** done → sync_backlog.py
+# 2) CHANGELOG [Unreleased]/Docs: задача #N выполнена…
+# 3) Удалить ##-секцию задачи из Backlog.md
+git add docs/Backlog.md docs/CHANGELOG.md
+git commit -m "docs: mark backlog #N done after merge"
+git push -u origin HEAD
+gh pr create --base dev --title "docs: mark backlog #N done" --body "…"
+gh pr merge --squash          # СРАЗУ в этом turn — не ждать пользователя
+git fetch origin
+# архив docs-ветки тем же алгоритмом → merged/<short>-backlog-done
+git checkout dev && git pull --ff-only origin dev
+# проверка: секции задачи нет в docs/Backlog.md
+```
+
+Кратко: **create → merge → archive docs → на `dev`**. Открытый `docs/*-backlog-done` без merge — ошибка процесса.
 
 ## Запрещено
 
@@ -51,3 +73,4 @@ git status -sb
 - PR / работа с head `merged/…`
 - Force-push `main` / `dev`
 - Завершать turn на task / `docs/*` / `merged/*` вместо `dev` (или `main`)
+- Завершать MERGED-turn с открытым PR `docs/*-backlog-done` или с секцией закрытой задачи всё ещё в `origin/dev:docs/Backlog.md`

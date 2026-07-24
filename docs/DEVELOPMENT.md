@@ -23,10 +23,12 @@
 
 | Слой | Файлы | Поведение |
 |------|--------|-----------|
-| Рендер | `app/content_render.py`, Jinja-фильтр `render_content` | Markdown / plain / html → nh3 → `Markup`. Без `| safe` по сырой колонке из БД |
+| Рендер | `app/content_render.py`, Jinja-фильтры `render_content`, `plain_excerpt` | Markdown / plain / html → nh3 → `Markup`. Extensions: `fenced_code`, `tables` (GFM), `nl2br`, `sane_lists`. Лента и `og:description`: `plain_excerpt` — краткий plain-text из `body_source` (строки GFM-таблиц `| … |` и markdown-картинки отбрасываются). `first_markdown_image_url` — первое абсолютное `http(s)` изображение для `og:image`. Без `| safe` по сырой колонке из БД |
+| Social preview | `posts/index.html`, `posts/detail.html` | Open Graph + Twitter Card: title/description/url/image (абсолютные URL). Image: картинка из тела поста или `static/img/og-default.jpg` |
 | Редактор | `app/static/js/markdown-editor.js`, vendor EasyMDE | JS обязателен для форм; чтение витрины без JS |
 | Preview | `POST /markdown/preview` | Тот же `render_to_html`, что на витрине; кнопка «глаз» в тулбаре |
 | Код | `app/static/js/syntax-highlight.js`, стили в `app.css` | Подсветка `pre code.language-*`: python, html, javascript, css, bash (+ aliases); иначе generic. Автоотступы (табы→пробелы, структурный indent); на submit — `formatMarkdownFences` |
+| Таблицы | стили в `app.css` (`.post-body table`, EasyMDE preview) | GFM `| col |` → `<table>`; Bootstrap reboot без `.table` — границы/thead/zebra через scoped CSS на витрине и в preview |
 
 Тулбар «Блок кода»: пресеты Python / HTML / JS / CSS / Bash или свой язык (` ```lang `).
 
@@ -41,17 +43,22 @@
 
 **Bootstrap 5 — канон.** Сетка, навбар, формы, кнопки, alerts, collapse, spacing — через компоненты и utility-классы BS5.
 
-Custom CSS (`app/static/css/app.css`) и JS (`theme.js`, `markdown-editor.js`, `syntax-highlight.js`) — **только исключения**: токены светлой/тёмной темы, бренд-типографика (IBM Plex), градиент hero, переключатель `data-bs-theme`, EasyMDE, подсветка/копирование кода. Не дублировать layout Bootstrap своими правилами и не подключать другие CSS-фреймворки.
+Custom CSS (`app/static/css/app.css`) и JS (`theme.js`, `markdown-editor.js`, `syntax-highlight.js`) — **только исключения**: токены светлой/тёмной темы, бренд-типографика (IBM Plex), градиент hero, переключатель `data-bs-theme`, EasyMDE, подсветка/копирование кода, стили GFM-таблиц в `.post-body` / preview. Не дублировать layout Bootstrap своими правилами и не подключать другие CSS-фреймворки.
+
+**Темы (чтение day/night):** light — тёплый paper/beige фон и мягкий графит; dark — gunmetal / metallic chrome и soft off-white. Токены `--fb-*` в `app.css`; `btn-dark` перекрашен под палитру. Приоритет — контраст и комфорт длинного чтения (`.post-body`), не чистый ч/б.
+
+**Лента / пост / комментарии:** главная — surface-карточки (`.feed-item`), заголовок → excerpt (`plain_excerpt`) → мета; карточка целиком — ссылка на пост. Страница поста — reading column (`.post-body`: абзацы, списки, blockquote, GFM-таблицы). Комментарии — отдельные карточки (`.comment-item`) с `gap`, не плоский список с `border-bottom`.
 
 ### Mobile / tablet first
 
 1. Базовая разметка — для phone.
 2. Усиление на `md` (планшет) и `lg`+ (ПК / wide) утилитами BS (`py-md-4`, `navbar-expand-lg`, …).
 3. Контейнер: `container-fluid` + `px-3/px-md-4/px-xl-5` — без узкого `container-xxl`, контент использует ширину ПК / wide.
-4. Sticky footer: `min-vh-100` + `flex-grow-1` на `main` (утилиты BS в `base.html`).
+4. Sticky footer: `min-vh-100` + `flex-grow-1` на `main` (утилиты BS в `base.html`); sticky navbar (`sticky-top` + blur surface).
 5. Переключатель темы — **вне** collapse на mobile/tablet (слева от hamburger); на desktop (`lg+`) — слева от «Войти» / действий пользователя.
 6. Два экземпляра кнопки темы в разметке; JS вешается на все `.theme-toggle` (`app/static/js/theme.js`).
-7. В шаблонах доступен `current_year` (context processor в `create_app`) — для футера.
+7. Active `nav-link` по `request.endpoint` / `request.blueprint`.
+8. В шаблонах доступен `current_year` (context processor в `create_app`) — для футера.
 
 ## Git / ветки
 

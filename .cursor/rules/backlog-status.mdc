@@ -6,7 +6,7 @@ alwaysApply: false
 
 # Backlog status
 
-Канон: [`docs/Backlog.md`](../../docs/Backlog.md) · sync: skill `backlog-github-projects-sync` · map: [`.github/backlog.json`](../../.github/backlog.json).
+Канон: [`docs/Backlog.md`](../../docs/Backlog.md) · sync: skill `backlog-github-projects-sync` · map: [`.github/backlog.json`](../../.github/backlog.json) · API: [`docs/GITHUB-PROJECTS-API.md`](../../docs/GITHUB-PROJECTS-API.md).
 
 Ключи `**Статус:**` → колонка Project:
 
@@ -15,19 +15,21 @@ alwaysApply: false
 | `open` | Backlog |
 | `in_progress` | In progress |
 | `in_review` | In review |
-| `ready` | Ready |
 | `done` | Done |
+
+Опционально `**Приоритет:**` / `**Priority:**` → поле Project **Priority** (`P0` / `P1` / `P2` на доске №6; `priorityMap` в `.github/backlog.json`).
 
 ## Когда менять (агент)
 
 | Событие | Статус |
 |---------|--------|
 | Старт реализации задачи из backlog (сразу после git-старта / взятия в работу) | `in_progress` |
-| Создание PR task-ветки → `dev` (integration) | `in_review` |
-| Merge PR в `dev` (или явный запрос пользователя) | `done` → sync → запись в `CHANGELOG.md` → **удалить** секцию задачи из `Backlog.md` |
+| Создание PR task-ветки → `dev` (integration) | `in_review` (**до** `gh pr create`, в skill `flask-blog-docs-after-task`) |
+| Merge PR в `dev` (или явный запрос пользователя `merged` / MERGED) | `done` → sync → CHANGELOG → **удалить** секцию из `Backlog.md` — skill [`flask-blog-git-merged-archive`](../skills/flask-blog-git-merged-archive/SKILL.md) |
 
 - Менять статус **в том же коммите** (или сразу следующим), что и событие; затем `python ~/.cursor/skills/backlog-github-projects-sync/scripts/sync_backlog.py`.
 - После `done` и sync: итог — в [`docs/CHANGELOG.md`](../../docs/CHANGELOG.md); секцию из `Backlog.md` убрать.
-- **Не** ставить `done` только потому, что реализация на ветке закончена — до PR остаётся `in_progress`.
+- **Post-merge очистка — в том же turn, что и `merged`:** docs-PR → **сразу** `gh pr merge --squash` → архив docs-ветки → `dev` с актуальным `Backlog.md`. **Не** оставлять открытый `docs/*-backlog-done` «на потом» (иначе на `dev` остаётся секция `in_review` и растут конфликты при параллельных правках backlog).
+- **Не** ставить `done` только потому, что реализация на ветке закончена — до подготовки PR остаётся `in_progress`; `in_review` — в docs-after-task **перед** `gh pr create`.
 - Задачи без записи в `Backlog.md` — правило не применять.
 - Scoping — [`AGENTS.md`](../../AGENTS.md) / `docs-context.mdc`.

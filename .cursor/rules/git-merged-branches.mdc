@@ -18,4 +18,4 @@ alwaysApply: false
 
 Имена: `feat/foo` → `merged/foo` (префикс снимается).
 
-**Алгоритм (bash + follow-up docs PR):** skill [`flask-blog-git-merged-archive`](../skills/flask-blog-git-merged-archive/SKILL.md) — Read и выполнить в том же turn после MERGED.
+**Алгоритм (bash + follow-up backlog):** skill [`flask-blog-git-merged-archive`](../skills/flask-blog-git-merged-archive/SKILL.md) — Read и выполнить в том же turn после MERGED. Очистка `Backlog.md` (`done` → sync → удалить секцию) — **сразу merge** docs-PR в том же turn; не оставлять открытый `docs/*-backlog-done`.

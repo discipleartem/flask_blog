@@ -25,6 +25,7 @@
 | Markdown-редактор / подсветка | DEVELOPMENT §Контент | `content_render.py`, `static/js/markdown-editor.js`, `syntax-highlight.js` | DEPLOY, auth |
 | CSRF / config / factory | ARCHITECTURE §Поток | `app/__init__.py`, `app/csrf.py`, `app/config.py` | DEPLOY |
 | Деплой / PA / hook | DEPLOY | `app/deploy/`, `.github/workflows/` | DEVELOPMENT UI, IronBee |
+| Релиз / GitHub Release | RELEASE, github-releases-api | skills `flask-blog-git-release*`, `docs/CHANGELOG.md` | UI, IronBee, schema |
 | Тесты | `testing.mdc` | `tests/` (+ модуль под тестом) | DEPLOY, static vendor |
 | Backlog / статусы задач | `backlog-status.mdc`, Backlog.md | — | код приложения |
 | Docs / карта проекта | этот файл, `docs/README.md` | `docs/`, `AGENTS.md`, `.cursor/rules/docs-context.mdc` | широкий `app/` |
@@ -37,4 +38,4 @@
 
 ## После изменения поведения
 
-Mapping «куда писать» + commit — skill [`.cursor/skills/flask-blog-docs-after-task/SKILL.md`](.cursor/skills/flask-blog-docs-after-task/SKILL.md) (**автоматически** в конце реализации; hook `stop`). Scoping: [`.cursor/rules/docs-context.mdc`](.cursor/rules/docs-context.mdc). Не копировать карты ARCHITECTURE в rules.
+Skill [`.cursor/skills/flask-blog-docs-after-task/SKILL.md`](.cursor/skills/flask-blog-docs-after-task/SKILL.md): mapping «куда писать» + commit + backlog `in_review` (**обязательно до PR в `dev`**; hook `stop`). Scoping: [`.cursor/rules/docs-context.mdc`](.cursor/rules/docs-context.mdc). Не копировать карты ARCHITECTURE в rules.
