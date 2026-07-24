@@ -11,6 +11,34 @@
 
 ---
 
+## SEO: Open Graph / Twitter Card превью ссылок на статьи
+
+**Статус:** in_progress
+**GitHub:** #67
+**Приоритет:** P2
+**Категория:** UI / SEO
+
+### Проблема
+
+При вставке URL статьи в Telegram, Discord, Slack, VK и т.п. не показывается карточка сайта: в `<head>` нет `og:*` / `twitter:*` (только `<title>`). Краулеры не из чего собрать превью.
+
+### Acceptance criteria
+
+- Страница `/posts/<id>` отдаёт `og:title`, `og:description`, `og:url`, `og:type`, `og:image` (абсолютные URL) и базовые Twitter Card теги.
+- Description — plain-text excerpt из `body_source` (reuse `plain_excerpt`).
+- `og:image`: первое абсолютное изображение из Markdown тела, иначе дефолтная картинка сайта в `static/`.
+- Unit-тесты: meta-теги присутствуют в HTML ответа detail.
+- Кратко задокументировано в DEVELOPMENT / ARCHITECTURE.
+
+### Подзадачи
+
+- [x] Meta-теги в `posts/detail.html` (+ при необходимости site-level на главной)
+- [x] Хелпер первого image URL из Markdown; дефолтный `og-default` asset
+- [x] Unit-тесты
+- [x] Docs
+
+---
+
 ## Auth: CSRF на все mutating POST
 
 **Статус:** open

@@ -1,6 +1,23 @@
 {% extends "base.html" %}
 {% block title %}{{ post['title'] }} · Flask Blog{% endblock %}
 {% block extra_head %}
+  {% if meta_description %}
+  <meta name="description" content="{{ meta_description }}">
+  {% endif %}
+  <meta property="og:site_name" content="Flask Blog">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="{{ post['title'] }}">
+  {% if meta_description %}
+  <meta property="og:description" content="{{ meta_description }}">
+  {% endif %}
+  <meta property="og:url" content="{{ og_url }}">
+  <meta property="og:image" content="{{ og_image_url }}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ post['title'] }}">
+  {% if meta_description %}
+  <meta name="twitter:description" content="{{ meta_description }}">
+  {% endif %}
+  <meta name="twitter:image" content="{{ og_image_url }}">
   {% if g.user %}
   <link rel="stylesheet" href="{{ url_for('static', filename='vendor/easymde/easymde.min.css') }}">
   {% endif %}

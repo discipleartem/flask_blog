@@ -9,6 +9,7 @@
 
 ### Added
 
+- Open Graph / Twitter Card meta на `/` и `/posts/<id>` (`og:title`, `og:description`, `og:url`, `og:image`, `twitter:*`); fallback-картинка `static/img/og-default.jpg`; `first_markdown_image_url` в `content_render`.
 - Jinja-фильтр `plain_excerpt` (`app/content_render.py`) — краткий plain-text превью для ленты постов.
 
 ### Changed
