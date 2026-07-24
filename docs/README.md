@@ -9,6 +9,7 @@
 | [DEPLOY.md](DEPLOY.md) | PythonAnywhere, `.env` на проде, auto-deploy |
 | [Backlog.md](Backlog.md) | Активные задачи (не история) |
 | [CHANGELOG.md](CHANGELOG.md) | История изменений |
+| [GITHUB-PROJECTS-API.md](GITHUB-PROJECTS-API.md) | GitHub Projects v2: возможности, GraphQL/REST, маппинг backlog |
 
 Ограничения стека (агент): [`.cursor/rules/00-project.mdc`](../.cursor/rules/00-project.mdc).  
 После реализации задачи агент **автоматически** обновляет docs (skill [flask-blog-docs-after-task](../.cursor/skills/flask-blog-docs-after-task/SKILL.md); pointer в `00-project.mdc`; hook `stop`).
