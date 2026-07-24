@@ -4,7 +4,11 @@ from __future__ import annotations
 
 import unittest
 
-from app.content_render import plain_excerpt, render_to_html
+from app.content_render import (
+    first_markdown_image_url,
+    plain_excerpt,
+    render_to_html,
+)
 
 
 class ContentRenderTests(unittest.TestCase):
@@ -82,6 +86,25 @@ class ContentRenderTests(unittest.TestCase):
         self.assertEqual(excerpt, "1. Архитектура")
         self.assertNotIn("|", excerpt)
         self.assertNotIn("---", excerpt)
+
+    def test_first_markdown_image_url_absolute(self) -> None:
+        src = "Intro\n\n![cover](https://cdn.example.com/a.jpg)\n\nMore"
+        self.assertEqual(
+            first_markdown_image_url(src),
+            "https://cdn.example.com/a.jpg",
+        )
+
+    def test_first_markdown_image_url_skips_relative(self) -> None:
+        src = "![local](/static/x.png)\n![ok](http://example.com/y.png)"
+        self.assertEqual(
+            first_markdown_image_url(src),
+            "http://example.com/y.png",
+        )
+
+    def test_first_markdown_image_url_none(self) -> None:
+        self.assertIsNone(first_markdown_image_url(""))
+        self.assertIsNone(first_markdown_image_url("no images here"))
+        self.assertIsNone(first_markdown_image_url("![x](relative.png)"))
 
 
 if __name__ == "__main__":

@@ -116,3 +116,55 @@ class PostsTests(BlogTestCase):
             json={"source": "x"},
         )
         self.assertIn(response.status_code, (302, 401))
+
+    def test_detail_has_open_graph_meta(self) -> None:
+        self.register("writer", "secret1")
+        self.client.post(
+            "/posts/new",
+            data={
+                "title": "OG Title",
+                "body_source": (
+                    "Hello **world** and some more text for description.\n\n"
+                    "![hero](https://cdn.example.com/cover.jpg)"
+                ),
+            },
+        )
+        post = query_one("SELECT id FROM posts WHERE title = ?", ("OG Title",))
+        detail = self.client.get(f"/posts/{post['id']}")
+        html = detail.data.decode("utf-8")
+        self.assertEqual(detail.status_code, 200)
+        self.assertIn('property="og:type" content="article"', html)
+        self.assertIn('property="og:title" content="OG Title"', html)
+        self.assertIn(
+            'property="og:description" content="Hello world and some more text for description."',
+            html,
+        )
+        self.assertIn(
+            'property="og:image" content="https://cdn.example.com/cover.jpg"',
+            html,
+        )
+        self.assertIn(f'property="og:url" content="http://localhost/posts/{post["id"]}"', html)
+        self.assertIn('name="twitter:card" content="summary_large_image"', html)
+
+    def test_detail_og_image_falls_back_to_default(self) -> None:
+        self.register("writer", "secret1")
+        self.client.post(
+            "/posts/new",
+            data={"title": "No Img", "body_source": "Just text, no pictures."},
+        )
+        post = query_one("SELECT id FROM posts WHERE title = ?", ("No Img",))
+        detail = self.client.get(f"/posts/{post['id']}")
+        html = detail.data.decode("utf-8")
+        self.assertIn(
+            'property="og:image" content="http://localhost/static/img/og-default.jpg"',
+            html,
+        )
+
+    def test_index_has_open_graph_meta(self) -> None:
+        home = self.client.get("/")
+        html = home.data.decode("utf-8")
+        self.assertIn('property="og:type" content="website"', html)
+        self.assertIn(
+            'property="og:image" content="http://localhost/static/img/og-default.jpg"',
+            html,
+        )

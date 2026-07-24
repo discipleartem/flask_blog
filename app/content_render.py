@@ -94,8 +94,31 @@ def render_content(source: str, fmt: str) -> Markup:
     return render_to_html(source or "", fmt or "plaintext")
 
 
+_MD_IMAGE_RE = re.compile(
+    r"!\[([^\]]*)\]\(([^)\s]+)(?:\s+\"[^\"]*\")?\)",
+)
+
+
+def first_markdown_image_url(source: str) -> str | None:
+    """Первый абсолютный http(s) URL картинки из Markdown.
+
+    Args:
+        source: Исходный body_source (Markdown или plain).
+
+    Returns:
+        URL или None, если подходящего изображения нет.
+    """
+    if not source:
+        return None
+    for match in _MD_IMAGE_RE.finditer(source):
+        url = match.group(2).strip()
+        if url.startswith(("http://", "https://")):
+            return url
+    return None
+
+
 def plain_excerpt(source: str, max_chars: int = 160) -> str:
-    """Краткий plain-text из Markdown/plaintext для ленты.
+    """Краткий plain-text из Markdown/plaintext для ленты и og:description.
 
     Args:
         source: Исходный body_source.
@@ -109,7 +132,7 @@ def plain_excerpt(source: str, max_chars: int = 160) -> str:
     text = source
     text = re.sub(r"```[\s\S]*?```", " ", text)
     text = re.sub(r"`[^`]*`", " ", text)
-    text = re.sub(r"!\[([^\]]*)\]\([^)]*\)", r"\1", text)
+    text = re.sub(r"!\[[^\]]*\]\([^)]*\)", " ", text)
     text = re.sub(r"\[([^\]]+)\]\([^)]*\)", r"\1", text)
     text = re.sub(r"(?m)^#{1,6}\s+", "", text)
     # GFM tables: drop row/separator lines so лента не показывает сырые «| … |»

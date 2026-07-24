@@ -23,7 +23,8 @@
 
 | Слой | Файлы | Поведение |
 |------|--------|-----------|
-| Рендер | `app/content_render.py`, Jinja-фильтры `render_content`, `plain_excerpt` | Markdown / plain / html → nh3 → `Markup`. Extensions: `fenced_code`, `tables` (GFM), `nl2br`, `sane_lists`. Лента: `plain_excerpt` — краткий plain-text из `body_source` (строки GFM-таблиц `| … |` отбрасываются). Без `| safe` по сырой колонке из БД |
+| Рендер | `app/content_render.py`, Jinja-фильтры `render_content`, `plain_excerpt` | Markdown / plain / html → nh3 → `Markup`. Extensions: `fenced_code`, `tables` (GFM), `nl2br`, `sane_lists`. Лента и `og:description`: `plain_excerpt` — краткий plain-text из `body_source` (строки GFM-таблиц `| … |` и markdown-картинки отбрасываются). `first_markdown_image_url` — первое абсолютное `http(s)` изображение для `og:image`. Без `| safe` по сырой колонке из БД |
+| Social preview | `posts/index.html`, `posts/detail.html` | Open Graph + Twitter Card: title/description/url/image (абсолютные URL). Image: картинка из тела поста или `static/img/og-default.jpg` |
 | Редактор | `app/static/js/markdown-editor.js`, vendor EasyMDE | JS обязателен для форм; чтение витрины без JS |
 | Preview | `POST /markdown/preview` | Тот же `render_to_html`, что на витрине; кнопка «глаз» в тулбаре |
 | Код | `app/static/js/syntax-highlight.js`, стили в `app.css` | Подсветка `pre code.language-*`: python, html, javascript, css, bash (+ aliases); иначе generic. Автоотступы (табы→пробелы, структурный indent); на submit — `formatMarkdownFences` |
