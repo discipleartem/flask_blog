@@ -205,8 +205,6 @@ body {
   max-width: 100%;
   border-collapse: collapse;
   font-size: 0.95em;
-  overflow-x: auto;
-  display: block;
 }
 
 .post-body thead th,
