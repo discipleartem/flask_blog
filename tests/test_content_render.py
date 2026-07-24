@@ -20,6 +20,16 @@ class ContentRenderTests(unittest.TestCase):
         self.assertIn("print(1)", html)
         self.assertNotIn("```", html)
 
+    def test_markdown_gfm_table(self) -> None:
+        src = "| Col A | Col B |\n| --- | --- |\n| one | two |\n"
+        html = str(render_to_html(src, "markdown"))
+        self.assertIn("<table>", html)
+        self.assertIn("<thead>", html)
+        self.assertIn("<th>Col A</th>", html)
+        self.assertIn("<td>one</td>", html)
+        self.assertIn("<td>two</td>", html)
+        self.assertNotIn("| Col A |", html)
+
     def test_plaintext_escapes_and_breaks(self) -> None:
         html = str(render_to_html("a <b>x</b>\nline", "plaintext"))
         self.assertIn("&lt;b&gt;", html)
@@ -59,6 +69,19 @@ class ContentRenderTests(unittest.TestCase):
     def test_plain_excerpt_empty(self) -> None:
         self.assertEqual(plain_excerpt(""), "")
         self.assertEqual(plain_excerpt("```\ncode\n```"), "")
+
+    def test_plain_excerpt_strips_gfm_table(self) -> None:
+        src = (
+            "## 1. Архитектура\n\n"
+            "| Слой | Реализация |\n"
+            "| --- | --- |\n"
+            "| Аутентификация | Cookie session |\n"
+            "| CSRF | Свой токен |\n"
+        )
+        excerpt = plain_excerpt(src, max_chars=200)
+        self.assertEqual(excerpt, "1. Архитектура")
+        self.assertNotIn("|", excerpt)
+        self.assertNotIn("---", excerpt)
 
 
 if __name__ == "__main__":
