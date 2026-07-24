@@ -1,19 +1,23 @@
 ---
 name: flask-blog-git-release-sync
 description: >-
-  After a release PR is merged into main (and optional GitHub Release): merge
-  origin/main into dev, resolve release-file conflicts preferring main, push
-  origin/dev. Use when user says sync after release, sync dev with main after
-  vX.Y.Z, or post-release when git log dev..origin/main is not empty.
+  After a release PR is merged into main (and GitHub Release with all fields):
+  merge origin/main into dev, resolve release-file conflicts preferring main,
+  push origin/dev. Use when user says sync after release, sync dev with main
+  after vX.Y.Z, or post-release when git log dev..origin/main is not empty.
 ---
 
 # flask_blog — sync `dev` ← `main` после релиза
 
+Полный релиз (подготовка → PR → **GitHub Release со всеми полями** → этот sync): skill [`flask-blog-git-release`](../flask-blog-git-release/SKILL.md).  
 Общий sync (не только релиз): skill [`git-dev-main-sync`](~/.cursor/skills/git-dev-main-sync/SKILL.md).  
-Архив release-ветки: skill [`flask-blog-git-merged-archive`](../flask-blog-git-merged-archive/SKILL.md).
+Архив release-ветки: skill [`flask-blog-git-merged-archive`](../flask-blog-git-merged-archive/SKILL.md).  
+API / поля Release: [`docs/github-releases-api.md`](../../../docs/github-releases-api.md) · процесс: [`docs/RELEASE.md`](../../../docs/RELEASE.md).
 
-**Когда:** сразу после squash merge release-PR в `main` (и при необходимости `gh release create`).  
+**Когда:** сразу после squash merge release-PR в `main` и создания GitHub Release (`gh release create` / API).  
 **Цель:** `git log dev..origin/main --oneline` пуст; закончить на `dev`.
+
+Если Release ещё не создан — сначала skill **`flask-blog-git-release`** §3 (все поля: tag, title, body, target=`main`, draft/prerelease явно, `--latest`), затем этот sync.
 
 ## Алгоритм
 
@@ -53,9 +57,10 @@ git commit --no-edit   # или -m "chore: sync dev with main after ${VERSION}"
 git push origin dev
 git log dev..origin/main --oneline   # must be empty
 git status -sb                       # на dev
+gh release view "${VERSION}"         # title/body непустые (если Release уже создан)
 ```
 
-После успешного sync — при необходимости архив `release/vX.Y.Z` → `merged/vX.Y.Z` (skill `flask-blog-git-merged-archive`).
+После успешного sync — архив `release/vX.Y.Z` → `merged/vX.Y.Z` (skill `flask-blog-git-merged-archive`).
 
 ## Нельзя
 
@@ -63,3 +68,4 @@ git status -sb                       # на dev
 - Оставлять `[Unreleased]` с уже выпущенными пунктами (брать CHANGELOG с `main`)
 - Завершать turn на `release/*` / `merged/*` вместо `dev`
 - Bare `git pull origin main` без явной стратегии merge
+- Считать релиз завершённым, если GitHub Release создан без title/body/target (исправить через `gh release edit` или skill `flask-blog-git-release`)

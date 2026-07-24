@@ -7,6 +7,8 @@
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Scoping: слои, маршруты, схема, права, карта `app/` |
 | [DEVELOPMENT.md](DEVELOPMENT.md) | Локальный запуск, UI, контент/Markdown, IronBee, проверки |
 | [DEPLOY.md](DEPLOY.md) | PythonAnywhere, `.env` на проде, auto-deploy |
+| [RELEASE.md](RELEASE.md) | Релиз `dev`→`main`: PR, squash, GitHub Release, sync |
+| [github-releases-api.md](github-releases-api.md) | GitHub REST API Releases: endpoints, поля, `gh` |
 | [Backlog.md](Backlog.md) | Активные задачи (не история) |
 | [CHANGELOG.md](CHANGELOG.md) | История изменений |
 | [GITHUB-PROJECTS-API.md](GITHUB-PROJECTS-API.md) | GitHub Projects v2: возможности, GraphQL/REST, маппинг backlog |

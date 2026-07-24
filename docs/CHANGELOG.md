@@ -26,6 +26,7 @@
 
 ### Docs
 
+- `docs/RELEASE.md` + `docs/github-releases-api.md`: канон релиза `dev`→`main` и справка GitHub Releases API; skill `flask-blog-git-release` (все поля Release обязательны).
 - `docs/GITHUB-PROJECTS-API.md`: возможности Projects v2, GraphQL/REST/`gh`, маппинг Status/Priority на backlog.
 - Backlog: auth/security задачи из обзора (CSRF, `next`, rate limit, session, пароли, prod defaults) с Priority P0–P2; sync → issues #54–#61 на Project «Flask Blog».
 - `backlog.json` / `backlog-status.mdc`: поле Priority; статус `ready` убран из `statusMap`.
