@@ -269,5 +269,8 @@ gh project field-list 6 --owner discipleartem --format json
 gh project item-list 6 --owner discipleartem --format json --limit 50
 
 python ~/.cursor/skills/backlog-github-projects-sync/scripts/sync_backlog.py --dry-run
+python ~/.cursor/skills/backlog-github-projects-sync/scripts/sync_backlog.py --rate-limit
+python ~/.cursor/skills/backlog-github-projects-sync/scripts/sync_backlog.py --pending-status
 python ~/.cursor/skills/backlog-github-projects-sync/scripts/sync_backlog.py
+# exit 2 = GraphQL rate limit / low budget → pending в ~/.cache/… ; после resetAt снова sync
 ```
