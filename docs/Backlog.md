@@ -11,33 +11,6 @@
 
 ---
 
-## Content: стили GFM-таблиц в markdown
-
-**Статус:** in_review
-**GitHub:** #63
-**Приоритет:** P1
-**Категория:** Content / Markdown
-
-### Проблема
-
-GFM-таблицы (`| col |`) парсятся в `<table>` на сервере, но на витрине и в EasyMDE preview выглядят как plain text без borders / header styling (Bootstrap reboot без `.table`). В ленте `plain_excerpt` схлопывал строки таблицы в одну строку с сырыми `|`.
-
-### Acceptance criteria
-
-- Таблицы в `.post-body` и в preview редактора визуально читаются как таблицы (границы, отступы ячеек, отличие thead).
-- Серверный рендер и preview согласованы (один HTML-пайплайн).
-- Unit-тест: markdown table → `<table>` / `<th>` / `<td>`.
-- Лента: excerpt без сырых `| … |` строк таблицы.
-
-### Подзадачи
-
-- [x] CSS для `.post-body table` и preview
-- [x] Unit-тест на tables extension
-- [x] `plain_excerpt` отбрасывает GFM table rows
-- [x] Docs + verify
-
----
-
 ## Auth: CSRF на все mutating POST
 
 **Статус:** open
