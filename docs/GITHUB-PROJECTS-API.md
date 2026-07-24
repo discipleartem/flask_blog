@@ -230,6 +230,8 @@ CLI: `gh project item-edit --id ITEM_ID --project-id PROJECT_ID --field-id FIELD
 
 Правило статусов агента: [`.cursor/rules/backlog-status.mdc`](../.cursor/rules/backlog-status.mdc).
 
+После merge task-PR в `dev`: агент в том же turn ставит `done`, sync, удаляет секцию из `Backlog.md` и **сразу** squash-merge docs-PR (skill [`flask-blog-git-merged-archive`](../.cursor/skills/flask-blog-git-merged-archive/SKILL.md)) — иначе на `dev` остаётся «закрытая» секция и растут конфликты при параллельных правках backlog.
+
 ### Priority → `**Приоритет:**`
 
 Фактические опции доски №6: **`P0`**, **`P1`**, **`P2`**.

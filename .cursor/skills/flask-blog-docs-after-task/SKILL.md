@@ -77,5 +77,5 @@ Post-merge rename — skill [`flask-blog-git-merged-archive`](../flask-blog-git-
 
 ## После merge в `dev` (не этот skill целиком)
 
-1. Backlog: `done` → sync → CHANGELOG (если ещё нет) → **удалить** секцию из `Backlog.md` — skill backlog-sync.
-2. Ветки: `feat|docs/…` → `merged/…`, **checkout `dev`** — skill `flask-blog-git-merged-archive`.
+1. Backlog: `done` → sync → CHANGELOG (если ещё нет) → **удалить** секцию из `Backlog.md` — skill backlog-sync + skill [`flask-blog-git-merged-archive`](../flask-blog-git-merged-archive/SKILL.md) (docs-PR **сразу** squash-merge в том же turn; не ждать пользователя).
+2. Ветки: `feat|docs/…` → `merged/…`, **checkout `dev`** — тот же skill `flask-blog-git-merged-archive`.
