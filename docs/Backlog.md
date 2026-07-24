@@ -13,7 +13,7 @@
 
 ## SEO: Open Graph / Twitter Card превью ссылок на статьи
 
-**Статус:** in_progress
+**Статус:** in_review
 **GitHub:** #67
 **Приоритет:** P2
 **Категория:** UI / SEO
