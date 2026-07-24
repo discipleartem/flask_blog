@@ -197,6 +197,50 @@ body {
   margin-bottom: 0;
 }
 
+/* GFM tables — Bootstrap reboot strips borders; scope without .table class */
+.post-body table,
+.EasyMDEContainer .editor-preview table,
+.EasyMDEContainer .editor-preview-side table {
+  width: 100%;
+  max-width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95em;
+  overflow-x: auto;
+  display: block;
+}
+
+.post-body thead th,
+.EasyMDEContainer .editor-preview thead th,
+.EasyMDEContainer .editor-preview-side thead th {
+  font-weight: 600;
+  text-align: left;
+  background: color-mix(in srgb, var(--fb-surface) 55%, var(--fb-bg));
+  color: var(--fb-ink);
+}
+
+[data-bs-theme="dark"] .post-body thead th,
+[data-bs-theme="dark"] .EasyMDEContainer .editor-preview thead th,
+[data-bs-theme="dark"] .EasyMDEContainer .editor-preview-side thead th {
+  background: color-mix(in srgb, var(--fb-surface) 80%, #000);
+}
+
+.post-body th,
+.post-body td,
+.EasyMDEContainer .editor-preview th,
+.EasyMDEContainer .editor-preview td,
+.EasyMDEContainer .editor-preview-side th,
+.EasyMDEContainer .editor-preview-side td {
+  border: 1px solid var(--fb-line);
+  padding: 0.55rem 0.75rem;
+  vertical-align: top;
+}
+
+.post-body tbody tr:nth-child(even),
+.EasyMDEContainer .editor-preview tbody tr:nth-child(even),
+.EasyMDEContainer .editor-preview-side tbody tr:nth-child(even) {
+  background: color-mix(in srgb, var(--fb-muted) 8%, transparent);
+}
+
 /* Code block + copy buttons */
 .code-block {
   position: relative;

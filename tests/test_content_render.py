@@ -20,6 +20,16 @@ class ContentRenderTests(unittest.TestCase):
         self.assertIn("print(1)", html)
         self.assertNotIn("```", html)
 
+    def test_markdown_gfm_table(self) -> None:
+        src = "| Col A | Col B |\n| --- | --- |\n| one | two |\n"
+        html = str(render_to_html(src, "markdown"))
+        self.assertIn("<table>", html)
+        self.assertIn("<thead>", html)
+        self.assertIn("<th>Col A</th>", html)
+        self.assertIn("<td>one</td>", html)
+        self.assertIn("<td>two</td>", html)
+        self.assertNotIn("| Col A |", html)
+
     def test_plaintext_escapes_and_breaks(self) -> None:
         html = str(render_to_html("a <b>x</b>\nline", "plaintext"))
         self.assertIn("&lt;b&gt;", html)
