@@ -18,6 +18,8 @@
 ### Docs
 
 - DEPLOY.md / DEVELOPMENT.md: обязательность `.env` на проде; локальный `flask run --debug` и CLI без debug.
+- Backlog #60 (безопасные дефолты SECRET_KEY / ADMIN_PASSWORD) выполнен после merge в `dev`.
+
 ## [0.4.0] — 2026-07-24
 
 ### Added
