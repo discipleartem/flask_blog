@@ -67,8 +67,8 @@ Identity: `name#NNNN`. Имя `admin` зарезервировано. Seed: `adm
 
 | Путь | Назначение |
 |------|------------|
-| `__init__.py` | App factory |
-| `config.py` | Config + `.env` |
+| `__init__.py` | App factory; в non-debug — отказ старта при небезопасных дефолтах секретов |
+| `config.py` | Config + `.env`; известные небезопасные дефолты `SECRET_KEY` / `ADMIN_PASSWORD` |
 | `db.py` | sqlite3 helpers, миграции |
 | `content_render.py` | Markdown/plain/html → безопасный HTML (в т.ч. GFM tables); `plain_excerpt` / `first_markdown_image_url` для ленты и OG |
 | `csrf.py` | CSRF token helpers |

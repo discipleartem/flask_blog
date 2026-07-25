@@ -9,12 +9,15 @@
 
 ### Added
 
+- Guard в `create_app`: в non-debug режиме отказ старта при известных небезопасных дефолтах `SECRET_KEY=dev-change-me` / `ADMIN_PASSWORD=admin` (`RuntimeError` + critical в лог). Debug/testing по-прежнему допускают дефолты.
+
 ### Changed
 
 ### Fixed
 
 ### Docs
 
+- DEPLOY.md / DEVELOPMENT.md: обязательность `.env` на проде; локальный `flask run --debug` и CLI без debug.
 ## [0.4.0] — 2026-07-24
 
 ### Added
