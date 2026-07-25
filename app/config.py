@@ -11,16 +11,23 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
 
+# Известные небезопасные дефолты — запрещены вне debug/testing (см. create_app).
+INSECURE_DEFAULT_SECRET_KEY = "dev-change-me"
+INSECURE_DEFAULT_ADMIN_PASSWORD = "admin"
+
 
 class Config:
     """Default configuration."""
 
-    SECRET_KEY = os.environ.get("SECRET_KEY", "dev-change-me")
+    SECRET_KEY = os.environ.get("SECRET_KEY", INSECURE_DEFAULT_SECRET_KEY)
     DATABASE = os.environ.get(
         "DATABASE",
         str(BASE_DIR / "instance" / "blog.sqlite3"),
     )
-    ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin")
+    ADMIN_PASSWORD = os.environ.get(
+        "ADMIN_PASSWORD",
+        INSECURE_DEFAULT_ADMIN_PASSWORD,
+    )
     DEPLOY_SECRET = os.environ.get("DEPLOY_SECRET", "")
     SCHEMA_PATH = BASE_DIR / "schema.sql"
     MIGRATIONS_DIR = BASE_DIR / "migrations"

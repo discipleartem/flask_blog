@@ -133,6 +133,12 @@ Mobile/tablet: `interaction_resize-viewport` в том же окне Chrome.
 
 Локальные пути IDE (не в архитектурной карте): `.vscode/settings.json` (IronBee CDP, interpreter), `launch.json`, `terminal-init.sh`.
 
+## Конфиг / секреты
+
+Локально удобны дефолты `SECRET_KEY=dev-change-me` и `ADMIN_PASSWORD=admin` — они **разрешены** при debug (`flask --app wsgi run --debug` выставляет `FLASK_DEBUG=1` до factory).
+
+В **non-debug** (WSGI на PA, `flask` без `--debug`, `FLASK_DEBUG=0`) те же значения → hard fail (`RuntimeError` + critical в лог). На проде всегда заполняйте `.env` (см. [DEPLOY.md](DEPLOY.md) §`.env`).
+
 ## Миграции
 
 Файлы в `migrations/` применяются по имени (сортировка). Таблица `schema_migrations` хранит уже применённые файлы. SoT таблиц: [`schema.sql`](../schema.sql).
@@ -141,4 +147,4 @@ Mobile/tablet: `interaction_resize-viewport` в том же окне Chrome.
 flask --app wsgi db-upgrade
 ```
 
-Миграции также запускаются при `create_app()`.
+Миграции также запускаются при `create_app()`. Для `db-upgrade` без `--debug` либо задайте секреты в `.env`, либо временно `FLASK_DEBUG=1`.

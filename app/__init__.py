@@ -5,10 +5,43 @@ from __future__ import annotations
 from datetime import datetime
 
 from flask import Flask
+from flask.helpers import get_debug_flag
 
-from app.config import Config
+from app.config import (
+    INSECURE_DEFAULT_ADMIN_PASSWORD,
+    INSECURE_DEFAULT_SECRET_KEY,
+    Config,
+)
 from app.db import init_app as init_db_app
 from app.db import init_db
+
+
+def _assert_secure_production_secrets(app: Flask) -> None:
+    """Запретить старт с известными небезопасными дефолтами вне debug/testing.
+
+    Локальный ``flask run --debug`` выставляет ``FLASK_DEBUG`` до factory —
+    дефолты остаются удобны для разработки. WSGI / prod без debug — hard fail.
+    """
+    if app.config.get("TESTING") or get_debug_flag() or app.debug:
+        return
+
+    problems: list[str] = []
+    if app.config.get("SECRET_KEY") == INSECURE_DEFAULT_SECRET_KEY:
+        problems.append(
+            f"SECRET_KEY={INSECURE_DEFAULT_SECRET_KEY!r} — задайте уникальный "
+            "ключ в .env"
+        )
+    if app.config.get("ADMIN_PASSWORD") == INSECURE_DEFAULT_ADMIN_PASSWORD:
+        problems.append(
+            f"ADMIN_PASSWORD={INSECURE_DEFAULT_ADMIN_PASSWORD!r} — задайте "
+            "сильный пароль в .env"
+        )
+    if not problems:
+        return
+
+    message = "Отказ старта в non-debug: " + "; ".join(problems)
+    app.logger.critical(message)
+    raise RuntimeError(message)
 
 
 def create_app(config_object: type[Config] | None = None) -> Flask:
@@ -16,6 +49,7 @@ def create_app(config_object: type[Config] | None = None) -> Flask:
     app = Flask(__name__, instance_relative_config=True)
     cfg = config_object or Config
     app.config.from_object(cfg)
+    _assert_secure_production_secrets(app)
 
     init_db_app(app)
 

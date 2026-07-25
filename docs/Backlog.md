@@ -163,7 +163,7 @@ CSRF-токен и `validate_csrf()` есть только на login/register. 
 
 ## Ops: безопасные дефолты SECRET_KEY / ADMIN_PASSWORD
 
-**Статус:** open
+**Статус:** in_progress
 **GitHub:** #60
 **Приоритет:** P0
 **Категория:** Ops / Deploy security
@@ -180,9 +180,9 @@ CSRF-токен и `validate_csrf()` есть только на login/register. 
 
 ### Подзадачи
 
-- [ ] Guard при старте factory (prod)
-- [ ] Обновить DEPLOY.md / DEVELOPMENT.md
-- [ ] Тест на отказ с bad defaults в prod-like config
+- [x] Guard при старте factory (prod)
+- [x] Обновить DEPLOY.md / DEVELOPMENT.md
+- [x] Тест на отказ с bad defaults в prod-like config
 
 ---
 
