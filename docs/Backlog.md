@@ -161,31 +161,6 @@ CSRF-токен и `validate_csrf()` есть только на login/register. 
 
 ---
 
-## Ops: безопасные дефолты SECRET_KEY / ADMIN_PASSWORD
-
-**Статус:** in_review
-**GitHub:** #60
-**Приоритет:** P0
-**Категория:** Ops / Deploy security
-
-### Проблема
-
-Дефолты `SECRET_KEY="dev-change-me"` и `ADMIN_PASSWORD="admin"` опасны при забытом `.env` на проде.
-
-### Acceptance criteria
-
-- В non-debug / production режиме приложение отказывается стартовать с известными небезопасными дефолтами **или** явно логирует hard fail.
-- DEPLOY.md напоминает обязательность `.env`.
-- Локальный dev с дефолтами по-прежнему удобен.
-
-### Подзадачи
-
-- [x] Guard при старте factory (prod)
-- [x] Обновить DEPLOY.md / DEVELOPMENT.md
-- [x] Тест на отказ с bad defaults в prod-like config
-
----
-
 ## Auth (продукт): password reset / 2FA / роли
 
 **Статус:** open
