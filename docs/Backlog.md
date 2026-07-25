@@ -163,7 +163,7 @@ CSRF-токен и `validate_csrf()` есть только на login/register. 
 
 ## Ops: безопасные дефолты SECRET_KEY / ADMIN_PASSWORD
 
-**Статус:** in_progress
+**Статус:** in_review
 **GitHub:** #60
 **Приоритет:** P0
 **Категория:** Ops / Deploy security
