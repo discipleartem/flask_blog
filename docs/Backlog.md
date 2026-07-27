@@ -39,7 +39,7 @@ CSRF-токен и `validate_csrf()` есть только на login/register. 
 
 ## Auth: безопасный redirect `next` после login
 
-**Статус:** in_progress
+**Статус:** in_review
 **GitHub:** #55
 **Приоритет:** P0
 **Категория:** Auth / Security
