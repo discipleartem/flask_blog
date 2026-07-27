@@ -39,7 +39,7 @@ CSRF-токен и `validate_csrf()` есть только на login/register. 
 
 ## Auth: безопасный redirect `next` после login
 
-**Статус:** open
+**Статус:** in_review
 **GitHub:** #55
 **Приоритет:** P0
 **Категория:** Auth / Security
@@ -56,9 +56,9 @@ CSRF-токен и `validate_csrf()` есть только на login/register. 
 
 ### Подзадачи
 
-- [ ] Хелпер валидации `next` (whitelist relative)
-- [ ] Подключить в login view
-- [ ] Тесты open-redirect negatives
+- [x] Хелпер валидации `next` (whitelist relative)
+- [x] Подключить в login view
+- [x] Тесты open-redirect negatives
 
 ---
 

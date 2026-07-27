@@ -21,6 +21,7 @@ from app.auth.helpers import (
     login_user,
     logout_user,
     parse_tag,
+    safe_next_url,
 )
 from app.csrf import validate_csrf
 from app.db import execute, query_one
@@ -144,8 +145,11 @@ def login():
         if error is None and user is not None:
             login_user(user["id"])
             flash(f"С возвращением, {format_tag(user['name'], user['discriminator'])}!", "success")
-            next_url = request.args.get("next")
-            return redirect(next_url or url_for("posts.index"))
+            next_url = safe_next_url(
+                request.args.get("next"),
+                default=url_for("posts.index"),
+            )
+            return redirect(next_url)
 
         flash(error or "Ошибка входа.", "danger")
 
