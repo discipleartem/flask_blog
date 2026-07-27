@@ -37,31 +37,6 @@ CSRF-токен и `validate_csrf()` есть только на login/register. 
 
 ---
 
-## Auth: безопасный redirect `next` после login
-
-**Статус:** in_review
-**GitHub:** #55
-**Приоритет:** P0
-**Категория:** Auth / Security
-
-### Проблема
-
-После login используется `redirect(next_url)` без валидации — риск open redirect. Нужны только relative path / same-host.
-
-### Acceptance criteria
-
-- `next` принимается только если это безопасный относительный путь (или same-host URL по явной политике).
-- Внешние и `//…` URL отклоняются; fallback на безопасный default (например home).
-- Unit-тесты на допустимые и недопустимые значения `next`.
-
-### Подзадачи
-
-- [x] Хелпер валидации `next` (whitelist relative)
-- [x] Подключить в login view
-- [x] Тесты open-redirect negatives
-
----
-
 ## Auth: rate limit / backoff на login
 
 **Статус:** open
