@@ -51,7 +51,7 @@
 1. `before_request`: `load_logged_in_user` → `g.user` из `session["user_id"]` (или `None`).
 2. Шаблоны: `csrf_token`, `current_year` (context processor).
 3. Контент на витрине: фильтры `render_content` / `plain_excerpt` (`app/content_render.py` + nh3), не сырой `| safe` из БД. Страницы `/` и `/posts/<id>`: Open Graph / Twitter Card meta (`og:*`, `twitter:*`); description из `plain_excerpt`, image — `first_markdown_image_url` или `static/img/og-default.jpg`.
-4. Login: cookie session; без JWT. Deploy-hook: Bearer `DEPLOY_SECRET` (не user-auth).
+4. Login: cookie session; без JWT. Query `next` после login — только через `safe_next_url` (whitelist relative `/…`; внешние и `//…` → home). Deploy-hook: Bearer `DEPLOY_SECRET` (не user-auth).
 
 ## Права
 

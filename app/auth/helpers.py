@@ -7,6 +7,7 @@ import re
 from collections.abc import Callable
 from functools import wraps
 from typing import Any, TypeVar
+from urllib.parse import urlparse
 
 from flask import flash, g, redirect, session, url_for
 
@@ -16,6 +17,28 @@ F = TypeVar("F", bound=Callable[..., Any])
 
 RESERVED_USERNAME = "admin"
 TAG_RE = re.compile(r"^([^#]+)#(\d{4})$")
+
+
+def safe_next_url(target: str | None, *, default: str) -> str:
+    """Вернуть ``target``, если это безопасный относительный путь; иначе ``default``.
+
+    Политика (whitelist relative): только path, начинающийся с одного ``/``.
+    Отклоняются внешние URL, ``//…`` (protocol-relative), scheme, netloc,
+    backslash и управляющие символы в Location.
+    """
+    if not target:
+        return default
+    candidate = target.strip()
+    if not candidate:
+        return default
+    if "\\" in candidate or "\n" in candidate or "\r" in candidate:
+        return default
+    if not candidate.startswith("/") or candidate.startswith("//"):
+        return default
+    parsed = urlparse(candidate)
+    if parsed.scheme or parsed.netloc:
+        return default
+    return candidate
 
 
 def parse_tag(value: str) -> tuple[str, str] | None:

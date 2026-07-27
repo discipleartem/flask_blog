@@ -15,6 +15,8 @@
 
 ### Fixed
 
+- Login: параметр `next` валидируется (`safe_next_url`) — open redirect на внешние/`//…` URL закрыт; fallback на home.
+
 ### Docs
 
 - DEPLOY.md / DEVELOPMENT.md: обязательность `.env` на проде; локальный `flask run --debug` и CLI без debug.
