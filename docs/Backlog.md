@@ -11,32 +11,6 @@
 
 ---
 
-## Auth: CSRF на все mutating POST
-
-**Статус:** in_review
-**GitHub:** #54
-**Приоритет:** P0
-**Категория:** Auth / Security
-
-### Проблема
-
-CSRF-токен и `validate_csrf()` есть только на login/register. Формы постов, комментариев и users (create/edit/delete) без серверной проверки. Logout через GET без CSRF. `SameSite=Lax` смягчает риск, но не заменяет CSRF на state-changing endpoints.
-
-### Acceptance criteria
-
-- Все mutating POST (posts, comments, users) принимают и проверяют CSRF.
-- Шаблоны форм содержат скрытое поле CSRF (или эквивалент).
-- Unit-тесты: отказ без токена / с неверным токеном.
-
-### Подзадачи
-
-- [x] CSRF на CRUD постов
-- [x] CSRF на CRUD комментариев
-- [x] CSRF на admin users CRUD
-- [x] Logout перевести на POST + CSRF (убрать GET-logout или оставить redirect-only без side-effect)
-
----
-
 ## Auth: rate limit / backoff на login
 
 **Статус:** open
