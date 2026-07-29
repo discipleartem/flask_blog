@@ -13,7 +13,7 @@
 
 ## Auth: CSRF на все mutating POST
 
-**Статус:** in_progress
+**Статус:** in_review
 **GitHub:** #54
 **Приоритет:** P0
 **Категория:** Auth / Security
