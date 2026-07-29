@@ -144,7 +144,7 @@ def login():
 
         if error is None and user is not None:
             login_user(user["id"])
-            flash(f"С возвращением, {format_tag(user['name'], user['discriminator'])}!", "success")
+            flash(f"С возвращением, {format_tag(user['name'], user['discriminator'])}", "success")
             next_url = safe_next_url(
                 request.args.get("next"),
                 default=url_for("posts.index"),
@@ -156,9 +156,14 @@ def login():
     return render_template("auth/login.html")
 
 
-@bp.route("/logout")
+@bp.route("/logout", methods=("GET", "POST"))
 def logout():
-    """Clear session and redirect home."""
+    """POST: clear session (CSRF required). GET: redirect only, no side-effect."""
+    if request.method == "GET":
+        return redirect(url_for("posts.index"))
+    if not validate_csrf():
+        flash("Сессия устарела. Обновите страницу и попробуйте снова.", "danger")
+        return redirect(url_for("posts.index"))
     logout_user()
     flash("Вы вышли.", "info")
     return redirect(url_for("posts.index"))

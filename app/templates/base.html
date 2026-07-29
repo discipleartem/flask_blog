@@ -69,7 +69,10 @@
           <a class="nav-link p-0 user-tag" href="{{ url_for('users.detail', user_id=g.user['id']) }}">
             {{ g.user['name'] }}#{{ g.user['discriminator'] }}
           </a>
-          <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('auth.logout') }}">Выйти</a>
+          <form class="d-inline" method="post" action="{{ url_for('auth.logout') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-outline-secondary btn-sm">Выйти</button>
+          </form>
           {% else %}
           <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('auth.login') }}">Войти</a>
           <a class="btn btn-dark btn-sm" href="{{ url_for('auth.register') }}">Регистрация</a>

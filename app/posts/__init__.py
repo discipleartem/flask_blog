@@ -6,6 +6,7 @@ from flask import Blueprint, abort, flash, g, jsonify, redirect, render_template
 
 from app.auth.helpers import is_owner_or_admin, login_required
 from app.content_render import first_markdown_image_url, plain_excerpt, render_to_html
+from app.csrf import validate_csrf
 from app.db import execute, query_all, query_one
 
 bp = Blueprint("posts", __name__)
@@ -92,6 +93,8 @@ def detail(post_id: int):
 def create():
     """Create a post."""
     if request.method == "POST":
+        if not validate_csrf():
+            abort(403)
         title = (request.form.get("title") or "").strip()
         body_source = (request.form.get("body_source") or "").strip()
         error = _validate_post(title, body_source)
@@ -121,6 +124,9 @@ def edit(post_id: int):
         abort(403)
 
     if request.method == "POST":
+        if not validate_csrf():
+            abort(403)
+
         title = (request.form.get("title") or "").strip()
         body_source = (request.form.get("body_source") or "").strip()
         error = _validate_post(title, body_source)
@@ -146,6 +152,8 @@ def edit(post_id: int):
 @login_required
 def delete(post_id: int):
     """Delete own post (or any as admin). Comments cascade."""
+    if not validate_csrf():
+        abort(403)
     post = query_one("SELECT * FROM posts WHERE id = ?", (post_id,))
     if post is None:
         abort(404)

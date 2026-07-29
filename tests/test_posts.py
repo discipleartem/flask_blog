@@ -11,7 +11,7 @@ class PostsTests(BlogTestCase):
         self.register("writer", "secret1")
         response = self.client.post(
             "/posts/new",
-            data={"title": "Hello", "body_source": "World body"},
+            data=self.csrf_data(title="Hello", body_source="World body"),
             follow_redirects=True,
         )
         self.assertEqual(response.status_code, 200)
@@ -21,37 +21,47 @@ class PostsTests(BlogTestCase):
         self.assertIn(b"Hello", home.data)
         self.assertIn(b"writer#", home.data)
 
+    def test_create_rejects_missing_csrf(self) -> None:
+        self.register("writer", "secret1")
+        response = self.client.post(
+            "/posts/new",
+            data={"title": "No CSRF", "body_source": "Nope"},
+        )
+        self.assertEqual(response.status_code, 403)
+        self.assertIsNone(query_one("SELECT id FROM posts WHERE title = ?", ("No CSRF",)))
+
     def test_edit_own_post(self) -> None:
         self.register("writer", "secret1")
-        self.client.post("/posts/new", data={"title": "T1", "body_source": "B1"})
+        self.client.post("/posts/new", data=self.csrf_data(title="T1", body_source="B1"))
         post = query_one("SELECT id FROM posts WHERE title = ?", ("T1",))
         response = self.client.post(
             f"/posts/{post['id']}/edit",
-            data={"title": "T2", "body_source": "B2"},
+            data=self.csrf_data(title="T2", body_source="B2"),
             follow_redirects=True,
         )
         self.assertIn(b"T2", response.data)
 
     def test_cannot_edit_others(self) -> None:
         self.register("owner", "secret1")
-        self.client.post("/posts/new", data={"title": "Mine", "body_source": "Secret"})
+        self.client.post("/posts/new", data=self.csrf_data(title="Mine", body_source="Secret"))
         post = query_one("SELECT id FROM posts WHERE title = ?", ("Mine",))
-        self.client.get("/auth/logout")
+        self.logout()
         self.register("other", "secret1")
         response = self.client.post(
             f"/posts/{post['id']}/edit",
-            data={"title": "Hijack", "body_source": "Nope"},
+            data=self.csrf_data(title="Hijack", body_source="Nope"),
         )
         self.assertEqual(response.status_code, 403)
 
     def test_admin_can_delete_any(self) -> None:
         self.register("owner", "secret1")
-        self.client.post("/posts/new", data={"title": "Gone", "body_source": "Soon"})
+        self.client.post("/posts/new", data=self.csrf_data(title="Gone", body_source="Soon"))
         post = query_one("SELECT id FROM posts WHERE title = ?", ("Gone",))
-        self.client.get("/auth/logout")
+        self.logout()
         self.login_admin()
         response = self.client.post(
             f"/posts/{post['id']}/delete",
+            data=self.csrf_data(),
             follow_redirects=True,
         )
         self.assertEqual(response.status_code, 200)
@@ -61,7 +71,7 @@ class PostsTests(BlogTestCase):
         self.register("writer", "secret1")
         self.client.post(
             "/posts/new",
-            data={"title": "Md", "body_source": "Hello **bold**"},
+            data=self.csrf_data(title="Md", body_source="Hello **bold**"),
         )
         post = query_one("SELECT id, body_format FROM posts WHERE title = ?", ("Md",))
         self.assertEqual(post["body_format"], "markdown")
@@ -73,11 +83,11 @@ class PostsTests(BlogTestCase):
         self.register("writer", "secret1")
         self.client.post(
             "/posts/new",
-            data={
-                "title": "Fmt",
-                "body_source": "plain-looking",
-                "body_format": "html",
-            },
+            data=self.csrf_data(
+                title="Fmt",
+                body_source="plain-looking",
+                body_format="html",
+            ),
         )
         post = query_one(
             "SELECT body_format FROM posts WHERE title = ?",
@@ -89,10 +99,10 @@ class PostsTests(BlogTestCase):
         self.register("writer", "secret1")
         self.client.post(
             "/posts/new",
-            data={
-                "title": "Xss",
-                "body_source": "<script>alert(1)</script> **ok**",
-            },
+            data=self.csrf_data(
+                title="Xss",
+                body_source="<script>alert(1)</script> **ok**",
+            ),
         )
         post = query_one("SELECT id FROM posts WHERE title = ?", ("Xss",))
         detail = self.client.get(f"/posts/{post['id']}")
@@ -121,13 +131,13 @@ class PostsTests(BlogTestCase):
         self.register("writer", "secret1")
         self.client.post(
             "/posts/new",
-            data={
-                "title": "OG Title",
-                "body_source": (
+            data=self.csrf_data(
+                title="OG Title",
+                body_source=(
                     "Hello **world** and some more text for description.\n\n"
                     "![hero](https://cdn.example.com/cover.jpg)"
                 ),
-            },
+            ),
         )
         post = query_one("SELECT id FROM posts WHERE title = ?", ("OG Title",))
         detail = self.client.get(f"/posts/{post['id']}")
@@ -150,7 +160,7 @@ class PostsTests(BlogTestCase):
         self.register("writer", "secret1")
         self.client.post(
             "/posts/new",
-            data={"title": "No Img", "body_source": "Just text, no pictures."},
+            data=self.csrf_data(title="No Img", body_source="Just text, no pictures."),
         )
         post = query_one("SELECT id FROM posts WHERE title = ?", ("No Img",))
         detail = self.client.get(f"/posts/{post['id']}")

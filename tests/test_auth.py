@@ -15,7 +15,7 @@ class AuthTests(BlogTestCase):
         self.assertNotIn(b'value="secret1"', response.data)
         self.assertNotIn(b"PasswordCredential", response.data)
 
-        self.client.get("/auth/logout", follow_redirects=True)
+        self.logout()
         tag = self.user_tag("bob")
         response = self.login(tag, "secret1")
         self.assertIn(b"bob#", response.data)
@@ -62,7 +62,7 @@ class AuthTests(BlogTestCase):
     def test_login_accepts_username_field_name(self) -> None:
         self.register("fieldname", "secret1")
         tag = self.user_tag("fieldname")
-        self.client.get("/auth/logout", follow_redirects=True)
+        self.logout()
         token = self.csrf_token()
         response = self.client.post(
             "/auth/login",
@@ -88,7 +88,7 @@ class AuthTests(BlogTestCase):
     def test_login_safe_next_relative_path(self) -> None:
         self.register("nextok", "secret1")
         tag = self.user_tag("nextok")
-        self.client.get("/auth/logout", follow_redirects=True)
+        self.logout()
         token = self.csrf_token()
         response = self.client.post(
             "/auth/login?next=/users/",
@@ -100,7 +100,7 @@ class AuthTests(BlogTestCase):
     def test_login_rejects_open_redirect_next(self) -> None:
         self.register("nextev", "secret1")
         tag = self.user_tag("nextev")
-        self.client.get("/auth/logout", follow_redirects=True)
+        self.logout()
         token = self.csrf_token()
         for evil in (
             "https://evil.example/",
@@ -120,7 +120,7 @@ class AuthTests(BlogTestCase):
                     msg=f"open redirect to {location!r}",
                 )
                 self.assertEqual(location, "/")
-                self.client.get("/auth/logout", follow_redirects=True)
+                self.logout()
                 token = self.csrf_token()
 
     def test_safe_next_url_helper(self) -> None:
@@ -139,9 +139,23 @@ class AuthTests(BlogTestCase):
 
     def test_logout(self) -> None:
         self.register("carol", "secret1")
-        response = self.client.get("/auth/logout", follow_redirects=True)
+        response = self.logout()
         self.assertIn("Вы вышли".encode(), response.data)
         self.assertNotIn(b"carol#", response.data)
+
+    def test_logout_get_has_no_side_effect(self) -> None:
+        self.register("getlogout", "secret1")
+        response = self.client.get("/auth/logout", follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("Вы вышли".encode(), response.data)
+        self.assertIn(b"getlogout#", response.data)
+
+    def test_logout_rejects_missing_csrf(self) -> None:
+        self.register("csrfout", "secret1")
+        response = self.client.post("/auth/logout", data={})
+        self.assertEqual(response.status_code, 302)
+        home = self.client.get("/")
+        self.assertIn(b"csrfout#", home.data)
 
     def test_profile_self(self) -> None:
         self.register("dave", "secret1")
@@ -154,8 +168,29 @@ class AuthTests(BlogTestCase):
         response = self.client.get("/users/")
         self.assertEqual(response.status_code, 302)
 
-        self.client.get("/auth/logout")
+        self.logout()
         self.login_admin()
         response = self.client.get("/users/")
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"eve#", response.data)
+
+    def test_users_edit_rejects_missing_csrf(self) -> None:
+        self.register("editme", "secret1")
+        user = query_one("SELECT id FROM users WHERE name = ?", ("editme",))
+        response = self.client.post(
+            f"/users/{user['id']}/edit",
+            data={"password": "secret2"},
+        )
+        self.assertEqual(response.status_code, 403)
+
+    def test_users_delete_rejects_bad_csrf(self) -> None:
+        self.register("victim", "secret1")
+        victim = query_one("SELECT id FROM users WHERE name = ?", ("victim",))
+        self.logout()
+        self.login_admin()
+        response = self.client.post(
+            f"/users/{victim['id']}/delete",
+            data={"csrf_token": "not-the-real-token"},
+        )
+        self.assertEqual(response.status_code, 403)
+        self.assertIsNotNone(query_one("SELECT id FROM users WHERE id = ?", (victim["id"],)))

@@ -6,6 +6,7 @@ from flask import Blueprint, abort, flash, g, redirect, render_template, request
 from werkzeug.security import generate_password_hash
 
 from app.auth.helpers import admin_required, format_tag, login_required
+from app.csrf import validate_csrf
 from app.db import execute, query_all, query_one
 
 bp = Blueprint("users", __name__, url_prefix="/users")
@@ -44,6 +45,8 @@ def edit(user_id: int):
         abort(403)
 
     if request.method == "POST":
+        if not validate_csrf():
+            abort(403)
         password = request.form.get("password") or ""
         if password:
             if len(password) < 6:
@@ -86,6 +89,8 @@ def edit(user_id: int):
 @admin_required
 def delete(user_id: int):
     """Admin: delete a user (not the last admin)."""
+    if not validate_csrf():
+        abort(403)
     user = query_one("SELECT * FROM users WHERE id = ?", (user_id,))
     if user is None:
         abort(404)

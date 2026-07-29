@@ -9,7 +9,10 @@ from tests import BlogTestCase
 class CommentsTests(BlogTestCase):
     def _make_post(self) -> int:
         self.register("author", "secret1")
-        self.client.post("/posts/new", data={"title": "Post", "body_source": "Body"})
+        self.client.post(
+            "/posts/new",
+            data=self.csrf_data(title="Post", body_source="Body"),
+        )
         post = query_one("SELECT id FROM posts WHERE title = ?", ("Post",))
         assert post is not None
         return int(post["id"])
@@ -18,16 +21,27 @@ class CommentsTests(BlogTestCase):
         post_id = self._make_post()
         response = self.client.post(
             f"/posts/{post_id}/comments",
-            data={"body_source": "Nice post"},
+            data=self.csrf_data(body_source="Nice post"),
             follow_redirects=True,
         )
         self.assertIn(b"Nice post", response.data)
+
+    def test_create_rejects_missing_csrf(self) -> None:
+        post_id = self._make_post()
+        response = self.client.post(
+            f"/posts/{post_id}/comments",
+            data={"body_source": "No CSRF"},
+        )
+        self.assertEqual(response.status_code, 403)
+        self.assertIsNone(
+            query_one("SELECT id FROM comments WHERE body_source = ?", ("No CSRF",))
+        )
 
     def test_edit_own_comment(self) -> None:
         post_id = self._make_post()
         self.client.post(
             f"/posts/{post_id}/comments",
-            data={"body_source": "v1"},
+            data=self.csrf_data(body_source="v1"),
         )
         comment = query_one(
             "SELECT id FROM comments WHERE body_source = ?",
@@ -35,7 +49,7 @@ class CommentsTests(BlogTestCase):
         )
         response = self.client.post(
             f"/comments/{comment['id']}/edit",
-            data={"body_source": "v2"},
+            data=self.csrf_data(body_source="v2"),
             follow_redirects=True,
         )
         self.assertIn(b"v2", response.data)
@@ -44,24 +58,31 @@ class CommentsTests(BlogTestCase):
         post_id = self._make_post()
         self.client.post(
             f"/posts/{post_id}/comments",
-            data={"body_source": "mine"},
+            data=self.csrf_data(body_source="mine"),
         )
         comment = query_one(
             "SELECT id FROM comments WHERE body_source = ?",
             ("mine",),
         )
-        self.client.get("/auth/logout")
+        self.logout()
         self.register("stranger", "secret1")
-        response = self.client.post(f"/comments/{comment['id']}/delete")
+        response = self.client.post(
+            f"/comments/{comment['id']}/delete",
+            data=self.csrf_data(),
+        )
         self.assertEqual(response.status_code, 403)
 
     def test_delete_post_cascades_comments(self) -> None:
         post_id = self._make_post()
         self.client.post(
             f"/posts/{post_id}/comments",
-            data={"body_source": "bye"},
+            data=self.csrf_data(body_source="bye"),
         )
-        self.client.post(f"/posts/{post_id}/delete", follow_redirects=True)
+        self.client.post(
+            f"/posts/{post_id}/delete",
+            data=self.csrf_data(),
+            follow_redirects=True,
+        )
         self.assertIsNone(
             query_one("SELECT id FROM comments WHERE post_id = ?", (post_id,))
         )
@@ -70,7 +91,7 @@ class CommentsTests(BlogTestCase):
         post_id = self._make_post()
         self.client.post(
             f"/posts/{post_id}/comments",
-            data={"body_source": "See **this**"},
+            data=self.csrf_data(body_source="See **this**"),
         )
         row = query_one(
             "SELECT body_format FROM comments WHERE body_source = ?",
@@ -85,7 +106,7 @@ class CommentsTests(BlogTestCase):
         post_id = self._make_post()
         self.client.post(
             f"/posts/{post_id}/comments",
-            data={"body_source": "c1", "body_format": "html"},
+            data=self.csrf_data(body_source="c1", body_format="html"),
         )
         row = query_one(
             "SELECT body_format FROM comments WHERE body_source = ?",

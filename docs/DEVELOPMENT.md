@@ -79,7 +79,7 @@ python -m unittest discover -s tests -v
 
 В GitHub Actions: [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) на `push`/`pull_request` в `main` и `dev`. Деплой на PythonAnywhere ([`deploy.yml`](../.github/workflows/deploy.yml)) на `main` идёт только после успешного того же прогона.
 
-**Вручную в браузере** (по необходимости, в т.ч. auth / password manager): регистрация → **Save** на ключике с полным `name#NNNN` → logout → login через предложение браузера (autofill). Агент не гоняет Playwright/CDP-скрипты для этого.
+**Вручную в браузере** (по необходимости, в т.ч. auth / password manager): регистрация → **Save** на ключике с полным `name#NNNN` → logout (`POST` с CSRF из навбара; `GET /auth/logout` сессию не чистит) → login через предложение браузера (autofill). Агент не гоняет Playwright/CDP-скрипты для этого.
 
 ## IronBee DevTools (опционально)
 
