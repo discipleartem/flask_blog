@@ -13,7 +13,7 @@
 
 ## Auth: CSRF на все mutating POST
 
-**Статус:** open
+**Статус:** in_progress
 **GitHub:** #54
 **Приоритет:** P0
 **Категория:** Auth / Security
@@ -30,10 +30,10 @@ CSRF-токен и `validate_csrf()` есть только на login/register. 
 
 ### Подзадачи
 
-- [ ] CSRF на CRUD постов
-- [ ] CSRF на CRUD комментариев
-- [ ] CSRF на admin users CRUD
-- [ ] Logout перевести на POST + CSRF (убрать GET-logout или оставить redirect-only без side-effect)
+- [x] CSRF на CRUD постов
+- [x] CSRF на CRUD комментариев
+- [x] CSRF на admin users CRUD
+- [x] Logout перевести на POST + CSRF (убрать GET-logout или оставить redirect-only без side-effect)
 
 ---
 

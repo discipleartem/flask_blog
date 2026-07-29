@@ -58,6 +58,18 @@ class BlogTestCase(unittest.TestCase):
     def login_admin(self):
         return self.login("admin#0001", self.app.config["ADMIN_PASSWORD"])
 
+    def logout(self, *, follow_redirects: bool = True):
+        """POST logout with CSRF (GET no longer clears the session)."""
+        return self.client.post(
+            "/auth/logout",
+            data=self.csrf_data(),
+            follow_redirects=follow_redirects,
+        )
+
+    def csrf_data(self, **fields) -> dict:
+        """Form POST payload with a fresh CSRF token."""
+        return {**fields, "csrf_token": self.csrf_token()}
+
     def user_tag(self, name: str) -> str:
         row = get_db().execute(
             "SELECT name, discriminator FROM users WHERE name = ? COLLATE NOCASE",

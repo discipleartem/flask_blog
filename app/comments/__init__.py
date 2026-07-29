@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from flask import Blueprint, abort, flash, g, redirect, request, url_for
+from flask import Blueprint, abort, flash, g, redirect, render_template, request, url_for
 
 from app.auth.helpers import is_owner_or_admin, login_required
+from app.csrf import validate_csrf
 from app.db import execute, query_one
 
 bp = Blueprint("comments", __name__)
@@ -17,6 +18,8 @@ _BODY_FORMAT = "markdown"
 @login_required
 def create(post_id: int):
     """Add a comment to a post."""
+    if not validate_csrf():
+        abort(403)
     post = query_one("SELECT id FROM posts WHERE id = ?", (post_id,))
     if post is None:
         abort(404)
@@ -39,8 +42,6 @@ def create(post_id: int):
 @login_required
 def edit(comment_id: int):
     """Edit own comment (or any as admin)."""
-    from flask import render_template
-
     comment = query_one("SELECT * FROM comments WHERE id = ?", (comment_id,))
     if comment is None:
         abort(404)
@@ -48,6 +49,8 @@ def edit(comment_id: int):
         abort(403)
 
     if request.method == "POST":
+        if not validate_csrf():
+            abort(403)
         body_source = (request.form.get("body_source") or "").strip()
         if not body_source:
             flash("Комментарий не может быть пустым.", "danger")
@@ -70,6 +73,8 @@ def edit(comment_id: int):
 @login_required
 def delete(comment_id: int):
     """Delete own comment (or any as admin)."""
+    if not validate_csrf():
+        abort(403)
     comment = query_one("SELECT * FROM comments WHERE id = ?", (comment_id,))
     if comment is None:
         abort(404)

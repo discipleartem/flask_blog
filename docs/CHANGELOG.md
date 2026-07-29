@@ -9,9 +9,12 @@
 
 ### Added
 
+- CSRF на все mutating POST: posts/comments/users CRUD + logout (`validate_csrf`, скрытое поле в формах). Unit-тесты на отказ без/с неверным токеном.
 - Guard в `create_app`: в non-debug режиме отказ старта при известных небезопасных дефолтах `SECRET_KEY=dev-change-me` / `ADMIN_PASSWORD=admin` (`RuntimeError` + critical в лог). Debug/testing по-прежнему допускают дефолты.
 
 ### Changed
+
+- Logout: `POST /auth/logout` с CSRF; `GET /auth/logout` только redirect без side-effect. В навбаре — форма «Выйти».
 
 ### Fixed
 

@@ -32,6 +32,7 @@
                 {% if u['id'] != g.user['id'] %}
                 <form class="d-inline" method="post" action="{{ url_for('users.delete', user_id=u['id']) }}"
                       onsubmit="return confirm('Удалить пользователя?');">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                   <button type="submit" class="btn btn-outline-danger btn-sm">Удалить</button>
                 </form>
                 {% endif %}
