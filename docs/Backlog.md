@@ -85,31 +85,6 @@
 
 ---
 
-## Auth: явный TTL сессии
-
-**Статус:** in_review
-**GitHub:** #59
-**Приоритет:** P1
-**Категория:** Auth / Session
-
-### Проблема
-
-`session.permanent = True` без явной политики TTL (дефолт Flask ~31 день). Нет разделения «remember me» vs короткий idle timeout.
-
-### Acceptance criteria
-
-- В config задан явный `PERMANENT_SESSION_LIFETIME` (или эквивалент).
-- Поведение описано в docs (DEVELOPMENT / ARCHITECTURE).
-- По возможности — опция короткой сессии без permanent (если UX позволит).
-
-### Подзадачи
-
-- [x] Константа TTL в config
-- [x] Документация
-- [x] (Опционально) remember-me checkbox
-
----
-
 ## Auth (продукт): password reset / 2FA / роли
 
 **Статус:** open
