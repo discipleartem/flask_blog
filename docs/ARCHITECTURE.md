@@ -48,7 +48,7 @@
 
 ## Поток запроса
 
-1. `before_request`: `load_logged_in_user` → `g.user` из `session["user_id"]` (или `None`).
+1. `before_request`: `load_logged_in_user` → `g.user` из `session["user_id"]` (или `None`); SELECT без `password_hash` (хеш только в auth login для `check_password_hash`).
 2. Шаблоны: `csrf_token`, `current_year` (context processor). Mutating POST (auth login/register/logout, posts/comments/users CRUD) проверяют `validate_csrf()`; скрытое поле `csrf_token` в формах. `GET /auth/logout` — только redirect, без очистки сессии.
 3. Контент на витрине: фильтры `render_content` / `plain_excerpt` (`app/content_render.py` + nh3), не сырой `| safe` из БД. Страницы `/` и `/posts/<id>`: Open Graph / Twitter Card meta (`og:*`, `twitter:*`); description из `plain_excerpt`, image — `first_markdown_image_url` или `static/img/og-default.jpg`.
 4. Login: cookie session; без JWT. Без «Запомнить меня» — сессия до закрытия браузера (`session.permanent=False`). С чекбоксом / после register — permanent с TTL `PERMANENT_SESSION_LIFETIME` (config, дефолт 30 дней; env `PERMANENT_SESSION_LIFETIME_DAYS`). Query `next` после login — только через `safe_next_url` (whitelist relative `/…`; внешние и `//…` → home). Deploy-hook: Bearer `DEPLOY_SECRET` (не user-auth).
