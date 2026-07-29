@@ -71,6 +71,26 @@ class AuthTests(BlogTestCase):
         )
         self.assertIn(tag.encode(), response.data)
 
+    def test_g_user_excludes_password_hash(self) -> None:
+        """g.user from session load must not include password_hash."""
+        from flask import g
+
+        self.register("nohash", "secret1")
+        with self.client:
+            response = self.client.get("/")
+            self.assertEqual(response.status_code, 200)
+            self.assertIsNotNone(g.user)
+            self.assertNotIn("password_hash", g.user.keys())
+            self.assertIn("id", g.user.keys())
+            self.assertIn("name", g.user.keys())
+
+        row = query_one(
+            "SELECT password_hash FROM users WHERE name = ? COLLATE NOCASE",
+            ("nohash",),
+        )
+        self.assertIsNotNone(row)
+        self.assertTrue(row["password_hash"])
+
     def test_permanent_session_lifetime_configured(self) -> None:
         from datetime import timedelta
 
