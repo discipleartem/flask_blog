@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from datetime import timedelta
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -14,6 +15,9 @@ load_dotenv(BASE_DIR / ".env")
 # Известные небезопасные дефолты — запрещены вне debug/testing (см. create_app).
 INSECURE_DEFAULT_SECRET_KEY = "dev-change-me"
 INSECURE_DEFAULT_ADMIN_PASSWORD = "admin"
+
+# TTL для permanent-сессии («Запомнить меня»). Переопределение: дней через env.
+_DEFAULT_SESSION_DAYS = 30
 
 
 class Config:
@@ -36,6 +40,15 @@ class Config:
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = "Lax"
     SESSION_COOKIE_SECURE = os.environ.get("SESSION_COOKIE_SECURE", "0") == "1"
+    # Явный TTL permanent-сессии (не Flask-дефолт ~31 день).
+    PERMANENT_SESSION_LIFETIME = timedelta(
+        days=int(
+            os.environ.get(
+                "PERMANENT_SESSION_LIFETIME_DAYS",
+                str(_DEFAULT_SESSION_DAYS),
+            )
+        )
+    )
 
 
 class TestConfig(Config):

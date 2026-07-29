@@ -81,6 +81,8 @@ python -m unittest discover -s tests -v
 
 **Вручную в браузере** (по необходимости, в т.ч. auth / password manager): регистрация → **Save** на ключике с полным `name#NNNN` → logout (`POST` с CSRF из навбара; `GET /auth/logout` сессию не чистит) → login через предложение браузера (autofill). Агент не гоняет Playwright/CDP-скрипты для этого.
 
+**Сессия (TTL):** `Config.PERMANENT_SESSION_LIFETIME` — явный срок permanent-cookie (дефолт 30 дней, override `PERMANENT_SESSION_LIFETIME_DAYS`). Login без чекбокса «Запомнить меня» — не permanent (до закрытия браузера); с чекбоксом или сразу после register — permanent. См. `app/config.py`, `login_user(..., remember=…)`.
+
 ## IronBee DevTools (опционально)
 
 | Настройка | Значение | Смысл |

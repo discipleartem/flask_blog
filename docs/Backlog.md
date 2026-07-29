@@ -87,7 +87,7 @@
 
 ## Auth: явный TTL сессии
 
-**Статус:** open
+**Статус:** in_review
 **GitHub:** #59
 **Приоритет:** P1
 **Категория:** Auth / Session
@@ -104,9 +104,9 @@
 
 ### Подзадачи
 
-- [ ] Константа TTL в config
-- [ ] Документация
-- [ ] (Опционально) remember-me checkbox
+- [x] Константа TTL в config
+- [x] Документация
+- [x] (Опционально) remember-me checkbox
 
 ---
 
