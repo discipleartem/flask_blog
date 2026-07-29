@@ -76,7 +76,7 @@ class AuthTests(BlogTestCase):
 
         self.assertEqual(
             self.app.config["PERMANENT_SESSION_LIFETIME"],
-            timedelta(days=14),
+            timedelta(days=30),
         )
 
     def test_login_default_is_non_permanent_session(self) -> None:

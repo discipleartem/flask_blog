@@ -87,7 +87,7 @@
 
 ## Auth: явный TTL сессии
 
-**Статус:** in_progress
+**Статус:** in_review
 **GitHub:** #59
 **Приоритет:** P1
 **Категория:** Auth / Session
