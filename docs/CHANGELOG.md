@@ -15,6 +15,7 @@
 
 ### Changed
 
+- Auth: `g.user` (`load_logged_in_user` / `login_user`) загружается без `password_hash`; хеш читается только в login view.
 - Logout: `POST /auth/logout` с CSRF; `GET /auth/logout` только redirect без side-effect. В навбаре — форма «Выйти».
 
 ### Fixed

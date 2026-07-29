@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import random
 import re
+import sqlite3
 from collections.abc import Callable
 from functools import wraps
 from typing import Any, TypeVar
@@ -71,13 +72,27 @@ def allocate_discriminator(name: str) -> str | None:
     return random.choice(candidates)
 
 
+# Колонки для g.user: без password_hash (хеш только в auth login view).
+_SESSION_USER_COLUMNS = (
+    "id, name, discriminator, is_admin, created_at, updated_at"
+)
+
+
+def _fetch_session_user(user_id: int) -> sqlite3.Row | None:
+    """Загрузить пользователя для session context без password_hash."""
+    return query_one(
+        f"SELECT {_SESSION_USER_COLUMNS} FROM users WHERE id = ?",
+        (user_id,),
+    )
+
+
 def load_logged_in_user() -> None:
     """Attach g.user from session user_id."""
     user_id = session.get("user_id")
     if user_id is None:
         g.user = None
     else:
-        g.user = query_one("SELECT * FROM users WHERE id = ?", (user_id,))
+        g.user = _fetch_session_user(user_id)
         if g.user is None:
             session.pop("user_id", None)
 
@@ -91,7 +106,7 @@ def login_user(user_id: int, *, remember: bool = False) -> None:
     session.clear()
     session["user_id"] = user_id
     session.permanent = remember
-    g.user = query_one("SELECT * FROM users WHERE id = ?", (user_id,))
+    g.user = _fetch_session_user(user_id)
 
 
 def logout_user() -> None:
