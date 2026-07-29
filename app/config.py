@@ -17,7 +17,7 @@ INSECURE_DEFAULT_SECRET_KEY = "dev-change-me"
 INSECURE_DEFAULT_ADMIN_PASSWORD = "admin"
 
 # TTL для permanent-сессии («Запомнить меня»). Переопределение: дней через env.
-_DEFAULT_SESSION_DAYS = 14
+_DEFAULT_SESSION_DAYS = 30
 
 
 class Config:
