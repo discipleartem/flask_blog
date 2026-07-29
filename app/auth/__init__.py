@@ -88,7 +88,7 @@ def register():
                 """,
                 (name, discriminator, generate_password_hash(password)),
             )
-            login_user(user_id)
+            login_user(user_id, remember=True)
             tag = format_tag(name, discriminator)
             # Tag only — password stays in the browser for PasswordCredential.store.
             session[_PENDING_TAG_KEY] = tag
@@ -143,7 +143,8 @@ def login():
                 error = "Неверный логин или пароль."
 
         if error is None and user is not None:
-            login_user(user["id"])
+            remember = request.form.get("remember") == "1"
+            login_user(user["id"], remember=remember)
             flash(f"С возвращением, {format_tag(user['name'], user['discriminator'])}", "success")
             next_url = safe_next_url(
                 request.args.get("next"),

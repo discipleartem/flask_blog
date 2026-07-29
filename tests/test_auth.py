@@ -71,6 +71,61 @@ class AuthTests(BlogTestCase):
         )
         self.assertIn(tag.encode(), response.data)
 
+    def test_permanent_session_lifetime_configured(self) -> None:
+        from datetime import timedelta
+
+        self.assertEqual(
+            self.app.config["PERMANENT_SESSION_LIFETIME"],
+            timedelta(days=14),
+        )
+
+    def test_login_default_is_non_permanent_session(self) -> None:
+        self.register("shortsess", "secret1")
+        tag = self.user_tag("shortsess")
+        self.logout()
+        token = self.csrf_token()
+        self.client.post(
+            "/auth/login",
+            data={"tag": tag, "password": "secret1", "csrf_token": token},
+        )
+        with self.client.session_transaction() as sess:
+            self.assertFalse(sess.permanent)
+            self.assertIsNotNone(sess.get("user_id"))
+
+    def test_login_remember_sets_permanent_session(self) -> None:
+        self.register("longsess", "secret1")
+        tag = self.user_tag("longsess")
+        self.logout()
+        token = self.csrf_token()
+        self.client.post(
+            "/auth/login",
+            data={
+                "tag": tag,
+                "password": "secret1",
+                "csrf_token": token,
+                "remember": "1",
+            },
+        )
+        with self.client.session_transaction() as sess:
+            self.assertTrue(sess.permanent)
+            self.assertIsNotNone(sess.get("user_id"))
+
+    def test_register_creates_permanent_session(self) -> None:
+        token = self.csrf_token()
+        self.client.post(
+            "/auth/register",
+            data={"name": "regperm", "password": "secret1", "csrf_token": token},
+        )
+        with self.client.session_transaction() as sess:
+            self.assertTrue(sess.permanent)
+            self.assertIsNotNone(sess.get("user_id"))
+
+    def test_login_form_has_remember_checkbox(self) -> None:
+        response = self.client.get("/auth/login")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'name="remember"', response.data)
+        self.assertIn("Запомнить меня".encode(), response.data)
+
     def test_reserved_admin_name(self) -> None:
         response = self.register("admin", "secret1")
         self.assertIn("зарезервировано".encode(), response.data)

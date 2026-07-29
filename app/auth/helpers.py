@@ -82,11 +82,15 @@ def load_logged_in_user() -> None:
             session.pop("user_id", None)
 
 
-def login_user(user_id: int) -> None:
-    """Store user id in the session cookie and attach g.user."""
+def login_user(user_id: int, *, remember: bool = False) -> None:
+    """Сохранить ``user_id`` в cookie-сессии и выставить ``g.user``.
+
+    ``remember=True`` — permanent cookie с TTL из ``PERMANENT_SESSION_LIFETIME``.
+    ``remember=False`` — сессия до закрытия браузера (не permanent).
+    """
     session.clear()
     session["user_id"] = user_id
-    session.permanent = True
+    session.permanent = remember
     g.user = query_one("SELECT * FROM users WHERE id = ?", (user_id,))
 
 
