@@ -23,6 +23,7 @@
 
 ### Docs
 
+- Backlog #59 (явный TTL сессии / remember-me) выполнен после merge в `dev`.
 - DEPLOY.md / DEVELOPMENT.md: обязательность `.env` на проде; локальный `flask run --debug` и CLI без debug.
 - Backlog #60 (безопасные дефолты SECRET_KEY / ADMIN_PASSWORD) выполнен после merge в `dev`.
 - Backlog #55 (безопасный redirect `next` после login) выполнен после merge в `dev`.
