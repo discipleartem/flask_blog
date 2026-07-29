@@ -38,7 +38,7 @@
 
 ## Auth: не грузить `password_hash` в `g.user`
 
-**Статус:** open
+**Статус:** in_progress
 **GitHub:** #57
 **Приоритет:** P1
 **Категория:** Auth / Hardening
