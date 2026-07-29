@@ -1,0 +1,40 @@
+---
+description: Naming for task branches — feat/fix/docs and Conventional Commits-like prefixes
+alwaysApply: false
+---
+
+# Git: имена task-веток (flask_blog)
+
+Создание ветки — skill [`git-task-start`](~/.cursor/skills/git-task-start/SKILL.md). Архив после merge — [`git-merged-branches.mdc`](git-merged-branches.mdc).
+
+## Формат
+
+`<тип>/<краткое-kebab-имя>` — одна тема на ветку, латиница, kebab-case.
+
+| Префикс | Когда |
+|---------|--------|
+| `feat/` | новый функционал |
+| `fix/` | исправление багов / угроз безопасности |
+| `docs/` | только документация / Cursor rules / backlog-описание без кода приложения |
+| `chore/` | tooling, CI, зависимости, housekeeping без смены поведения приложения |
+| `refactor/` | рефакторинг без смены внешнего поведения |
+| `test/` | только тесты |
+| `release/` | подготовка релиза (skill `flask-blog-git-release`) |
+| `merged/` | архив после merge — **не** для новой работы |
+
+Остальное — по аналогии с Conventional Commits (`ci/`, `build/`, …), если тип однозначен.
+
+## Примеры
+
+```text
+feat/csrf-protect-forms
+fix/session-fixation
+docs/git-branch-naming
+chore/ruff-config
+refactor/posts-query-helpers
+test/auth-helpers-coverage
+```
+
+## Архив
+
+`feat/foo` → `merged/foo` (префикс типа снимается). То же для `fix/`, `docs/`, …

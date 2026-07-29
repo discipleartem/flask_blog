@@ -154,7 +154,7 @@ def main() -> int:
         return 0
 
     branch = git_out(root, "branch", "--show-current")
-    if not branch.startswith(("feat/", "fix/", "chore/")):
+    if not branch.startswith(("feat/", "fix/", "chore/", "refactor/", "test/")):
         print("{}")
         return 0
 

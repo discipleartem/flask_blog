@@ -40,6 +40,7 @@ alwaysApply: true
 |------|------|
 | Docs-first / scoping | `docs-context.mdc` |
 | Docs after task | skill `flask-blog-docs-after-task` + hook `stop` |
+| Имена task-веток | `git-branches.mdc` |
 | Post-merge `merged/*` | `git-merged-branches.mdc` + skill `flask-blog-git-merged-archive` |
 | Flask 3.0.3, factory, blueprints | `flask-3.mdc` |
 | SQL, `schema.sql`, миграции | `database.mdc` |

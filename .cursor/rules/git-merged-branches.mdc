@@ -16,6 +16,6 @@ alwaysApply: false
 3. Закончить на integration: `git checkout dev && git pull --ff-only origin dev`
 4. Не PR / не новая работа с head `merged/…`
 
-Имена: `feat/foo` → `merged/foo` (префикс снимается).
+Имена task-веток: [`git-branches.mdc`](git-branches.mdc). Архив: `feat/foo` → `merged/foo` (префикс типа снимается; то же для `fix/`, `docs/`, …).
 
 **Алгоритм (bash + follow-up backlog):** skill [`flask-blog-git-merged-archive`](../skills/flask-blog-git-merged-archive/SKILL.md) — Read и выполнить в том же turn после MERGED. Очистка `Backlog.md` (`done` → sync → удалить секцию) — **сразу merge** docs-PR в том же turn; не оставлять открытый `docs/*-backlog-done`.
