@@ -37,7 +37,9 @@
           </a>
         </td>
         <td class="small text-break">
-          {{ c['body_source']|plain_excerpt(120) }}
+          <div class="post-body post-body-sm mb-0">
+            {{ c['body_source'] | render_content(c['body_format']) }}
+          </div>
         </td>
         <td class="text-secondary small">{{ c['created_at'] }}</td>
         <td class="text-end text-nowrap">

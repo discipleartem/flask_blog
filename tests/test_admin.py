@@ -79,6 +79,31 @@ class AdminPanelTests(BlogTestCase):
         self.assertIn(b"Hello admin", comments_page.data)
         self.assertIn(b"author#", comments_page.data)
 
+    def test_admin_comments_render_markdown_not_plain_excerpt(self) -> None:
+        """В админке code fence и markdown видны (render_content), не пустой excerpt."""
+        self.register("mdauthor", "secret1")
+        user_id = query_one("SELECT id FROM users WHERE name = ?", ("mdauthor",))["id"]
+        post_id = execute(
+            """
+            INSERT INTO posts (title, body_source, body_format, author_id)
+            VALUES (?, ?, 'markdown', ?)
+            """,
+            ("MD post", "body", user_id),
+        )
+        execute(
+            """
+            INSERT INTO comments (post_id, user_id, body_source, body_format)
+            VALUES (?, ?, ?, 'markdown')
+            """,
+            (post_id, user_id, "```python\nprint(1)\n```"),
+        )
+        self.logout()
+        self.login_admin()
+        response = self.client.get(f"/admin/posts/{post_id}/comments")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"<code", response.data)
+        self.assertIn(b"print(1)", response.data)
+
     def test_admin_delete_post_returns_to_admin(self) -> None:
         self.register("deleter", "secret1")
         token = self.csrf_token()

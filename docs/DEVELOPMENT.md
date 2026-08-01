@@ -49,7 +49,7 @@ Custom CSS (`app/static/css/app.css`) и JS (`theme.js`, `markdown-editor.js`, `
 
 **Лента / пост / комментарии:** главная — surface-карточки (`.feed-item`), заголовок → excerpt (`plain_excerpt`) → мета; карточка целиком — ссылка на пост. Страница поста — reading column (`.post-body`: абзацы, списки, blockquote, GFM-таблицы). Комментарии — отдельные карточки (`.comment-item`) с `gap`, не плоский список с `border-bottom`.
 
-**Админ-панель:** `/admin/` (только `is_admin`) — обзор + таблицы пользователей и статей; комментарии с авторами — drill-down `/admin/posts/<id>/comments`. Edit/delete идут в существующие маршруты `users` / `posts` / `comments` (формы delete могут передать `next` обратно в админку). Навбар: пункт «Админка». Шаблоны: `app/templates/admin/`.
+**Админ-панель:** `/admin/` (только `is_admin`) — обзор + таблицы пользователей и статей; комментарии с авторами — drill-down `/admin/posts/<id>/comments` (текст через `render_content`, как на витрине — не `plain_excerpt`). Edit/delete идут в существующие маршруты `users` / `posts` / `comments` (формы delete могут передать `next` обратно в админку). Навбар: пункт «Админка». Шаблоны: `app/templates/admin/`.
 
 ### Mobile / tablet first
 
@@ -97,6 +97,8 @@ python -m unittest discover -s tests -v
 | `browser.cdp.endpointUrl` | `http://127.0.0.1:9222` | CDP endpoint |
 | `platform.browser.enable` | `true` | MCP browser |
 | `platform.backend.enable` | `true` | HTTP / SQLite smoke |
+
+**Verify на показ:** пользователь хочет **видеть мышь** в окне Chrome — только headed, реальные клики IronBee (не headless / не «тихий» HTTP-only, если идёт UI-прогон). Rule: [`.cursor/rules/browser-verify-mouse.mdc`](../.cursor/rules/browser-verify-mouse.mdc).
 
 ### Быстрый старт
 

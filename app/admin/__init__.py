@@ -71,7 +71,8 @@ def post_comments(post_id: int):
         abort(404)
     comments = query_all(
         """
-        SELECT c.id, c.body_source, c.created_at, c.updated_at, c.user_id,
+        SELECT c.id, c.body_source, c.body_format, c.created_at, c.updated_at,
+               c.user_id,
                u.name AS author_name, u.discriminator AS author_disc
         FROM comments c
         JOIN users u ON u.id = c.user_id
