@@ -49,7 +49,7 @@ Custom CSS (`app/static/css/app.css`) и JS (`theme.js`, `markdown-editor.js`, `
 
 **Лента / пост / комментарии:** главная — surface-карточки (`.feed-item`), заголовок → excerpt (`plain_excerpt`) → мета; карточка целиком — ссылка на пост. Страница поста — reading column (`.post-body`: абзацы, списки, blockquote, GFM-таблицы). Комментарии — отдельные карточки (`.comment-item`) с `gap`, не плоский список с `border-bottom`.
 
-**Админ-панель:** `/admin/` (только `is_admin`) — обзор + таблицы пользователей и статей; комментарии с авторами — drill-down `/admin/posts/<id>/comments` (текст через `render_content`, как на витрине — не `plain_excerpt`). Edit/delete идут в существующие маршруты `users` / `posts` / `comments` (формы delete могут передать `next` обратно в админку). Навбар: пункт «Админка». Шаблоны: `app/templates/admin/`.
+**Админ-панель:** `/admin/` (только `is_admin`) — обзор + таблицы пользователей и статей; комментарии с авторами — drill-down `/admin/posts/<id>/comments` (текст через `render_content` + `syntax-highlight.js`, как на витрине — не `plain_excerpt`). Edit/delete идут в существующие маршруты `users` / `posts` / `comments` (формы delete могут передать `next` обратно в админку). Навбар: пункт «Админка». Шаблоны: `app/templates/admin/`.
 
 ### Mobile / tablet first
 

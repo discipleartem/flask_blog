@@ -103,6 +103,7 @@ class AdminPanelTests(BlogTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"<code", response.data)
         self.assertIn(b"print(1)", response.data)
+        self.assertIn(b"syntax-highlight.js", response.data)
 
     def test_admin_delete_post_returns_to_admin(self) -> None:
         self.register("deleter", "secret1")
