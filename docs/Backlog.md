@@ -164,6 +164,37 @@
 
 ---
 
+## UI: Progressive Web App (мобильная установка)
+
+**Статус:** open
+**GitHub:** #97
+**Приоритет:** P2
+**Категория:** UI / Mobile
+
+### Проблема
+
+Сайт адаптивен (Bootstrap + viewport), но не является PWA: нет Web App Manifest, service worker, installable-иконок. На телефоне нельзя «Установить» / Add to Home Screen в режиме `standalone`.
+
+### Acceptance criteria
+
+- Web App Manifest (`name`, `short_name`, `start_url`, `scope`, `display: standalone`, `theme_color`, `background_color`, иконки **192** и **512**, желательно maskable).
+- Ссылка на manifest + `theme-color` (и при необходимости `apple-touch-icon`) в `base.html`.
+- Service Worker с корневым scope (`/sw.js` или эквивалент + `Service-Worker-Allowed`), достаточный для installability в Chrome/Android.
+- Уровень кэша: минимум install-only; опционально precache app shell (CSS/JS), без кэша персонального HTML / админки / POST.
+- HTTPS на проде (уже PA); поведение session-cookie в standalone не ломается.
+- Кратко в DEVELOPMENT / ARCHITECTURE.
+
+### Подзадачи
+
+- [ ] Иконки (192/512, apple-touch) в `static/`
+- [ ] `manifest.webmanifest` + link в `base.html`
+- [ ] Минимальный service worker + регистрация + отдача с корневым scope
+- [ ] (Опционально) precache shell; стратегия обновления SW
+- [ ] Проверка install на Android Chrome и Add to Home Screen на iOS Safari
+- [ ] Docs
+
+---
+
 ## Feat: загрузка изображений (модуль админки)
 
 **Статус:** open
