@@ -146,6 +146,34 @@ class PaModuleTests(BlogTestCase):
         self.assertIn("недоступен", view["note"])
         self.assertTrue(data["blocks"][0]["result"].ok)
 
+    def test_dashboard_disk_progress_bar_always_rendered(self) -> None:
+        """Полоса диска на Dashboard есть даже без локального du."""
+        pa.save_settings(
+            enabled=True,
+            username="u1",
+            api_host="www.pythonanywhere.com",
+            webapp_domain="",
+            api_token="secret",
+            keep_existing_token=False,
+            monitor_cpu=False,
+            monitor_webapps=False,
+            monitor_schedule=False,
+            monitor_always_on=False,
+            monitor_consoles=False,
+            monitor_disk=True,
+            disk_quota_mib=Config.PA_DISC_FREE,
+        )
+        self.login_admin()
+        with mock.patch(
+            "app.admin.pythonanywhere._home_disk_usage_bytes",
+            return_value=(None, "оффлайн"),
+        ):
+            page = self.client.get("/admin/")
+        self.assertEqual(page.status_code, 200)
+        self.assertIn("Жёсткий диск".encode(), page.data)
+        self.assertIn('aria-label="Использование диска"'.encode(), page.data)
+        self.assertIn(b"progress-bar", page.data)
+
     def test_home_disk_usage_uses_pa_disk_quota_formula(self) -> None:
         """Команда измерения совпадает со справкой PA Disk Quota."""
         home = Path("/home/u1")
