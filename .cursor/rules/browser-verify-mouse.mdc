@@ -1,0 +1,20 @@
+---
+description: При UI-verify показывать движение мыши в headed Chrome
+alwaysApply: true
+---
+
+# Browser verify — видимая мышь
+
+При проверке UI (IronBee browser / CDP) пользователь **хочет видеть курсор мыши** в окне Chrome.
+
+## Обязательно
+
+- Только **headed** Chrome (`ironbeeDevTools.browser.headless: false`) — не headless.
+- Клики / fill / навигация — через реальные interaction-tools IronBee (не «тихий» screenshot-only прогон).
+- Действия достаточно медленные, чтобы было видно движение курсора и фокус на элементах (не пакет из десятков кликов без пауз).
+- Окно Chrome должно быть на экране (CDP к системному Chrome), не только HTTP backend-smoke.
+
+## Запрещено при UI-verify «на показ»
+
+- `headless: true` / скрытый browser только ради скорости
+- Пропуск браузерного шага, если пользователь явно смотрит за тестом

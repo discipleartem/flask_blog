@@ -10,11 +10,12 @@
             "request": "launch",
             "module": "flask",
             "env": {
-                "FLASK_APP": "app/__init__.py",
+                "FLASK_APP": "wsgi",
                 "FLASK_DEBUG": "1"
             },
             "args": [
                 "run",
+                "--debug",
                 "--no-debugger",
                 "--no-reload"
             ],
