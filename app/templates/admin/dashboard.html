@@ -31,28 +31,29 @@
 <section class="mb-4" aria-labelledby="monitoring-heading">
   <div class="d-flex flex-wrap align-items-baseline justify-content-between gap-2 mb-3">
     <h2 id="monitoring-heading" class="h5 mb-0">Мониторинг</h2>
-    <a class="small" href="{{ url_for('admin.pythonanywhere_settings') }}">
-      Настройки PythonAnywhere
+    <a class="small" href="{{ url_for('admin.modules_index') }}">
+      Модули
     </a>
   </div>
 
   {% if not monitoring.enabled %}
   <div class="border rounded p-3 text-secondary">
     Модуль PythonAnywhere выключен.
-    <a href="{{ url_for('admin.pythonanywhere_settings') }}">Включить и указать данные</a>
-    в форме Админки.
+    <a href="{{ url_for('admin.modules_index') }}">Модули</a>
+    → Хостинг → PythonAnywhere.
   </div>
   {% elif not monitoring.configured %}
   <div class="border rounded p-3 text-secondary">
     Нет username / API token.
-    Заполните
-    <a href="{{ url_for('admin.pythonanywhere_settings') }}">форму модуля</a>
-    (не из env).
+    Заполните форму в
+    <a href="{{ url_for('admin.pythonanywhere_settings') }}">PythonAnywhere</a>
+    (вкладка Модули → Хостинг).
   </div>
   {% elif not monitoring.blocks %}
   <div class="border rounded p-3 text-secondary">
     Ни один элемент мониторинга не выбран. Отметьте чекбоксы в
-    <a href="{{ url_for('admin.pythonanywhere_settings') }}">настройках модуля</a>.
+    <a href="{{ url_for('admin.pythonanywhere_settings') }}">настройках PythonAnywhere</a>
+    (Модули → Хостинг).
   </div>
   {% else %}
   <p class="small text-secondary mb-3">

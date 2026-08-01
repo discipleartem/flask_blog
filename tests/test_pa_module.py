@@ -91,6 +91,16 @@ class PaModuleTests(BlogTestCase):
         page = self.client.get("/admin/")
         self.assertEqual(page.status_code, 200)
         self.assertIn("Мониторинг".encode(), page.data)
+        self.assertIn(b"/admin/modules", page.data)
+
+    def test_modules_catalog_tab(self) -> None:
+        self.login_admin()
+        page = self.client.get("/admin/modules")
+        self.assertEqual(page.status_code, 200)
+        self.assertIn("Модули".encode(), page.data)
+        self.assertIn("Хостинг".encode(), page.data)
+        self.assertIn("Медиа".encode(), page.data)
+        self.assertIn(b"PythonAnywhere", page.data)
         self.assertIn(b"/admin/modules/pythonanywhere", page.data)
 
     def test_fetch_monitoring_calls_selected_endpoints(self) -> None:

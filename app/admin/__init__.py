@@ -7,6 +7,7 @@ import json
 from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 
 from app.admin import pythonanywhere as pa
+from app.admin.modules_registry import catalog_for_template
 from app.auth.helpers import admin_required
 from app.csrf import validate_csrf
 from app.db import query_all, query_one
@@ -35,6 +36,16 @@ def dashboard():
     )
 
 
+@bp.route("/modules")
+@admin_required
+def modules_index():
+    """Вкладка «Модули»: каталог по категориям."""
+    return render_template(
+        "admin/modules.html",
+        categories=catalog_for_template(),
+    )
+
+
 @bp.route("/modules/pythonanywhere", methods=("GET", "POST"))
 @admin_required
 def pythonanywhere_settings():
@@ -60,7 +71,7 @@ def pythonanywhere_settings():
     return render_template(
         "admin/pythonanywhere.html",
         settings=settings,
-        ALLOWED_hosts=sorted(pa.ALLOWED_HOSTS),
+        allowed_hosts=sorted(pa.ALLOWED_HOSTS),
     )
 
 

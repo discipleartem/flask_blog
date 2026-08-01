@@ -1,6 +1,17 @@
 {% extends "admin/layout.html" %}
-{% block title %}PythonAnywhere · Админка · Flask Blog{% endblock %}
+{% block title %}PythonAnywhere · Модули · Админка{% endblock %}
 {% block admin_content %}
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb mb-0">
+    <li class="breadcrumb-item">
+      <a href="{{ url_for('admin.modules_index') }}">Модули</a>
+    </li>
+    <li class="breadcrumb-item">
+      <a href="{{ url_for('admin.modules_index') }}#cat-hosting">Хостинг</a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page">PythonAnywhere</li>
+  </ol>
+</nav>
 <h1 class="h3 mb-2">Модуль PythonAnywhere</h1>
 <p class="text-secondary mb-4">
   Учётные данные и выбор метрик только через эту форму.

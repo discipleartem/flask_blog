@@ -37,6 +37,7 @@
 | GET | `/admin/users` | admin |
 | GET | `/admin/posts` | admin |
 | GET | `/admin/posts/<id>/comments` | admin |
+| GET | `/admin/modules` | admin |
 | GET, POST | `/admin/modules/pythonanywhere` | admin |
 | POST | `/internal/deploy` | deploy |
 
@@ -83,7 +84,7 @@ Identity: `name#NNNN`. Имя `admin` зарезервировано. Seed: `adm
 | `posts/` | лента, CRUD постов, markdown preview, OG meta на index/detail |
 | `comments/` | CRUD комментариев |
 | `users/` | профиль; edit/delete (список → `/admin/users`) |
-| `admin/` | панель: dashboard (+ мониторинг PA), users/posts/comments; модуль `pythonanywhere.py` |
+| `admin/` | панель: dashboard (+ мониторинг PA), users/posts/comments; вкладка Модули (`modules_registry.py`, `pythonanywhere.py`) |
 | `deploy/` | `POST /internal/deploy` |
 | `templates/` | Jinja + Bootstrap 5 |
 | `static/css/app.css` | тема, бренд, код-блоки (исключения сверх BS5) |
