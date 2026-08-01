@@ -1,10 +1,14 @@
-"""Admin blueprint: панель управления users / posts / comments."""
+"""Admin blueprint: панель управления users / posts / comments + модули."""
 
 from __future__ import annotations
 
-from flask import Blueprint, abort, render_template
+import json
 
+from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
+
+from app.admin import pythonanywhere as pa
 from app.auth.helpers import admin_required
+from app.csrf import validate_csrf
 from app.db import query_all, query_one
 
 bp = Blueprint("admin", __name__, url_prefix="/admin")
@@ -13,7 +17,7 @@ bp = Blueprint("admin", __name__, url_prefix="/admin")
 @bp.route("/")
 @admin_required
 def dashboard():
-    """Обзор админ-панели: счётчики и ссылки на таблицы."""
+    """Обзор админ-панели: счётчики, мониторинг PA."""
     counts = query_one(
         """
         SELECT
@@ -22,7 +26,42 @@ def dashboard():
           (SELECT COUNT(*) FROM comments) AS comments
         """
     )
-    return render_template("admin/dashboard.html", counts=counts)
+    monitoring = pa.fetch_monitoring()
+    return render_template(
+        "admin/dashboard.html",
+        counts=counts,
+        monitoring=monitoring,
+        pretty_json=_pretty_json,
+    )
+
+
+@bp.route("/modules/pythonanywhere", methods=("GET", "POST"))
+@admin_required
+def pythonanywhere_settings():
+    """Подключаемый модуль: учётные данные PA и чекбоксы мониторинга.
+
+    Все поля только из этой формы — без чтения env / GitHub Secrets.
+    """
+    if request.method == "POST":
+        if not validate_csrf():
+            abort(403)
+        kwargs, form_error = pa.settings_from_form(request.form)
+        if form_error:
+            flash(form_error, "danger")
+        else:
+            save_error = pa.save_settings(**kwargs)
+            if save_error:
+                flash(save_error, "danger")
+            else:
+                flash("Настройки PythonAnywhere сохранены.", "success")
+                return redirect(url_for("admin.pythonanywhere_settings"))
+
+    settings = pa.get_settings()
+    return render_template(
+        "admin/pythonanywhere.html",
+        settings=settings,
+        ALLOWED_hosts=sorted(pa.ALLOWED_HOSTS),
+    )
 
 
 @bp.route("/users")
@@ -86,3 +125,8 @@ def post_comments(post_id: int):
         post=post,
         comments=comments,
     )
+
+
+def _pretty_json(data: object) -> str:
+    """Красивый JSON для шаблона мониторинга."""
+    return json.dumps(data, ensure_ascii=False, indent=2, default=str)

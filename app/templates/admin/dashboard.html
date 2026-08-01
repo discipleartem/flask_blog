@@ -2,7 +2,7 @@
 {% block title %}Админка · Flask Blog{% endblock %}
 {% block admin_content %}
 <h1 class="h3 mb-4">Админ-панель</h1>
-<div class="row g-3">
+<div class="row g-3 mb-4">
   <div class="col-12 col-md-4">
     <a class="text-decoration-none" href="{{ url_for('admin.users') }}">
       <div class="border rounded p-3 h-100">
@@ -27,4 +27,92 @@
     </div>
   </div>
 </div>
+
+<section class="mb-4" aria-labelledby="monitoring-heading">
+  <div class="d-flex flex-wrap align-items-baseline justify-content-between gap-2 mb-3">
+    <h2 id="monitoring-heading" class="h5 mb-0">Мониторинг</h2>
+    <a class="small" href="{{ url_for('admin.pythonanywhere_settings') }}">
+      Настройки PythonAnywhere
+    </a>
+  </div>
+
+  {% if not monitoring.enabled %}
+  <div class="border rounded p-3 text-secondary">
+    Модуль PythonAnywhere выключен.
+    <a href="{{ url_for('admin.pythonanywhere_settings') }}">Включить и указать данные</a>
+    в форме Админки.
+  </div>
+  {% elif not monitoring.configured %}
+  <div class="border rounded p-3 text-secondary">
+    Нет username / API token.
+    Заполните
+    <a href="{{ url_for('admin.pythonanywhere_settings') }}">форму модуля</a>
+    (не из env).
+  </div>
+  {% elif not monitoring.blocks %}
+  <div class="border rounded p-3 text-secondary">
+    Ни один элемент мониторинга не выбран. Отметьте чекбоксы в
+    <a href="{{ url_for('admin.pythonanywhere_settings') }}">настройках модуля</a>.
+  </div>
+  {% else %}
+  <p class="small text-secondary mb-3">
+    Аккаунт <span class="user-tag">{{ monitoring.username }}</span>
+    · host {{ monitoring.api_host }}
+    {% if monitoring.webapp_domain %}
+    · webapp
+    <a href="https://{{ monitoring.webapp_domain }}/" rel="noopener" target="_blank">
+      {{ monitoring.webapp_domain }}
+    </a>
+    {% endif %}
+  </p>
+  <div class="row g-3">
+    {% for block in monitoring.blocks %}
+    <div class="col-12 col-lg-6">
+      <div class="border rounded p-3 h-100">
+        <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+          <h3 class="h6 mb-0">{{ block.title }}</h3>
+          {% if block.result.ok %}
+          <span class="badge text-bg-success">OK</span>
+          {% else %}
+          <span class="badge text-bg-danger">ошибка</span>
+          {% endif %}
+        </div>
+        {% if block.result.ok %}
+          {% if block.key == 'cpu' and block.result.data is mapping %}
+          <dl class="row small mb-0">
+            <dt class="col-7 text-secondary">Использовано, с</dt>
+            <dd class="col-5 mb-1">{{ block.result.data.get('daily_cpu_total_usage_seconds', '—') }}</dd>
+            <dt class="col-7 text-secondary">Лимит, с</dt>
+            <dd class="col-5 mb-1">{{ block.result.data.get('daily_cpu_limit_seconds', '—') }}</dd>
+            <dt class="col-7 text-secondary">Сброс</dt>
+            <dd class="col-5 mb-0">{{ block.result.data.get('next_reset_time', '—') }}</dd>
+          </dl>
+          {% elif block.key == 'webapps' and block.result.data is sequence %}
+          <ul class="list-unstyled small mb-0">
+            {% for app in block.result.data %}
+            <li class="mb-1">
+              <span class="fw-medium">{{ app.get('domain_name') or app }}</span>
+              {% if app.get('python_version') %}
+              <span class="text-secondary">· {{ app.get('python_version') }}</span>
+              {% endif %}
+            </li>
+            {% else %}
+            <li class="text-secondary">Нет webapps</li>
+            {% endfor %}
+          </ul>
+          {% elif block.result.data is sequence %}
+          <p class="small mb-1">Записей: {{ block.result.data|length }}</p>
+          <pre class="small mb-0 overflow-auto">{{ pretty_json(block.result.data) }}</pre>
+          {% else %}
+          <pre class="small mb-0 overflow-auto">{{ pretty_json(block.result.data) }}</pre>
+          {% endif %}
+        {% else %}
+        <p class="small text-danger mb-0">{{ block.result.error or 'Ошибка API' }}</p>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</section>
 {% endblock %}

@@ -1,0 +1,106 @@
+{% extends "admin/layout.html" %}
+{% block title %}PythonAnywhere · Админка · Flask Blog{% endblock %}
+{% block admin_content %}
+<h1 class="h3 mb-2">Модуль PythonAnywhere</h1>
+<p class="text-secondary mb-4">
+  Учётные данные и выбор метрик только через эту форму.
+  Значения не подставляются из <code>.env</code> или GitHub Secrets.
+  API:
+  <a href="https://help.pythonanywhere.com/pages/API/" rel="noopener" target="_blank">документация</a>,
+  сайт:
+  <a href="https://www.pythonanywhere.com/" rel="noopener" target="_blank">pythonanywhere.com</a>.
+</p>
+
+<form method="post" class="border rounded p-3 p-md-4">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+  <div class="form-check form-switch mb-4">
+    <input class="form-check-input" type="checkbox" role="switch"
+           id="enabled" name="enabled"{% if settings.enabled %} checked{% endif %}>
+    <label class="form-check-label" for="enabled">Модуль включён</label>
+  </div>
+
+  <div class="row g-3 mb-3">
+    <div class="col-12 col-md-6">
+      <label class="form-label" for="username">Username</label>
+      <input class="form-control" type="text" id="username" name="username"
+             value="{{ settings.username }}" autocomplete="off"
+             placeholder="ваш логин на PA">
+    </div>
+    <div class="col-12 col-md-6">
+      <label class="form-label" for="api_host">API host</label>
+      <select class="form-select" id="api_host" name="api_host">
+        {% for host in allowed_hosts %}
+        <option value="{{ host }}"{% if settings.api_host == host %} selected{% endif %}>
+          {{ host }}
+        </option>
+        {% endfor %}
+      </select>
+      <div class="form-text">www — US; eu — Европа.</div>
+    </div>
+    <div class="col-12">
+      <label class="form-label" for="webapp_domain">Домен webapp (опционально)</label>
+      <input class="form-control" type="text" id="webapp_domain" name="webapp_domain"
+             value="{{ settings.webapp_domain }}" autocomplete="off"
+             placeholder="username.pythonanywhere.com">
+    </div>
+    <div class="col-12">
+      <label class="form-label" for="api_token">API token</label>
+      <input class="form-control" type="password" id="api_token" name="api_token"
+             value="" autocomplete="new-password"
+             placeholder="{% if settings.token_configured %}•••••••• (оставьте пустым, чтобы не менять){% else %}вставьте token с Account → API token{% endif %}">
+      {% if settings.token_configured %}
+      <div class="form-check mt-2">
+        <input class="form-check-input" type="checkbox" id="clear_token" name="clear_token">
+        <label class="form-check-label" for="clear_token">Очистить сохранённый token</label>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <h2 class="h6 text-secondary text-uppercase ls-wide mb-3">Мониторинг на Dashboard</h2>
+  <p class="small text-secondary mb-3">Отметьте, какие GET-эндпоинты показывать в секции «Мониторинг».</p>
+  <div class="row g-2 mb-4">
+    <div class="col-12 col-sm-6 col-lg-4">
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="monitor_cpu" name="monitor_cpu"
+               {% if settings.monitor_cpu %}checked{% endif %}>
+        <label class="form-check-label" for="monitor_cpu">CPU quota</label>
+      </div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-4">
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="monitor_webapps" name="monitor_webapps"
+               {% if settings.monitor_webapps %}checked{% endif %}>
+        <label class="form-check-label" for="monitor_webapps">Webapps</label>
+      </div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-4">
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="monitor_schedule" name="monitor_schedule"
+               {% if settings.monitor_schedule %}checked{% endif %}>
+        <label class="form-check-label" for="monitor_schedule">Scheduled tasks</label>
+      </div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-4">
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="monitor_always_on" name="monitor_always_on"
+               {% if settings.monitor_always_on %}checked{% endif %}>
+        <label class="form-check-label" for="monitor_always_on">Always-on tasks</label>
+      </div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-4">
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="monitor_consoles" name="monitor_consoles"
+               {% if settings.monitor_consoles %}checked{% endif %}>
+        <label class="form-check-label" for="monitor_consoles">Consoles</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex flex-wrap gap-2">
+    <button type="submit" class="btn btn-dark">Сохранить</button>
+    <a class="btn btn-outline-secondary" href="{{ url_for('admin.dashboard') }}">К Dashboard</a>
+  </div>
+</form>
+{% endblock %}

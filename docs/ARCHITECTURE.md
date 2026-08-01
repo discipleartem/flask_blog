@@ -37,6 +37,7 @@
 | GET | `/admin/users` | admin |
 | GET | `/admin/posts` | admin |
 | GET | `/admin/posts/<id>/comments` | admin |
+| GET, POST | `/admin/modules/pythonanywhere` | admin |
 | POST | `/internal/deploy` | deploy |
 
 ## Данные
@@ -46,6 +47,7 @@
 | `users` | `name`, `discriminator`, `password_hash`, `is_admin` |
 | `posts` | `title`, `body_source`, `body_format`, `author_id` |
 | `comments` | `post_id`, `user_id`, `body_source`, `body_format` |
+| `pa_module_settings` | singleton `id=1`: PA API credentials + monitor checkboxes (только Admin UI) |
 | `schema_migrations` | `filename`, `applied_at` |
 
 `body_format`: `plaintext` \| `markdown` \| `html`. Формы Post/Comment пишут `markdown`. Индексы и FK — в `schema.sql`. Миграции: `migrations/*.sql` через `run_migrations()` / `flask db-upgrade`.
@@ -81,7 +83,7 @@ Identity: `name#NNNN`. Имя `admin` зарезервировано. Seed: `adm
 | `posts/` | лента, CRUD постов, markdown preview, OG meta на index/detail |
 | `comments/` | CRUD комментариев |
 | `users/` | профиль; edit/delete (список → `/admin/users`) |
-| `admin/` | панель: dashboard, таблицы users/posts, comments по посту |
+| `admin/` | панель: dashboard (+ мониторинг PA), users/posts/comments; модуль `pythonanywhere.py` |
 | `deploy/` | `POST /internal/deploy` |
 | `templates/` | Jinja + Bootstrap 5 |
 | `static/css/app.css` | тема, бренд, код-блоки (исключения сверх BS5) |

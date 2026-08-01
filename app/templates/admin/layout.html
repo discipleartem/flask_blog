@@ -9,6 +9,8 @@
          href="{{ url_for('admin.users') }}">Пользователи</a>
       <a class="nav-link{% if request.endpoint in ('admin.posts', 'admin.post_comments') %} active{% endif %}"
          href="{{ url_for('admin.posts') }}">Статьи</a>
+      <a class="nav-link{% if request.endpoint == 'admin.pythonanywhere_settings' %} active{% endif %}"
+         href="{{ url_for('admin.pythonanywhere_settings') }}">PythonAnywhere</a>
     </nav>
     {% block admin_content %}{% endblock %}
   </div>
