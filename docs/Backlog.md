@@ -166,7 +166,7 @@
 
 ## Feat: админ-панель (таблицы users / posts / comments)
 
-**Статус:** in_progress
+**Статус:** in_review
 **GitHub:** #88
 **Приоритет:** P1
 **Категория:** Admin / UI
