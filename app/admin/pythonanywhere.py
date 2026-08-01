@@ -17,6 +17,7 @@ from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
+from app.config import Config
 from app.db import execute, query_one
 
 _ALLOWED_HOSTS = frozenset(
@@ -86,7 +87,11 @@ def get_settings() -> PaSettings:
         monitor_always_on=bool(row["monitor_always_on"]),
         monitor_consoles=bool(row["monitor_consoles"]),
         monitor_disk=bool(row["monitor_disk"]) if "monitor_disk" in row.keys() else False,
-        disk_quota_mib=int(row["disk_quota_mib"]) if "disk_quota_mib" in row.keys() else 512,
+        disk_quota_mib=(
+            int(row["disk_quota_mib"])
+            if "disk_quota_mib" in row.keys()
+            else Config.PA_DISC_FREE
+        ),
         updated_at=row["updated_at"],
     )
 
@@ -379,7 +384,8 @@ def _disk_view(
         "files_url": files_url,
         "hint": (
             "В публичном API нет эндпоинта квоты. Лимит — из настроек модуля "
-            "(free: 512 МиБ). Занятость — официальная формула PA Disk Quota: "
+            "(free: "
+            f"{Config.PA_DISC_FREE} МиБ). Занятость — официальная формула PA Disk Quota: "
             "du по /tmp и домашнему каталогу (включая скрытые)."
         ),
     }
@@ -515,7 +521,7 @@ def settings_from_form(form: Any) -> tuple[dict[str, Any], str | None]:
     if enabled and not will_have_token:
         return {}, "Для включения модуля нужен API token."
 
-    raw_quota = (form.get("disk_quota_mib") or "").strip() or "512"
+    raw_quota = (form.get("disk_quota_mib") or "").strip() or str(Config.PA_DISC_FREE)
     try:
         disk_quota_mib = int(raw_quota)
     except ValueError:

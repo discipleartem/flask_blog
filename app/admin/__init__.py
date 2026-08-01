@@ -4,7 +4,16 @@ from __future__ import annotations
 
 import json
 
-from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
+from flask import (
+    Blueprint,
+    abort,
+    current_app,
+    flash,
+    redirect,
+    render_template,
+    request,
+    url_for,
+)
 
 from app.admin import pythonanywhere as pa
 from app.admin.modules_registry import catalog_for_template
@@ -72,6 +81,7 @@ def pythonanywhere_settings():
         "admin/pythonanywhere.html",
         settings=settings,
         allowed_hosts=sorted(pa.ALLOWED_HOSTS),
+        pa_disc_free=current_app.config["PA_DISC_FREE"],
     )
 
 

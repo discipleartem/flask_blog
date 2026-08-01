@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS pa_module_settings (
     monitor_always_on INTEGER NOT NULL DEFAULT 0 CHECK (monitor_always_on IN (0, 1)),
     monitor_consoles INTEGER NOT NULL DEFAULT 0 CHECK (monitor_consoles IN (0, 1)),
     monitor_disk INTEGER NOT NULL DEFAULT 0 CHECK (monitor_disk IN (0, 1)),
-    disk_quota_mib INTEGER NOT NULL DEFAULT 512,
+    disk_quota_mib INTEGER NOT NULL DEFAULT 512,  -- sync with Config.PA_DISC_FREE (MiB)
     updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 

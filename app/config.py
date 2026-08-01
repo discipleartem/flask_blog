@@ -50,6 +50,9 @@ class Config:
         )
     )
 
+    # Free PythonAnywhere disk quota (MiB). See help.pythonanywhere.com/pages/DiskQuota
+    PA_DISC_FREE = 512  # in Mbytes
+
 
 class TestConfig(Config):
     """Isolated in-memory / temp DB for unit tests."""

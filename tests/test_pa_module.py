@@ -9,6 +9,7 @@ from unittest import mock
 from urllib.error import HTTPError
 
 from app.admin import pythonanywhere as pa
+from app.config import Config
 from app.db import query_one
 from tests import BlogTestCase
 
@@ -20,7 +21,7 @@ class PaModuleTests(BlogTestCase):
         self.assertFalse(settings.has_credentials)
         self.assertEqual(settings.api_host, "www.pythonanywhere.com")
         self.assertFalse(settings.monitor_disk)
-        self.assertEqual(settings.disk_quota_mib, 512)
+        self.assertEqual(settings.disk_quota_mib, Config.PA_DISC_FREE)
 
     def test_settings_form_requires_admin(self) -> None:
         self.register("nope", "secret1")
@@ -102,7 +103,7 @@ class PaModuleTests(BlogTestCase):
             monitor_always_on=False,
             monitor_consoles=False,
             monitor_disk=True,
-            disk_quota_mib=512,
+            disk_quota_mib=Config.PA_DISC_FREE,
         )
         with mock.patch(
             "app.admin.pythonanywhere._home_disk_usage_bytes",
@@ -116,7 +117,7 @@ class PaModuleTests(BlogTestCase):
         view = block["view"]
         self.assertEqual(view["kind"], "disk")
         self.assertEqual(view["percent"], 50.0)
-        self.assertEqual(view["quota_mib"], 512)
+        self.assertEqual(view["quota_mib"], Config.PA_DISC_FREE)
 
     def test_fetch_disk_off_host_shows_quota_note(self) -> None:
         pa.save_settings(
@@ -132,7 +133,7 @@ class PaModuleTests(BlogTestCase):
             monitor_always_on=False,
             monitor_consoles=False,
             monitor_disk=True,
-            disk_quota_mib=512,
+            disk_quota_mib=Config.PA_DISC_FREE,
         )
         with mock.patch(
             "app.admin.pythonanywhere._home_disk_usage_bytes",
@@ -141,7 +142,7 @@ class PaModuleTests(BlogTestCase):
             data = pa.fetch_monitoring()
         view = data["blocks"][0]["view"]
         self.assertIsNone(view["used_mib"])
-        self.assertEqual(view["quota_mib"], 512)
+        self.assertEqual(view["quota_mib"], Config.PA_DISC_FREE)
         self.assertIn("недоступен", view["note"])
         self.assertTrue(data["blocks"][0]["result"].ok)
 
@@ -213,7 +214,7 @@ class PaModuleTests(BlogTestCase):
             monitor_always_on=False,
             monitor_consoles=False,
             monitor_disk=False,
-            disk_quota_mib=512,
+            disk_quota_mib=Config.PA_DISC_FREE,
         )
         cpu_payload = {
             "daily_cpu_limit_seconds": 100,
@@ -264,7 +265,7 @@ class PaModuleTests(BlogTestCase):
             monitor_always_on=False,
             monitor_consoles=False,
             monitor_disk=False,
-            disk_quota_mib=512,
+            disk_quota_mib=Config.PA_DISC_FREE,
         )
         cpu_payload = {
             "daily_cpu_limit_seconds": 100,
@@ -310,7 +311,7 @@ class PaModuleTests(BlogTestCase):
             monitor_always_on=False,
             monitor_consoles=False,
             monitor_disk=False,
-            disk_quota_mib=512,
+            disk_quota_mib=Config.PA_DISC_FREE,
         )
         err = HTTPError(
             "https://example",

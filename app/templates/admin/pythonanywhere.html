@@ -127,7 +127,7 @@
              name="disk_quota_mib" value="{{ settings.disk_quota_mib }}"
              {% if not settings.monitor_disk %}aria-describedby="disk_quota_help"{% endif %}>
       <div id="disk_quota_help" class="form-text">
-        Лимит тарифа PA (<a href="https://help.pythonanywhere.com/pages/DiskQuota" rel="noopener" target="_blank">Disk Quota</a>: free обычно 512 МиБ). Нужен для процента занятости.
+        Лимит тарифа PA (<a href="https://help.pythonanywhere.com/pages/DiskQuota" rel="noopener" target="_blank">Disk Quota</a>: free обычно {{ pa_disc_free }} МиБ). Нужен для процента занятости.
       </div>
     </div>
   </div>
