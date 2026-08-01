@@ -90,8 +90,48 @@ class PaModuleTests(BlogTestCase):
         self.login_admin()
         page = self.client.get("/admin/")
         self.assertEqual(page.status_code, 200)
+        # Секция скрыта, пока модуль выключен / нет блоков.
+        self.assertNotIn("Модуль PythonAnywhere выключен".encode(), page.data)
+        self.assertNotIn("Мониторинг".encode(), page.data)
+
+    def test_dashboard_shows_monitoring_when_enabled(self) -> None:
+        pa.save_settings(
+            enabled=True,
+            username="u1",
+            api_host="www.pythonanywhere.com",
+            webapp_domain="",
+            api_token="secret",
+            keep_existing_token=False,
+            monitor_cpu=True,
+            monitor_webapps=False,
+            monitor_schedule=False,
+            monitor_always_on=False,
+            monitor_consoles=False,
+        )
+        cpu_payload = {
+            "daily_cpu_limit_seconds": 100,
+            "daily_cpu_total_usage_seconds": 10,
+            "next_reset_time": "tomorrow",
+        }
+
+        class _Resp:
+            status = 200
+
+            def read(self) -> bytes:
+                return json.dumps(cpu_payload).encode()
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *args):
+                return False
+
+        self.login_admin()
+        with mock.patch("app.admin.pythonanywhere.urlopen", return_value=_Resp()):
+            page = self.client.get("/admin/")
+        self.assertEqual(page.status_code, 200)
         self.assertIn("Мониторинг".encode(), page.data)
-        self.assertIn(b"/admin/modules", page.data)
+        self.assertIn(b"u1", page.data)
 
     def test_modules_catalog_tab(self) -> None:
         self.login_admin()
