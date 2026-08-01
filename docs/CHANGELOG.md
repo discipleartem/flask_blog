@@ -11,6 +11,7 @@
 
 - Админ-панель `/admin/` (`is_admin`): dashboard, таблицы users/posts, comments по посту; edit/delete через существующие CRUD; `/users/` → redirect на `/admin/users`.
 - Модуль PythonAnywhere в Админке: форма credentials + чекбоксы мониторинга; секция «Мониторинг» на Dashboard (данные только из формы, не из env).
+- Мониторинг диска PA: чекбокс + квота МиБ в настройках модуля; на Dashboard — прогресс (занятость через `du` на хосте PA; без публичного API квоты).
 - CSRF на все mutating POST: posts/comments/users CRUD + logout (`validate_csrf`, скрытое поле в формах). Unit-тесты на отказ без/с неверным токеном.
 - Guard в `create_app`: в non-debug режиме отказ старта при известных небезопасных дефолтах `SECRET_KEY=dev-change-me` / `ADMIN_PASSWORD=admin` (`RuntimeError` + critical в лог). Debug/testing по-прежнему допускают дефолты.
 - Auth: явный `PERMANENT_SESSION_LIFETIME` (30 дней / `PERMANENT_SESSION_LIFETIME_DAYS`); чекбокс «Запомнить меня» на login; без него — сессия до закрытия браузера. Register остаётся permanent.

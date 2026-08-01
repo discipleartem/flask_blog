@@ -48,7 +48,7 @@
 | `users` | `name`, `discriminator`, `password_hash`, `is_admin` |
 | `posts` | `title`, `body_source`, `body_format`, `author_id` |
 | `comments` | `post_id`, `user_id`, `body_source`, `body_format` |
-| `pa_module_settings` | singleton `id=1`: PA API credentials + monitor checkboxes (только Admin UI) |
+| `pa_module_settings` | singleton `id=1`: PA API credentials + monitor checkboxes + `disk_quota_mib` (только Admin UI) |
 | `schema_migrations` | `filename`, `applied_at` |
 
 `body_format`: `plaintext` \| `markdown` \| `html`. Формы Post/Comment пишут `markdown`. Индексы и FK — в `schema.sql`. Миграции: `migrations/*.sql` через `run_migrations()` / `flask db-upgrade`.

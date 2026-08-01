@@ -90,6 +90,36 @@
           <dd class="col-6 mb-0">{{ block.view.reset }}</dd>
         </dl>
 
+        {% elif block.view and block.view.kind == 'disk' %}
+        <p class="small text-secondary mb-2">{{ block.view.hint }}</p>
+        {% if block.view.percent is not none %}
+        <div class="progress mb-3" role="progressbar"
+             aria-label="Использование диска"
+             aria-valuenow="{{ block.view.bar }}" aria-valuemin="0" aria-valuemax="100">
+          <div class="progress-bar{% if block.view.bar >= 90 %} bg-danger{% elif block.view.bar >= 70 %} bg-warning{% endif %}"
+               style="width: {{ block.view.bar }}%"></div>
+        </div>
+        {% endif %}
+        <dl class="row small mb-2">
+          <dt class="col-6 text-secondary">Занято</dt>
+          <dd class="col-6 mb-1">
+            {{ block.view.used_label }}
+            {% if block.view.percent is not none %}
+            <span class="text-secondary">({{ block.view.percent }}%)</span>
+            {% endif %}
+          </dd>
+          <dt class="col-6 text-secondary">Квота (из настроек)</dt>
+          <dd class="col-6 mb-0">{{ block.view.quota_label }}</dd>
+        </dl>
+        {% if block.view.note %}
+        <p class="small text-secondary mb-2">{{ block.view.note }}</p>
+        {% endif %}
+        {% if block.view.files_url %}
+        <p class="small mb-0">
+          <a href="{{ block.view.files_url }}" rel="noopener" target="_blank">Files на PythonAnywhere</a>
+        </p>
+        {% endif %}
+
         {% elif block.view and block.view.kind == 'list' %}
         {% if block.view.empty %}
         <p class="small text-secondary mb-0">Пока пусто.</p>

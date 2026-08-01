@@ -18,6 +18,8 @@ class PaModuleTests(BlogTestCase):
         self.assertFalse(settings.enabled)
         self.assertFalse(settings.has_credentials)
         self.assertEqual(settings.api_host, "www.pythonanywhere.com")
+        self.assertFalse(settings.monitor_disk)
+        self.assertEqual(settings.disk_quota_mib, 512)
 
     def test_settings_form_requires_admin(self) -> None:
         self.register("nope", "secret1")
@@ -65,6 +67,83 @@ class PaModuleTests(BlogTestCase):
         )
         self.assertEqual(pa.get_settings().api_token, "tok-from-form-only")
 
+    def test_save_disk_monitoring_settings(self) -> None:
+        self.login_admin()
+        response = self.client.post(
+            "/admin/modules/pythonanywhere",
+            data=self.csrf_data(
+                enabled="on",
+                username="demo_user",
+                api_host="www.pythonanywhere.com",
+                api_token="tok-disk",
+                monitor_disk="on",
+                disk_quota_mib="1024",
+            ),
+            follow_redirects=True,
+        )
+        self.assertEqual(response.status_code, 200)
+        settings = pa.get_settings()
+        self.assertTrue(settings.monitor_disk)
+        self.assertEqual(settings.disk_quota_mib, 1024)
+        self.assertFalse(settings.monitor_cpu)
+
+    def test_fetch_disk_on_host(self) -> None:
+        pa.save_settings(
+            enabled=True,
+            username="u1",
+            api_host="www.pythonanywhere.com",
+            webapp_domain="",
+            api_token="secret",
+            keep_existing_token=False,
+            monitor_cpu=False,
+            monitor_webapps=False,
+            monitor_schedule=False,
+            monitor_always_on=False,
+            monitor_consoles=False,
+            monitor_disk=True,
+            disk_quota_mib=512,
+        )
+        with mock.patch(
+            "app.admin.pythonanywhere._home_disk_usage_bytes",
+            return_value=(256 * 1024 * 1024, None),
+        ):
+            data = pa.fetch_monitoring()
+        self.assertEqual(len(data["blocks"]), 1)
+        block = data["blocks"][0]
+        self.assertEqual(block["key"], "disk")
+        self.assertTrue(block["result"].ok)
+        view = block["view"]
+        self.assertEqual(view["kind"], "disk")
+        self.assertEqual(view["percent"], 50.0)
+        self.assertEqual(view["quota_mib"], 512)
+
+    def test_fetch_disk_off_host_shows_quota_note(self) -> None:
+        pa.save_settings(
+            enabled=True,
+            username="u1",
+            api_host="www.pythonanywhere.com",
+            webapp_domain="",
+            api_token="secret",
+            keep_existing_token=False,
+            monitor_cpu=False,
+            monitor_webapps=False,
+            monitor_schedule=False,
+            monitor_always_on=False,
+            monitor_consoles=False,
+            monitor_disk=True,
+            disk_quota_mib=512,
+        )
+        with mock.patch(
+            "app.admin.pythonanywhere._home_disk_usage_bytes",
+            return_value=(None, "Каталог недоступен"),
+        ):
+            data = pa.fetch_monitoring()
+        view = data["blocks"][0]["view"]
+        self.assertIsNone(view["used_mib"])
+        self.assertEqual(view["quota_mib"], 512)
+        self.assertIn("недоступен", view["note"])
+        self.assertTrue(data["blocks"][0]["result"].ok)
+
     def test_does_not_read_env_for_credentials(self) -> None:
         """Модуль не подставляет PA_* из environ."""
         import os
@@ -107,6 +186,8 @@ class PaModuleTests(BlogTestCase):
             monitor_schedule=False,
             monitor_always_on=False,
             monitor_consoles=False,
+            monitor_disk=False,
+            disk_quota_mib=512,
         )
         cpu_payload = {
             "daily_cpu_limit_seconds": 100,
@@ -156,6 +237,8 @@ class PaModuleTests(BlogTestCase):
             monitor_schedule=False,
             monitor_always_on=False,
             monitor_consoles=False,
+            monitor_disk=False,
+            disk_quota_mib=512,
         )
         cpu_payload = {
             "daily_cpu_limit_seconds": 100,
@@ -200,6 +283,8 @@ class PaModuleTests(BlogTestCase):
             monitor_schedule=False,
             monitor_always_on=False,
             monitor_consoles=False,
+            monitor_disk=False,
+            disk_quota_mib=512,
         )
         err = HTTPError(
             "https://example",

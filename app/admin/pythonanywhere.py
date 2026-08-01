@@ -8,8 +8,10 @@ from __future__ import annotations
 
 import json
 import ssl
+import subprocess
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
@@ -39,6 +41,8 @@ class PaSettings:
     monitor_schedule: bool
     monitor_always_on: bool
     monitor_consoles: bool
+    monitor_disk: bool
+    disk_quota_mib: int
     updated_at: str | None = None
 
     @property
@@ -80,6 +84,8 @@ def get_settings() -> PaSettings:
         monitor_schedule=bool(row["monitor_schedule"]),
         monitor_always_on=bool(row["monitor_always_on"]),
         monitor_consoles=bool(row["monitor_consoles"]),
+        monitor_disk=bool(row["monitor_disk"]) if "monitor_disk" in row.keys() else False,
+        disk_quota_mib=int(row["disk_quota_mib"]) if "disk_quota_mib" in row.keys() else 512,
         updated_at=row["updated_at"],
     )
 
@@ -97,6 +103,8 @@ def save_settings(
     monitor_schedule: bool,
     monitor_always_on: bool,
     monitor_consoles: bool,
+    monitor_disk: bool,
+    disk_quota_mib: int,
 ) -> str | None:
     """Сохранить настройки из формы. Возвращает текст ошибки или None.
 
@@ -107,6 +115,8 @@ def save_settings(
     host = api_host.strip()
     if host not in _ALLOWED_HOSTS:
         return "Недопустимый API host. Выберите www или eu."
+    if disk_quota_mib < 1:
+        return "Квота диска должна быть не меньше 1 МиБ."
 
     current = get_settings()
     token = current.api_token
@@ -128,6 +138,8 @@ def save_settings(
             monitor_schedule = ?,
             monitor_always_on = ?,
             monitor_consoles = ?,
+            monitor_disk = ?,
+            disk_quota_mib = ?,
             updated_at = datetime('now')
         WHERE id = 1
         """,
@@ -142,6 +154,8 @@ def save_settings(
             1 if monitor_schedule else 0,
             1 if monitor_always_on else 0,
             1 if monitor_consoles else 0,
+            1 if monitor_disk else 0,
+            int(disk_quota_mib),
         ),
     )
     return None
@@ -213,6 +227,7 @@ def fetch_monitoring(settings: PaSettings | None = None) -> dict[str, Any]:
 
     specs: list[tuple[str, str, str, bool]] = [
         ("cpu", "Дневная квота CPU", "cpu/", settings.monitor_cpu),
+        ("disk", "Жёсткий диск", "", settings.monitor_disk),
         ("webapps", "Веб-приложения", "webapps/", settings.monitor_webapps),
         ("schedule", "Расписание задач", "schedule/", settings.monitor_schedule),
         ("always_on", "Always-on задачи", "always_on/", settings.monitor_always_on),
@@ -220,6 +235,17 @@ def fetch_monitoring(settings: PaSettings | None = None) -> dict[str, Any]:
     ]
     for key, title, path, on in specs:
         if not on:
+            continue
+        if key == "disk":
+            result, view = _fetch_disk(settings)
+            out["blocks"].append(
+                {
+                    "key": key,
+                    "title": title,
+                    "result": result,
+                    "view": view,
+                }
+            )
             continue
         result = _api_get(settings, path)
         block: dict[str, Any] = {
@@ -271,6 +297,106 @@ def _cpu_view(data: dict[str, Any]) -> dict[str, Any]:
             "(не процент загрузки сервера)."
         ),
     }
+
+
+def _format_mib(value: float | None) -> str:
+    """МиБ с одним знаком после запятой (или целые, если почти целые)."""
+    if value is None:
+        return "—"
+    if abs(value - round(value)) < 0.05:
+        return f"{int(round(value))} МиБ"
+    return f"{value:.1f} МиБ"
+
+
+def _home_disk_usage_bytes(username: str) -> tuple[int | None, str | None]:
+    """Размер /home/{username} через du. None — не на хосте PA / ошибка."""
+    home = Path(f"/home/{username}")
+    if not home.is_dir():
+        return None, (
+            "Каталог домашнего аккаунта недоступен на этой машине. "
+            "Занятость диска считается только когда приложение запущено "
+            "на PythonAnywhere (du по /home/<username>). "
+            "Квоту смотрите в Dashboard → Files на PA."
+        )
+    try:
+        completed = subprocess.run(
+            ["du", "-sb", str(home)],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        return None, f"Не удалось измерить диск: {exc}"
+    if completed.returncode != 0:
+        err = (completed.stderr or completed.stdout or "").strip()[:200]
+        return None, f"du завершился с ошибкой" + (f": {err}" if err else "")
+    first = (completed.stdout or "").strip().split()[0:1]
+    if not first:
+        return None, "Пустой ответ du"
+    try:
+        return int(first[0]), None
+    except ValueError:
+        return None, "Некорректный ответ du"
+
+
+def _disk_view(
+    *,
+    used_mib: float | None,
+    quota_mib: int,
+    note: str | None = None,
+    files_url: str | None = None,
+) -> dict[str, Any]:
+    """Карточка использования диска (квота из формы Админки)."""
+    percent: float | None = None
+    if used_mib is not None and quota_mib > 0:
+        percent = round(100.0 * used_mib / float(quota_mib), 1)
+    bar = 0.0 if percent is None else min(100.0, max(0.0, percent))
+    return {
+        "kind": "disk",
+        "used_mib": used_mib,
+        "quota_mib": quota_mib,
+        "used_label": _format_mib(used_mib),
+        "quota_label": _format_mib(float(quota_mib)),
+        "percent": percent,
+        "bar": bar,
+        "note": note,
+        "files_url": files_url,
+        "hint": (
+            "В публичном API PythonAnywhere нет эндпоинта квоты диска. "
+            "Лимит задаётся в настройках модуля; занятость — du домашнего "
+            "каталога на хосте PA."
+        ),
+    }
+
+
+def _fetch_disk(settings: PaSettings) -> tuple[PaApiResult, dict[str, Any]]:
+    """Диск: локальный du при запуске на PA; иначе квота + пояснение."""
+    quota = max(1, int(settings.disk_quota_mib))
+    files_url = f"https://{settings.api_host}/user/{settings.username}/files/"
+    used_bytes, err = _home_disk_usage_bytes(settings.username)
+    if used_bytes is None:
+        view = _disk_view(
+            used_mib=None,
+            quota_mib=quota,
+            note=err,
+            files_url=files_url,
+        )
+        # Не ошибка API: квота всё равно полезна; OK=True без data.
+        return (
+            PaApiResult(ok=True, status_code=None, data={"quota_mib": quota}),
+            view,
+        )
+    used_mib = used_bytes / (1024.0 * 1024.0)
+    view = _disk_view(used_mib=used_mib, quota_mib=quota, files_url=files_url)
+    return (
+        PaApiResult(
+            ok=True,
+            status_code=None,
+            data={"used_bytes": used_bytes, "quota_mib": quota},
+        ),
+        view,
+    )
 
 
 def _list_rows(items: Any, fields: tuple[tuple[str, str], ...]) -> dict[str, Any]:
@@ -374,6 +500,14 @@ def settings_from_form(form: Any) -> tuple[dict[str, Any], str | None]:
     if enabled and not will_have_token:
         return {}, "Для включения модуля нужен API token."
 
+    raw_quota = (form.get("disk_quota_mib") or "").strip() or "512"
+    try:
+        disk_quota_mib = int(raw_quota)
+    except ValueError:
+        return {}, "Квота диска должна быть целым числом (МиБ)."
+    if disk_quota_mib < 1:
+        return {}, "Квота диска должна быть не меньше 1 МиБ."
+
     return {
         "enabled": enabled,
         "username": username,
@@ -386,4 +520,6 @@ def settings_from_form(form: Any) -> tuple[dict[str, Any], str | None]:
         "monitor_schedule": form.get("monitor_schedule") == "on",
         "monitor_always_on": form.get("monitor_always_on") == "on",
         "monitor_consoles": form.get("monitor_consoles") == "on",
+        "monitor_disk": form.get("monitor_disk") == "on",
+        "disk_quota_mib": disk_quota_mib,
     }, None
