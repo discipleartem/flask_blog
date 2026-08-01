@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import ssl
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
@@ -212,10 +213,10 @@ def fetch_monitoring(settings: PaSettings | None = None) -> dict[str, Any]:
 
     specs: list[tuple[str, str, str, bool]] = [
         ("cpu", "Дневная квота CPU", "cpu/", settings.monitor_cpu),
-        ("webapps", "Webapps", "webapps/", settings.monitor_webapps),
-        ("schedule", "Schedule", "schedule/", settings.monitor_schedule),
-        ("always_on", "Always-on", "always_on/", settings.monitor_always_on),
-        ("consoles", "Consoles", "consoles/", settings.monitor_consoles),
+        ("webapps", "Веб-приложения", "webapps/", settings.monitor_webapps),
+        ("schedule", "Расписание задач", "schedule/", settings.monitor_schedule),
+        ("always_on", "Always-on задачи", "always_on/", settings.monitor_always_on),
+        ("consoles", "Консоли", "consoles/", settings.monitor_consoles),
     ]
     for key, title, path, on in specs:
         if not on:
@@ -225,18 +226,30 @@ def fetch_monitoring(settings: PaSettings | None = None) -> dict[str, Any]:
             "key": key,
             "title": title,
             "result": result,
+            "view": None,
         }
-        if key == "cpu" and result.ok and isinstance(result.data, dict):
-            block["cpu_view"] = _cpu_view(result.data)
+        if result.ok:
+            block["view"] = _friendly_view(key, result.data)
         out["blocks"].append(block)
     return out
+
+
+def _format_reset(value: Any) -> str:
+    """ISO-время сброса → дд.мм.гггг чч:мм UTC."""
+    if value is None or value == "":
+        return "—"
+    text = str(value).strip()
+    try:
+        dt = datetime.fromisoformat(text.replace("Z", "+00:00"))
+        return dt.strftime("%d.%m.%Y %H:%M UTC")
+    except ValueError:
+        return text
 
 
 def _cpu_view(data: dict[str, Any]) -> dict[str, Any]:
     """Человекочитаемая сводка дневной квоты CPU (секунды процессора)."""
     used = data.get("daily_cpu_total_usage_seconds")
     limit = data.get("daily_cpu_limit_seconds")
-    reset = data.get("next_reset_time")
     percent: float | None = None
     try:
         used_f = float(used) if used is not None else None
@@ -245,12 +258,89 @@ def _cpu_view(data: dict[str, Any]) -> dict[str, Any]:
         used_f, limit_f = None, None
     if used_f is not None and limit_f and limit_f > 0:
         percent = round(100.0 * used_f / limit_f, 1)
+    bar = 0.0 if percent is None else min(100.0, max(0.0, percent))
     return {
-        "used": used_f if used_f is not None else used,
-        "limit": limit_f if limit_f is not None else limit,
+        "kind": "cpu",
+        "used": used_f,
+        "limit": limit_f,
         "percent": percent,
-        "reset": reset,
+        "bar": bar,
+        "reset": _format_reset(data.get("next_reset_time")),
+        "hint": (
+            "Секунды работы процессора за сутки на тарифе PythonAnywhere "
+            "(не процент загрузки сервера)."
+        ),
     }
+
+
+def _list_rows(items: Any, fields: tuple[tuple[str, str], ...]) -> dict[str, Any]:
+    """Таблица из списка dict для шаблона."""
+    rows: list[dict[str, str]] = []
+    if isinstance(items, list):
+        for item in items:
+            if not isinstance(item, dict):
+                rows.append({"primary": str(item), "secondary": ""})
+                continue
+            parts: list[str] = []
+            primary = ""
+            for key, label in fields:
+                val = item.get(key)
+                if val is None or val == "":
+                    continue
+                if not primary:
+                    primary = str(val)
+                else:
+                    parts.append(f"{label}: {val}")
+            rows.append(
+                {
+                    "primary": primary or "—",
+                    "secondary": " · ".join(parts),
+                }
+            )
+    return {"kind": "list", "count": len(rows), "rows": rows, "empty": not rows}
+
+
+def _friendly_view(key: str, data: Any) -> dict[str, Any] | None:
+    """Преобразовать ответ API в структуру для user-friendly шаблона."""
+    if key == "cpu" and isinstance(data, dict):
+        return _cpu_view(data)
+    if key == "webapps":
+        return _list_rows(
+            data,
+            (
+                ("domain_name", "домен"),
+                ("python_version", "Python"),
+            ),
+        )
+    if key == "schedule":
+        return _list_rows(
+            data,
+            (
+                ("command", "команда"),
+                ("enabled", "вкл"),
+                ("interval", "интервал"),
+                ("description", "описание"),
+            ),
+        )
+    if key == "always_on":
+        return _list_rows(
+            data,
+            (
+                ("command", "команда"),
+                ("description", "описание"),
+                ("enabled", "вкл"),
+            ),
+        )
+    if key == "consoles":
+        return _list_rows(
+            data,
+            (
+                ("executable", "команда"),
+                ("working_directory", "каталог"),
+                ("id", "id"),
+            ),
+        )
+    return {"kind": "raw", "data": data}
 
 
 def settings_from_form(form: Any) -> tuple[dict[str, Any], str | None]:

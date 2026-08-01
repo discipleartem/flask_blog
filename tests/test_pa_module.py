@@ -181,9 +181,11 @@ class PaModuleTests(BlogTestCase):
         self.assertEqual(len(data["blocks"]), 1)
         self.assertEqual(data["blocks"][0]["key"], "cpu")
         self.assertTrue(data["blocks"][0]["result"].ok)
-        self.assertEqual(data["blocks"][0]["cpu_view"]["used"], 10.0)
-        self.assertEqual(data["blocks"][0]["cpu_view"]["limit"], 100.0)
-        self.assertEqual(data["blocks"][0]["cpu_view"]["percent"], 10.0)
+        view = data["blocks"][0]["view"]
+        self.assertEqual(view["kind"], "cpu")
+        self.assertEqual(view["used"], 10.0)
+        self.assertEqual(view["limit"], 100.0)
+        self.assertEqual(view["percent"], 10.0)
 
     def test_api_error_surface(self) -> None:
         pa.save_settings(

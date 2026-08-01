@@ -58,49 +58,57 @@
           <span class="badge text-bg-danger">ошибка</span>
           {% endif %}
         </div>
-        {% if block.result.ok %}
-          {% if block.key == 'cpu' and block.cpu_view %}
-          <p class="small text-secondary mb-2">
-            Сколько секунд процессора израсходовано сегодня (квота PythonAnywhere), не «нагрузка в %» сервера.
-          </p>
-          <dl class="row small mb-0">
-            <dt class="col-7 text-secondary">Израсходовано</dt>
-            <dd class="col-5 mb-1">
-              {% if block.cpu_view.used is not none %}
-              {{ block.cpu_view.used }} с
-              {% if block.cpu_view.percent is not none %}
-              <span class="text-secondary">({{ block.cpu_view.percent }}%)</span>
-              {% endif %}
-              {% else %}—{% endif %}
-            </dd>
-            <dt class="col-7 text-secondary">Дневной лимит</dt>
-            <dd class="col-5 mb-1">
-              {% if block.cpu_view.limit is not none %}{{ block.cpu_view.limit }} с{% else %}—{% endif %}
-            </dd>
-            <dt class="col-7 text-secondary">Обновление квоты</dt>
-            <dd class="col-5 mb-0">{{ block.cpu_view.reset or '—' }}</dd>
-          </dl>
-          {% elif block.key == 'webapps' and block.result.data is sequence %}
-          <ul class="list-unstyled small mb-0">
-            {% for app in block.result.data %}
-            <li class="mb-1">
-              <span class="fw-medium">{{ app.get('domain_name') or app }}</span>
-              {% if app.get('python_version') %}
-              <span class="text-secondary">· {{ app.get('python_version') }}</span>
-              {% endif %}
-            </li>
-            {% else %}
-            <li class="text-secondary">Нет webapps</li>
-            {% endfor %}
-          </ul>
-          {% elif block.result.data is sequence %}
-          <p class="small mb-1">Записей: {{ block.result.data|length }}</p>
-          <pre class="small mb-0 overflow-auto">{{ pretty_json(block.result.data) }}</pre>
-          {% else %}
-          <pre class="small mb-0 overflow-auto">{{ pretty_json(block.result.data) }}</pre>
-          {% endif %}
-        {% else %}
+
+        {% if not block.result.ok %}
         <p class="small text-danger mb-0">{{ block.result.error or 'Ошибка API' }}</p>
+
+        {% elif block.view and block.view.kind == 'cpu' %}
+        <p class="small text-secondary mb-2">{{ block.view.hint }}</p>
+        {% if block.view.percent is not none %}
+        <div class="progress mb-3" role="progressbar"
+             aria-label="Использование дневной квоты CPU"
+             aria-valuenow="{{ block.view.bar }}" aria-valuemin="0" aria-valuemax="100">
+          <div class="progress-bar{% if block.view.bar >= 90 %} bg-danger{% elif block.view.bar >= 70 %} bg-warning{% endif %}"
+               style="width: {{ block.view.bar }}%"></div>
+        </div>
+        {% endif %}
+        <dl class="row small mb-0">
+          <dt class="col-6 text-secondary">Израсходовано сегодня</dt>
+          <dd class="col-6 mb-1">
+            {% if block.view.used is not none %}
+              {{ block.view.used }} сек.
+              {% if block.view.percent is not none %}
+              <span class="text-secondary">({{ block.view.percent }}% квоты)</span>
+              {% endif %}
+            {% else %}—{% endif %}
+          </dd>
+          <dt class="col-6 text-secondary">Дневной лимит</dt>
+          <dd class="col-6 mb-1">
+            {% if block.view.limit is not none %}{{ block.view.limit }} сек.{% else %}—{% endif %}
+          </dd>
+          <dt class="col-6 text-secondary">Квота обновится</dt>
+          <dd class="col-6 mb-0">{{ block.view.reset }}</dd>
+        </dl>
+
+        {% elif block.view and block.view.kind == 'list' %}
+        {% if block.view.empty %}
+        <p class="small text-secondary mb-0">Пока пусто.</p>
+        {% else %}
+        <p class="small text-secondary mb-2">Всего: {{ block.view.count }}</p>
+        <ul class="list-unstyled small mb-0">
+          {% for row in block.view.rows %}
+          <li class="mb-2{% if not loop.last %} border-bottom pb-2{% endif %}">
+            <div class="fw-medium">{{ row.primary }}</div>
+            {% if row.secondary %}
+            <div class="text-secondary">{{ row.secondary }}</div>
+            {% endif %}
+          </li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+
+        {% else %}
+        <pre class="small mb-0 overflow-auto">{{ pretty_json(block.result.data) }}</pre>
         {% endif %}
       </div>
     </div>
