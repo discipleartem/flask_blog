@@ -29,6 +29,7 @@
 
 ### Docs
 
+- Backlog #88 (админ-панель `/admin/`, модули, мониторинг PA) выполнен после merge в `dev`.
 - Backlog #57 (`g.user` без `password_hash`) выполнен после merge в `dev`.
 - Backlog #59 (явный TTL сессии / remember-me) выполнен после merge в `dev`.
 - DEPLOY.md / DEVELOPMENT.md: обязательность `.env` на проде; локальный `flask run --debug` и CLI без debug.
