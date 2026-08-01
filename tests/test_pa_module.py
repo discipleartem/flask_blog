@@ -144,7 +144,8 @@ class PaModuleTests(BlogTestCase):
         self.assertIsNone(view["used_mib"])
         self.assertEqual(view["quota_mib"], Config.PA_DISC_FREE)
         self.assertIn("недоступен", view["note"])
-        self.assertTrue(data["blocks"][0]["result"].ok)
+        self.assertTrue(view["offline"])
+        self.assertFalse(data["blocks"][0]["result"].ok)
 
     def test_dashboard_disk_progress_bar_always_rendered(self) -> None:
         """Полоса диска на Dashboard есть даже без локального du."""
@@ -171,8 +172,13 @@ class PaModuleTests(BlogTestCase):
             page = self.client.get("/admin/")
         self.assertEqual(page.status_code, 200)
         self.assertIn("Жёсткий диск".encode(), page.data)
+        self.assertIn("локально".encode(), page.data)
         self.assertIn('aria-label="Использование диска"'.encode(), page.data)
         self.assertIn(b"progress-bar", page.data)
+        # Не показываем ложный OK, пока нет измерения на хосте.
+        disk_idx = page.data.find("Жёсткий диск".encode())
+        snippet = page.data[disk_idx : disk_idx + 400]
+        self.assertNotIn(b"text-bg-success", snippet)
 
     def test_home_disk_usage_uses_pa_disk_quota_formula(self) -> None:
         """Команда измерения совпадает со справкой PA Disk Quota."""

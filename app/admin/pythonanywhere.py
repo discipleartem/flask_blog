@@ -377,6 +377,7 @@ def _disk_view(
     quota_mib: int,
     note: str | None = None,
     files_url: str | None = None,
+    offline: bool = False,
 ) -> dict[str, Any]:
     """Карточка использования диска (квота из формы Админки)."""
     percent: float | None = None
@@ -393,6 +394,7 @@ def _disk_view(
         "bar": bar,
         "note": note,
         "files_url": files_url,
+        "offline": offline,
         "hint": (
             "В публичном API нет эндпоинта квоты. Лимит — из настроек модуля "
             "(free: "
@@ -403,9 +405,10 @@ def _disk_view(
 
 
 def _fetch_disk(settings: PaSettings) -> tuple[PaApiResult, dict[str, Any]]:
-    """Диск: локальный du при запуске на PA; иначе квота + пояснение."""
+    """Диск: локальный du при запуске на PA; иначе квота + статус «локально»."""
     quota = max(1, int(settings.disk_quota_mib))
     files_url = f"https://{settings.api_host}/user/{settings.username}/files/"
+    offline = not Path(f"/home/{settings.username}").is_dir()
     used_bytes, err = _home_disk_usage_bytes(settings.username)
     if used_bytes is None:
         view = _disk_view(
@@ -413,10 +416,20 @@ def _fetch_disk(settings: PaSettings) -> tuple[PaApiResult, dict[str, Any]]:
             quota_mib=quota,
             note=err,
             files_url=files_url,
+            offline=offline,
         )
-        # Не ошибка API: квота всё равно полезна; OK=True без data.
+        message = err or (
+            "Занятость диска доступна только на хосте PythonAnywhere."
+            if offline
+            else "Не удалось измерить диск."
+        )
         return (
-            PaApiResult(ok=True, status_code=None, data={"quota_mib": quota}),
+            PaApiResult(
+                ok=False,
+                status_code=None,
+                data={"quota_mib": quota, "offline": offline},
+                error=message,
+            ),
             view,
         )
     used_mib = used_bytes / (1024.0 * 1024.0)
