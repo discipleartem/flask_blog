@@ -72,8 +72,9 @@
   <h2 class="h6 text-secondary text-uppercase ls-wide mb-3">Мониторинг на Dashboard</h2>
   <p class="small text-secondary mb-3">
     Отметьте метрики для секции «Мониторинг». CPU и списки — GET API PA;
-    диск — квота из поля ниже + <code>du</code> домашнего каталога на хосте PA
-    (в публичном API квоты диска нет).
+    диск — квота из поля ниже + официальная формула
+    <a href="https://help.pythonanywhere.com/pages/DiskQuota" rel="noopener" target="_blank">PA Disk Quota</a>
+    (<code>du</code> по <code>/tmp</code> и home, включая скрытые; в публичном API квоты нет).
   </p>
   <div class="row g-2 mb-3">
     <div class="col-12 col-sm-6 col-lg-4">
@@ -126,7 +127,7 @@
              name="disk_quota_mib" value="{{ settings.disk_quota_mib }}"
              {% if not settings.monitor_disk %}aria-describedby="disk_quota_help"{% endif %}>
       <div id="disk_quota_help" class="form-text">
-        Лимит тарифа PA (Beginner обычно 512 МиБ). Нужен для процента занятости.
+        Лимит тарифа PA (<a href="https://help.pythonanywhere.com/pages/DiskQuota" rel="noopener" target="_blank">Disk Quota</a>: free обычно 512 МиБ). Нужен для процента занятости.
       </div>
     </div>
   </div>

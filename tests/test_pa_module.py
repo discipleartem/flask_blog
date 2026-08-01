@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from io import BytesIO
+from pathlib import Path
 from unittest import mock
 from urllib.error import HTTPError
 
@@ -143,6 +144,31 @@ class PaModuleTests(BlogTestCase):
         self.assertEqual(view["quota_mib"], 512)
         self.assertIn("недоступен", view["note"])
         self.assertTrue(data["blocks"][0]["result"].ok)
+
+    def test_home_disk_usage_uses_pa_disk_quota_formula(self) -> None:
+        """Команда измерения совпадает со справкой PA Disk Quota."""
+        home = Path("/home/u1")
+
+        class _Completed:
+            returncode = 0
+            stdout = "123456789\n"
+            stderr = ""
+
+        with (
+            mock.patch.object(Path, "is_dir", return_value=True),
+            mock.patch("app.admin.pythonanywhere.subprocess.run", return_value=_Completed()) as run,
+        ):
+            used, err = pa._home_disk_usage_bytes("u1")
+        self.assertIsNone(err)
+        self.assertEqual(used, 123456789)
+        args = run.call_args
+        self.assertEqual(args.args[0][0], "bash")
+        script = args.args[0][2]
+        self.assertIn("du -s -B 1 /tmp", script)
+        self.assertIn('"$HOME"/.[!.]*', script)
+        self.assertIn('"$HOME"/*', script)
+        self.assertIn("awk", script)
+        self.assertEqual(args.kwargs["env"]["HOME"], str(home))
 
     def test_does_not_read_env_for_credentials(self) -> None:
         """Модуль не подставляет PA_* из environ."""

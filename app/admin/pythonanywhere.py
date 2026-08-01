@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 import json
+import os
 import ssl
 import subprocess
 from dataclasses import dataclass
@@ -309,35 +310,49 @@ def _format_mib(value: float | None) -> str:
 
 
 def _home_disk_usage_bytes(username: str) -> tuple[int | None, str | None]:
-    """Размер /home/{username} через du. None — не на хосте PA / ошибка."""
+    """Занятость диска по формуле PA Disk Quota (du + awk).
+
+    Официально:
+    https://help.pythonanywhere.com/pages/DiskQuota
+    ``du -s -B 1 /tmp ~/.[!.]* ~/* | awk '{s+=$1}END{print s}'``
+
+    None — не на хосте PA / ошибка измерения.
+    """
     home = Path(f"/home/{username}")
     if not home.is_dir():
         return None, (
             "Каталог домашнего аккаунта недоступен на этой машине. "
-            "Занятость диска считается только когда приложение запущено "
-            "на PythonAnywhere (du по /home/<username>). "
+            "Занятость считается по формуле PA Disk Quota только когда "
+            "приложение запущено на PythonAnywhere. "
             "Квоту смотрите в Dashboard → Files на PA."
         )
+    # bash + те же пути, что в справке PA; HOME фиксируем на username.
+    script = (
+        'du -s -B 1 /tmp "$HOME"/.[!.]* "$HOME"/* 2>/dev/null '
+        "| awk '{s+=$1}END{print s+0}'"
+    )
     try:
         completed = subprocess.run(
-            ["du", "-sb", str(home)],
+            ["bash", "-c", script],
             check=False,
             capture_output=True,
             text=True,
-            timeout=60,
+            timeout=90,
+            env={**os.environ, "HOME": str(home)},
+            cwd=str(home),
         )
     except (OSError, subprocess.TimeoutExpired) as exc:
         return None, f"Не удалось измерить диск: {exc}"
     if completed.returncode != 0:
         err = (completed.stderr or completed.stdout or "").strip()[:200]
         return None, f"du завершился с ошибкой" + (f": {err}" if err else "")
-    first = (completed.stdout or "").strip().split()[0:1]
-    if not first:
-        return None, "Пустой ответ du"
+    text = (completed.stdout or "").strip().splitlines()
+    if not text:
+        return None, "Пустой ответ du/awk"
     try:
-        return int(first[0]), None
+        return int(text[-1].strip()), None
     except ValueError:
-        return None, "Некорректный ответ du"
+        return None, "Некорректный ответ du/awk"
 
 
 def _disk_view(
@@ -363,9 +378,9 @@ def _disk_view(
         "note": note,
         "files_url": files_url,
         "hint": (
-            "В публичном API PythonAnywhere нет эндпоинта квоты диска. "
-            "Лимит задаётся в настройках модуля; занятость — du домашнего "
-            "каталога на хосте PA."
+            "В публичном API нет эндпоинта квоты. Лимит — из настроек модуля "
+            "(free: 512 МиБ). Занятость — официальная формула PA Disk Quota: "
+            "du по /tmp и домашнему каталогу (включая скрытые)."
         ),
     }
 
