@@ -67,16 +67,28 @@
       </div>
       {% endif %}
     </div>
+    <div class="col-12 col-md-6 col-lg-4">
+      <label class="form-label" for="disk_quota_mib">Лимит диска (МБ)</label>
+      <input class="form-control" type="number" min="1" step="1" id="disk_quota_mib"
+             name="disk_quota_mib"
+             value="{{ settings.disk_quota_mib if settings.disk_quota_mib else pa_disc_free }}"
+             aria-describedby="disk_quota_help">
+      <div id="disk_quota_help" class="form-text">
+        Квота тарифа PA (в API нет). Free по умолчанию {{ pa_disc_free }}&nbsp;МБ
+        (<code>PA_DISC_FREE</code>). Нужен для процента в «Мониторинг».
+        <a href="https://help.pythonanywhere.com/pages/DiskQuota" rel="noopener" target="_blank">Disk Quota</a>
+      </div>
+    </div>
   </div>
 
   <h2 class="h6 text-secondary text-uppercase ls-wide mb-3">Мониторинг на Dashboard</h2>
   <p class="small text-secondary mb-3">
     Отметьте метрики для секции «Мониторинг». CPU и списки — GET API PA;
-    диск — квота из поля ниже + официальная формула
+    диск — лимит из поля выше + формула
     <a href="https://help.pythonanywhere.com/pages/DiskQuota" rel="noopener" target="_blank">PA Disk Quota</a>
-    (<code>du</code> по <code>/tmp</code> и home, включая скрытые; в публичном API квоты нет).
+    (<code>du</code> по <code>/tmp</code> и home).
   </p>
-  <div class="row g-2 mb-3">
+  <div class="row g-2 mb-4">
     <div class="col-12 col-sm-6 col-lg-4">
       <div class="form-check">
         <input class="form-check-input" type="checkbox" id="monitor_cpu" name="monitor_cpu"
@@ -88,7 +100,7 @@
       <div class="form-check">
         <input class="form-check-input" type="checkbox" id="monitor_disk" name="monitor_disk"
                {% if settings.monitor_disk %}checked{% endif %}>
-        <label class="form-check-label" for="monitor_disk">Жёсткий диск (домашний каталог)</label>
+        <label class="form-check-label" for="monitor_disk">Жёсткий диск (занятость)</label>
       </div>
     </div>
     <div class="col-12 col-sm-6 col-lg-4">
@@ -117,17 +129,6 @@
         <input class="form-check-input" type="checkbox" id="monitor_consoles" name="monitor_consoles"
                {% if settings.monitor_consoles %}checked{% endif %}>
         <label class="form-check-label" for="monitor_consoles">Consoles</label>
-      </div>
-    </div>
-  </div>
-  <div class="row g-3 mb-4">
-    <div class="col-12 col-md-6 col-lg-4">
-      <label class="form-label" for="disk_quota_mib">Квота диска (МиБ)</label>
-      <input class="form-control" type="number" min="1" step="1" id="disk_quota_mib"
-             name="disk_quota_mib" value="{{ settings.disk_quota_mib }}"
-             {% if not settings.monitor_disk %}aria-describedby="disk_quota_help"{% endif %}>
-      <div id="disk_quota_help" class="form-text">
-        Лимит тарифа PA (<a href="https://help.pythonanywhere.com/pages/DiskQuota" rel="noopener" target="_blank">Disk Quota</a>: free обычно {{ pa_disc_free }} МиБ). Нужен для процента занятости.
       </div>
     </div>
   </div>

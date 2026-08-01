@@ -87,13 +87,24 @@ def get_settings() -> PaSettings:
         monitor_always_on=bool(row["monitor_always_on"]),
         monitor_consoles=bool(row["monitor_consoles"]),
         monitor_disk=bool(row["monitor_disk"]) if "monitor_disk" in row.keys() else False,
-        disk_quota_mib=(
-            int(row["disk_quota_mib"])
-            if "disk_quota_mib" in row.keys()
-            else Config.PA_DISC_FREE
-        ),
+        disk_quota_mib=_disk_quota_from_row(row),
         updated_at=row["updated_at"],
     )
+
+
+def _disk_quota_from_row(row: Any) -> int:
+    """Лимит диска из БД; пустое/битое → Config.PA_DISC_FREE."""
+    if "disk_quota_mib" not in row.keys():
+        return Config.PA_DISC_FREE
+    raw = row["disk_quota_mib"]
+    if raw is None or raw == "":
+        return Config.PA_DISC_FREE
+    try:
+        value = int(raw)
+    except (TypeError, ValueError):
+        return Config.PA_DISC_FREE
+    return value if value >= 1 else Config.PA_DISC_FREE
+
 
 
 def save_settings(

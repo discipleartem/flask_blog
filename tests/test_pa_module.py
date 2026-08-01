@@ -171,6 +171,14 @@ class PaModuleTests(BlogTestCase):
         self.assertIn("awk", script)
         self.assertEqual(args.kwargs["env"]["HOME"], str(home))
 
+    def test_settings_form_shows_disk_limit_field(self) -> None:
+        self.login_admin()
+        page = self.client.get("/admin/modules/pythonanywhere")
+        self.assertEqual(page.status_code, 200)
+        self.assertIn("disk_quota_mib".encode(), page.data)
+        self.assertIn("Лимит диска".encode(), page.data)
+        self.assertIn(str(Config.PA_DISC_FREE).encode(), page.data)
+
     def test_does_not_read_env_for_credentials(self) -> None:
         """Модуль не подставляет PA_* из environ."""
         import os
