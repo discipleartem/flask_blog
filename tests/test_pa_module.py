@@ -23,6 +23,58 @@ class PaModuleTests(BlogTestCase):
         self.assertFalse(settings.monitor_disk)
         self.assertEqual(settings.disk_quota_mib, Config.PA_DISC_FREE)
 
+    def test_pa_settings_post_requires_csrf(self) -> None:
+        self.login_admin()
+        response = self.client.post(
+            "/admin/modules/pythonanywhere",
+            data={
+                "enabled": "on",
+                "username": "demo_user",
+                "api_host": "www.pythonanywhere.com",
+                "api_token": "tok",
+                "disk_quota_mib": str(Config.PA_DISC_FREE),
+            },
+        )
+        self.assertEqual(response.status_code, 403)
+        self.assertFalse(pa.get_settings().enabled)
+
+    def test_rejects_invalid_pa_username(self) -> None:
+        self.login_admin()
+        response = self.client.post(
+            "/admin/modules/pythonanywhere",
+            data=self.csrf_data(
+                enabled="on",
+                username="../etc",
+                api_host="www.pythonanywhere.com",
+                api_token="tok",
+                disk_quota_mib=str(Config.PA_DISC_FREE),
+            ),
+            follow_redirects=True,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Username".encode(), response.data)
+        self.assertFalse(pa.get_settings().enabled)
+
+    def test_api_token_encrypted_at_rest(self) -> None:
+        self.login_admin()
+        self.client.post(
+            "/admin/modules/pythonanywhere",
+            data=self.csrf_data(
+                enabled="on",
+                username="demo_user",
+                api_host="www.pythonanywhere.com",
+                api_token="plain-secret-token",
+                monitor_cpu="on",
+                disk_quota_mib=str(Config.PA_DISC_FREE),
+            ),
+            follow_redirects=True,
+        )
+        row = query_one("SELECT api_token FROM pa_module_settings WHERE id = 1")
+        stored = row["api_token"]
+        self.assertTrue(stored.startswith("enc:v1:"))
+        self.assertNotIn("plain-secret-token", stored)
+        self.assertEqual(pa.get_settings().api_token, "plain-secret-token")
+
     def test_settings_form_requires_admin(self) -> None:
         self.register("nope", "secret1")
         response = self.client.get("/admin/modules/pythonanywhere")
@@ -68,6 +120,9 @@ class PaModuleTests(BlogTestCase):
             follow_redirects=True,
         )
         self.assertEqual(pa.get_settings().api_token, "tok-from-form-only")
+        row = query_one("SELECT api_token FROM pa_module_settings WHERE id = 1")
+        self.assertTrue(row["api_token"].startswith("enc:v1:"))
+        self.assertNotIn("tok-from-form-only", row["api_token"])
 
     def test_save_disk_monitoring_settings(self) -> None:
         self.login_admin()

@@ -2,12 +2,15 @@
 
 Учётные данные задаются только формами в `/admin/modules/pythonanywhere`.
 Не читать `PA_*` / `API_TOKEN` из env или GitHub Secrets.
+API token в БД хранится зашифрованным (Fernet + SECRET_KEY).
 """
 
 from __future__ import annotations
 
+import base64
 import json
 import os
+import re
 import ssl
 import subprocess
 from dataclasses import dataclass
@@ -15,7 +18,13 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError, URLError
+from urllib.parse import quote
 from urllib.request import Request, urlopen
+
+from cryptography.fernet import Fernet, InvalidToken
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.hkdf import HKDF
+from flask import current_app
 
 from app.config import Config
 from app.db import execute, query_one
@@ -27,6 +36,12 @@ _ALLOWED_HOSTS = frozenset(
     }
 )
 ALLOWED_HOSTS = _ALLOWED_HOSTS
+
+# PA username: латиница/цифры/_/- ; без path-сегментов.
+_USERNAME_RE = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
+_TOKEN_PREFIX = "enc:v1:"
+_TOKEN_KDF_SALT = b"flask-blog-pa-api-token-v1"
+_TOKEN_KDF_INFO = b"pa_module_settings.api_token"
 
 
 @dataclass(frozen=True)
@@ -68,6 +83,51 @@ class PaApiResult:
     error: str | None = None
 
 
+def _validate_username(username: str) -> str | None:
+    """None если username допустим (в т.ч. пустой); иначе текст ошибки."""
+    if not username:
+        return None
+    if not _USERNAME_RE.fullmatch(username):
+        return (
+            "Username: только латиница, цифры, _ и - "
+            "(1–64 символа, без пробелов и /)."
+        )
+    return None
+
+
+def _fernet() -> Fernet:
+    """Fernet-ключ из SECRET_KEY приложения (HKDF)."""
+    secret = str(current_app.config["SECRET_KEY"]).encode("utf-8")
+    derived = HKDF(
+        algorithm=hashes.SHA256(),
+        length=32,
+        salt=_TOKEN_KDF_SALT,
+        info=_TOKEN_KDF_INFO,
+    ).derive(secret)
+    return Fernet(base64.urlsafe_b64encode(derived))
+
+
+def seal_api_token(plain: str) -> str:
+    """Зашифровать token для хранения в SQLite."""
+    if not plain:
+        return ""
+    token = _fernet().encrypt(plain.encode("utf-8")).decode("ascii")
+    return f"{_TOKEN_PREFIX}{token}"
+
+
+def unseal_api_token(stored: str) -> str:
+    """Расшифровать token из БД; legacy plaintext без префикса — как есть."""
+    if not stored:
+        return ""
+    if not stored.startswith(_TOKEN_PREFIX):
+        return stored
+    blob = stored[len(_TOKEN_PREFIX) :].encode("ascii")
+    try:
+        return _fernet().decrypt(blob).decode("utf-8")
+    except (InvalidToken, ValueError):
+        return ""
+
+
 def get_settings() -> PaSettings:
     """Загрузить singleton-настройки модуля."""
     row = query_one("SELECT * FROM pa_module_settings WHERE id = 1")
@@ -77,7 +137,7 @@ def get_settings() -> PaSettings:
     assert row is not None
     return PaSettings(
         enabled=bool(row["enabled"]),
-        api_token=row["api_token"] or "",
+        api_token=unseal_api_token(row["api_token"] or ""),
         username=(row["username"] or "").strip(),
         api_host=(row["api_host"] or "www.pythonanywhere.com").strip(),
         webapp_domain=(row["webapp_domain"] or "").strip(),
@@ -134,6 +194,10 @@ def save_settings(
         return "Недопустимый API host. Выберите www или eu."
     if disk_quota_mib < 1:
         return "Квота диска должна быть не меньше 1 МиБ."
+    username_clean = username.strip()
+    username_error = _validate_username(username_clean)
+    if username_error:
+        return username_error
 
     current = get_settings()
     token = current.api_token
@@ -162,8 +226,8 @@ def save_settings(
         """,
         (
             1 if enabled else 0,
-            token,
-            username.strip(),
+            seal_api_token(token),
+            username_clean,
             host,
             webapp_domain.strip(),
             1 if monitor_cpu else 0,
@@ -184,8 +248,11 @@ def _api_get(settings: PaSettings, path: str) -> PaApiResult:
         return PaApiResult(ok=False, status_code=None, error="Нет username/token")
     if settings.api_host not in _ALLOWED_HOSTS:
         return PaApiResult(ok=False, status_code=None, error="Недопустимый host")
+    if _validate_username(settings.username) is not None:
+        return PaApiResult(ok=False, status_code=None, error="Недопустимый username")
 
-    base = f"https://{settings.api_host}/api/v0/user/{settings.username}"
+    user = quote(settings.username, safe="")
+    base = f"https://{settings.api_host}/api/v0/user/{user}"
     url = f"{base}/{path.lstrip('/')}"
     req = Request(
         url,
@@ -334,6 +401,8 @@ def _home_disk_usage_bytes(username: str) -> tuple[int | None, str | None]:
 
     None — не на хосте PA / ошибка измерения.
     """
+    if _validate_username(username) is not None or not username:
+        return None, "Недопустимый username для измерения диска."
     home = Path(f"/home/{username}")
     if not home.is_dir():
         return None, (
@@ -342,6 +411,12 @@ def _home_disk_usage_bytes(username: str) -> tuple[int | None, str | None]:
             "приложение запущено на PythonAnywhere. "
             "Квоту смотрите в Dashboard → Files на PA."
         )
+    try:
+        resolved = home.resolve()
+    except OSError as exc:
+        return None, f"Не удалось разрешить home: {exc}"
+    if resolved != (Path("/home") / username).resolve():
+        return None, "Недопустимый путь home для измерения диска."
     # bash + те же пути, что в справке PA; HOME фиксируем на username.
     script = (
         'du -s -B 1 /tmp "$HOME"/.[!.]* "$HOME"/* 2>/dev/null '
@@ -527,6 +602,9 @@ def settings_from_form(form: Any) -> tuple[dict[str, Any], str | None]:
         return {}, "Укажите username PythonAnywhere."
     if enabled and api_host not in _ALLOWED_HOSTS:
         return {}, "Выберите API host (www или eu)."
+    username_error = _validate_username(username)
+    if username_error:
+        return {}, username_error
 
     current = get_settings()
     if clear_token:
