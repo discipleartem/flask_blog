@@ -1,0 +1,150 @@
+{% extends "admin/layout.html" %}
+{% block title %}Админка · Flask Blog{% endblock %}
+{% block admin_content %}
+<h1 class="h3 mb-4">Админ-панель</h1>
+<div class="row g-3 mb-4">
+  <div class="col-12 col-md-4">
+    <a class="text-decoration-none" href="{{ url_for('admin.users') }}">
+      <div class="border rounded p-3 h-100">
+        <div class="text-secondary small mb-1">Пользователи</div>
+        <div class="display-6 text-body">{{ counts['users'] }}</div>
+      </div>
+    </a>
+  </div>
+  <div class="col-12 col-md-4">
+    <a class="text-decoration-none" href="{{ url_for('admin.posts') }}">
+      <div class="border rounded p-3 h-100">
+        <div class="text-secondary small mb-1">Статьи</div>
+        <div class="display-6 text-body">{{ counts['posts'] }}</div>
+      </div>
+    </a>
+  </div>
+  <div class="col-12 col-md-4">
+    <div class="border rounded p-3 h-100">
+      <div class="text-secondary small mb-1">Комментарии</div>
+      <div class="display-6 text-body">{{ counts['comments'] }}</div>
+      <p class="small text-secondary mb-0 mt-2">Открываются из списка статей.</p>
+    </div>
+  </div>
+</div>
+
+{% if monitoring.enabled and monitoring.configured and monitoring.blocks %}
+<section class="mb-4" aria-labelledby="monitoring-heading">
+  <div class="d-flex flex-wrap align-items-baseline justify-content-between gap-2 mb-3">
+    <h2 id="monitoring-heading" class="h5 mb-0">Мониторинг</h2>
+    <a class="small" href="{{ url_for('admin.pythonanywhere_settings') }}">
+      PythonAnywhere
+    </a>
+  </div>
+  <p class="small text-secondary mb-3">
+    Аккаунт <span class="user-tag">{{ monitoring.username }}</span>
+    · host {{ monitoring.api_host }}
+    {% if monitoring.webapp_domain %}
+    · webapp
+    <a href="https://{{ monitoring.webapp_domain }}/" rel="noopener" target="_blank">
+      {{ monitoring.webapp_domain }}
+    </a>
+    {% endif %}
+  </p>
+  <div class="row g-3">
+    {% for block in monitoring.blocks %}
+    <div class="col-12 col-lg-6">
+      <div class="border rounded p-3 h-100">
+        <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+          <h3 class="h6 mb-0">{{ block.title }}</h3>
+          {% if block.view and block.view.kind == 'disk' and block.view.offline %}
+          <span class="badge text-bg-warning">локально</span>
+          {% elif block.result.ok %}
+          <span class="badge text-bg-success">OK</span>
+          {% else %}
+          <span class="badge text-bg-danger">ошибка</span>
+          {% endif %}
+        </div>
+
+        {% if block.view and block.view.kind == 'disk' %}
+        <p class="small text-secondary mb-2">{{ block.view.hint }}</p>
+        <div class="progress mb-3" role="progressbar"
+             aria-label="Использование диска"
+             aria-valuenow="{{ block.view.bar }}" aria-valuemin="0" aria-valuemax="100"
+             {% if block.view.percent is none %}aria-valuetext="неизвестно"{% endif %}>
+          <div class="progress-bar{% if block.view.bar >= 90 %} bg-danger{% elif block.view.bar >= 70 %} bg-warning{% endif %}"
+               style="width: {{ block.view.bar }}%"></div>
+        </div>
+        <dl class="row small mb-2">
+          <dt class="col-6 text-secondary">Занято</dt>
+          <dd class="col-6 mb-1">
+            {{ block.view.used_label }}
+            {% if block.view.percent is not none %}
+            <span class="text-secondary">({{ block.view.percent }}%)</span>
+            {% endif %}
+          </dd>
+          <dt class="col-6 text-secondary">Квота (из настроек)</dt>
+          <dd class="col-6 mb-0">{{ block.view.quota_label }}</dd>
+        </dl>
+        {% if block.view.note %}
+        <p class="small text-secondary mb-2">{{ block.view.note }}</p>
+        {% endif %}
+        {% if block.view.files_url %}
+        <p class="small mb-0">
+          <a href="{{ block.view.files_url }}" rel="noopener" target="_blank">Files на PythonAnywhere</a>
+        </p>
+        {% endif %}
+
+        {% elif not block.result.ok %}
+        <p class="small text-danger mb-0">{{ block.result.error or 'Ошибка API' }}</p>
+
+        {% elif block.view and block.view.kind == 'cpu' %}
+        <p class="small text-secondary mb-2">{{ block.view.hint }}</p>
+        {% if block.view.percent is not none %}
+        <div class="progress mb-3" role="progressbar"
+             aria-label="Использование дневной квоты CPU"
+             aria-valuenow="{{ block.view.bar }}" aria-valuemin="0" aria-valuemax="100">
+          <div class="progress-bar{% if block.view.bar >= 90 %} bg-danger{% elif block.view.bar >= 70 %} bg-warning{% endif %}"
+               style="width: {{ block.view.bar }}%"></div>
+        </div>
+        {% endif %}
+        <dl class="row small mb-0">
+          <dt class="col-6 text-secondary">Израсходовано сегодня</dt>
+          <dd class="col-6 mb-1">
+            {% if block.view.used is not none %}
+              {{ block.view.used }} сек.
+              {% if block.view.percent is not none %}
+              <span class="text-secondary">({{ block.view.percent }}% квоты)</span>
+              {% endif %}
+            {% else %}—{% endif %}
+          </dd>
+          <dt class="col-6 text-secondary">Дневной лимит</dt>
+          <dd class="col-6 mb-1">
+            {% if block.view.limit is not none %}{{ block.view.limit }} сек.{% else %}—{% endif %}
+          </dd>
+          <dt class="col-6 text-secondary">Квота обновится</dt>
+          <dd class="col-6 mb-0">{{ block.view.reset }}</dd>
+        </dl>
+
+        {% elif block.view and block.view.kind == 'list' %}
+        {% if block.view.empty %}
+        <p class="small text-secondary mb-0">Пока пусто.</p>
+        {% else %}
+        <p class="small text-secondary mb-2">Всего: {{ block.view.count }}</p>
+        <ul class="list-unstyled small mb-0">
+          {% for row in block.view.rows %}
+          <li class="mb-2{% if not loop.last %} border-bottom pb-2{% endif %}">
+            <div class="fw-medium">{{ row.primary }}</div>
+            {% if row.secondary %}
+            <div class="text-secondary">{{ row.secondary }}</div>
+            {% endif %}
+          </li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+
+        {% else %}
+        <pre class="small mb-0 overflow-auto">{{ pretty_json(block.result.data) }}</pre>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+{% endblock %}

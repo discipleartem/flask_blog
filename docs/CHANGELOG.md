@@ -9,6 +9,9 @@
 
 ### Added
 
+- Админ-панель `/admin/` (`is_admin`): dashboard, таблицы users/posts, comments по посту; edit/delete через существующие CRUD; `/users/` → redirect на `/admin/users`.
+- Модуль PythonAnywhere в Админке: форма credentials + чекбоксы мониторинга; секция «Мониторинг» на Dashboard (данные только из формы, не из env).
+- Мониторинг диска PA: чекбокс + квота МиБ в настройках модуля; на Dashboard — прогресс (занятость по формуле [Disk Quota](https://help.pythonanywhere.com/pages/DiskQuota): `du` `/tmp` + home; без публичного API квоты).
 - CSRF на все mutating POST: posts/comments/users CRUD + logout (`validate_csrf`, скрытое поле в формах). Unit-тесты на отказ без/с неверным токеном.
 - Guard в `create_app`: в non-debug режиме отказ старта при известных небезопасных дефолтах `SECRET_KEY=dev-change-me` / `ADMIN_PASSWORD=admin` (`RuntimeError` + critical в лог). Debug/testing по-прежнему допускают дефолты.
 - Auth: явный `PERMANENT_SESSION_LIFETIME` (30 дней / `PERMANENT_SESSION_LIFETIME_DAYS`); чекбокс «Запомнить меня» на login; без него — сессия до закрытия браузера. Register остаётся permanent.
@@ -17,6 +20,8 @@
 
 - Auth: `g.user` (`load_logged_in_user` / `login_user`) загружается без `password_hash`; хеш читается только в login view.
 - Logout: `POST /auth/logout` с CSRF; `GET /auth/logout` только redirect без side-effect. В навбаре — форма «Выйти».
+- Дефолт квоты диска PA-модуля: `Config.PA_DISC_FREE` (МиБ) в `app/config.py`.
+- PA-модуль: валидация username, URL-encode в API, `api_token` at rest (Fernet + `SECRET_KEY`), CSRF-тест на POST настроек.
 
 ### Fixed
 

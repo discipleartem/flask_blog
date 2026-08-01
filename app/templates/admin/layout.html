@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-xl-10 col-xxl-9">
+    <nav class="nav nav-pills flex-wrap gap-2 mb-4" aria-label="Админ-панель">
+      <a class="nav-link{% if request.endpoint == 'admin.dashboard' %} active{% endif %}"
+         href="{{ url_for('admin.dashboard') }}">Обзор</a>
+      <a class="nav-link{% if request.endpoint == 'admin.users' %} active{% endif %}"
+         href="{{ url_for('admin.users') }}">Пользователи</a>
+      <a class="nav-link{% if request.endpoint in ('admin.posts', 'admin.post_comments') %} active{% endif %}"
+         href="{{ url_for('admin.posts') }}">Статьи</a>
+      <a class="nav-link{% if request.path.startswith('/admin/modules') %} active{% endif %}"
+         href="{{ url_for('admin.modules_index') }}">Модули</a>
+    </nav>
+    {% block admin_content %}{% endblock %}
+  </div>
+</div>
+{% endblock %}

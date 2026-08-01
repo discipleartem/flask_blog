@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from flask import Blueprint, abort, flash, g, jsonify, redirect, render_template, request, url_for
 
-from app.auth.helpers import is_owner_or_admin, login_required
+from app.auth.helpers import is_owner_or_admin, login_required, safe_next_url
 from app.content_render import first_markdown_image_url, plain_excerpt, render_to_html
 from app.csrf import validate_csrf
 from app.db import execute, query_all, query_one
@@ -161,7 +161,11 @@ def delete(post_id: int):
         abort(403)
     execute("DELETE FROM posts WHERE id = ?", (post_id,))
     flash("Статья удалена.", "info")
-    return redirect(url_for("posts.index"))
+    back = safe_next_url(
+        request.form.get("next"),
+        default=url_for("posts.index"),
+    )
+    return redirect(back)
 
 
 def _validate_post(title: str, body_source: str) -> str | None:

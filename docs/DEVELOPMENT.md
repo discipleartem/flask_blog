@@ -49,6 +49,8 @@ Custom CSS (`app/static/css/app.css`) и JS (`theme.js`, `markdown-editor.js`, `
 
 **Лента / пост / комментарии:** главная — surface-карточки (`.feed-item`), заголовок → excerpt (`plain_excerpt`) → мета; карточка целиком — ссылка на пост. Страница поста — reading column (`.post-body`: абзацы, списки, blockquote, GFM-таблицы). Комментарии — отдельные карточки (`.comment-item`) с `gap`, не плоский список с `border-bottom`.
 
+**Админ-панель:** `/admin/` (только `is_admin`) — обзор + таблицы пользователей и статей; комментарии с авторами — drill-down `/admin/posts/<id>/comments` (текст через `render_content` + `syntax-highlight.js`). Вкладка **Модули** (`/admin/modules`) — каталог по категориям (Хостинг, Медиа, Локализация, Аккаунт); [PythonAnywhere](https://www.pythonanywhere.com/) в «Хостинг» (`/admin/modules/pythonanywhere`): username, API host, token и чекбоксы метрик **только из формы**; выбранные GET ([API](https://help.pythonanywhere.com/pages/API/)) на Dashboard в секции «Мониторинг». Диск: дефолт квоты `Config.PA_DISC_FREE` (МиБ), значение в форме → `disk_quota_mib`; формула [Disk Quota](https://help.pythonanywhere.com/pages/DiskQuota) (`du` `/tmp` + home) на хосте PA. Token в БД — Fernet (`SECRET_KEY`); username только `[A-Za-z0-9_-]{1,64}`. Таблица `pa_module_settings` (`monitor_disk`, `disk_quota_mib`). Edit/delete контента — маршруты `users` / `posts` / `comments`. Навбар: «Админка». Шаблоны: `app/templates/admin/`.
+
 ### Mobile / tablet first
 
 1. Базовая разметка — для phone.
@@ -95,6 +97,8 @@ python -m unittest discover -s tests -v
 | `browser.cdp.endpointUrl` | `http://127.0.0.1:9222` | CDP endpoint |
 | `platform.browser.enable` | `true` | MCP browser |
 | `platform.backend.enable` | `true` | HTTP / SQLite smoke |
+
+**Verify на показ:** пользователь хочет **видеть мышь** в окне Chrome — только headed, реальные клики IronBee (не headless / не «тихий» HTTP-only, если идёт UI-прогон). Rule: [`.cursor/rules/browser-verify-mouse.mdc`](../.cursor/rules/browser-verify-mouse.mdc).
 
 ### Быстрый старт
 

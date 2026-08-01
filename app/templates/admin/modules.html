@@ -1,0 +1,38 @@
+{% extends "admin/layout.html" %}
+{% block title %}Модули · Админка · Flask Blog{% endblock %}
+{% block admin_content %}
+<h1 class="h3 mb-2">Модули</h1>
+<p class="text-secondary mb-4">
+  Подключаемые расширения админки по категориям. Настройки каждого модуля — только через его форму.
+</p>
+
+{% for cat in categories %}
+<section class="mb-4" aria-labelledby="cat-{{ cat.id }}">
+  <h2 id="cat-{{ cat.id }}" class="h5 mb-1">{{ cat.title }}</h2>
+  <p class="small text-secondary mb-3">{{ cat.description }}</p>
+  <div class="row g-3">
+    {% for mod in cat.modules %}
+    <div class="col-12 col-md-6">
+      <div class="border rounded p-3 h-100 d-flex flex-column">
+        <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+          <h3 class="h6 mb-0">{{ mod.title }}</h3>
+          {% if mod.available %}
+          <span class="badge text-bg-dark">{{ mod.status }}</span>
+          {% else %}
+          <span class="badge text-bg-secondary">{{ mod.status }}</span>
+          {% endif %}
+        </div>
+        <p class="small text-secondary flex-grow-1 mb-3">{{ mod.description }}</p>
+        {% if mod.available and mod.endpoint %}
+        <a class="btn btn-outline-secondary btn-sm align-self-start"
+           href="{{ url_for(mod.endpoint) }}">Открыть</a>
+        {% else %}
+        <span class="small text-secondary">Появится в следующих задачах backlog.</span>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endfor %}
+{% endblock %}
