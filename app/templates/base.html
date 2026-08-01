@@ -57,8 +57,8 @@
           {% endif %}
           {% if g.user and g.user['is_admin'] %}
           <li class="nav-item">
-            <a class="nav-link{% if request.blueprint == 'users' %} active{% endif %}"
-               href="{{ url_for('users.index') }}"{% if request.blueprint == 'users' %} aria-current="page"{% endif %}>Пользователи</a>
+            <a class="nav-link{% if request.blueprint == 'admin' %} active{% endif %}"
+               href="{{ url_for('admin.dashboard') }}"{% if request.blueprint == 'admin' %} aria-current="page"{% endif %}>Админка</a>
           </li>
           {% endif %}
         </ul>

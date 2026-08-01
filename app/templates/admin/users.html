@@ -1,0 +1,50 @@
+{% extends "admin/layout.html" %}
+{% block title %}Пользователи · Админка · Flask Blog{% endblock %}
+{% block admin_content %}
+<h1 class="h3 mb-4">Пользователи</h1>
+<div class="table-responsive border rounded">
+  <table class="table users-table align-middle mb-0">
+    <thead>
+      <tr>
+        <th scope="col">ID</th>
+        <th scope="col">Тег</th>
+        <th scope="col">Admin</th>
+        <th scope="col">Создан</th>
+        <th scope="col" class="text-end">Действия</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in users %}
+      <tr>
+        <td class="text-secondary">{{ u['id'] }}</td>
+        <td>
+          <a class="link-body-emphasis text-decoration-none fw-medium"
+             href="{{ url_for('users.detail', user_id=u['id']) }}">
+            {{ u['name'] }}#{{ u['discriminator'] }}
+          </a>
+        </td>
+        <td>{% if u['is_admin'] %}<span class="badge text-bg-dark">да</span>{% else %}<span class="text-secondary">—</span>{% endif %}</td>
+        <td class="text-secondary small">{{ u['created_at'] }}</td>
+        <td class="text-end text-nowrap">
+          <a class="btn btn-outline-secondary btn-sm"
+             href="{{ url_for('users.edit', user_id=u['id']) }}">Изменить</a>
+          {% if u['id'] != g.user['id'] %}
+          <form class="d-inline" method="post"
+                action="{{ url_for('users.delete', user_id=u['id']) }}"
+                onsubmit="return confirm('Удалить пользователя?');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="next" value="{{ url_for('admin.users') }}">
+            <button type="submit" class="btn btn-outline-danger btn-sm">Удалить</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="5" class="text-secondary text-center py-4">Нет пользователей.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

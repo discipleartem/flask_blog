@@ -245,8 +245,9 @@ class AuthTests(BlogTestCase):
 
         self.logout()
         self.login_admin()
-        response = self.client.get("/users/")
+        response = self.client.get("/users/", follow_redirects=True)
         self.assertEqual(response.status_code, 200)
+        self.assertIn(b"/admin/users", response.request.path.encode())
         self.assertIn(b"eve#", response.data)
 
     def test_users_edit_rejects_missing_csrf(self) -> None:

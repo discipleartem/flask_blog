@@ -8,7 +8,7 @@
 |------|-----|
 | Entry | `wsgi.py` → `create_app()` |
 | Factory | `app/__init__.py` — blueprints, `before_request`, фильтр `render_content`, CSRF в context |
-| Blueprints | `app/auth`, `posts`, `comments`, `users`, `deploy` |
+| Blueprints | `app/auth`, `posts`, `comments`, `users`, `admin`, `deploy` |
 | Данные | `app/db.py` + SQLite (`Config.DATABASE`) |
 | UI | Jinja `app/templates/` + Bootstrap 5; static исключения в `app/static/` |
 
@@ -29,10 +29,14 @@
 | POST | `/posts/<id>/comments` | comments |
 | GET, POST | `/comments/<id>/edit` | comments |
 | POST | `/comments/<id>/delete` | comments |
-| GET | `/users/` | users |
+| GET | `/users/` | users → redirect `/admin/users` |
 | GET | `/users/<id>` | users |
 | GET, POST | `/users/<id>/edit` | users |
 | POST | `/users/<id>/delete` | users |
+| GET | `/admin/` | admin |
+| GET | `/admin/users` | admin |
+| GET | `/admin/posts` | admin |
+| GET | `/admin/posts/<id>/comments` | admin |
 | POST | `/internal/deploy` | deploy |
 
 ## Данные
@@ -49,7 +53,7 @@
 ## Поток запроса
 
 1. `before_request`: `load_logged_in_user` → `g.user` из `session["user_id"]` (или `None`); SELECT без `password_hash` (хеш только в auth login для `check_password_hash`).
-2. Шаблоны: `csrf_token`, `current_year` (context processor). Mutating POST (auth login/register/logout, posts/comments/users CRUD) проверяют `validate_csrf()`; скрытое поле `csrf_token` в формах. `GET /auth/logout` — только redirect, без очистки сессии.
+2. Шаблоны: `csrf_token`, `current_year` (context processor). Mutating POST (auth login/register/logout, posts/comments/users CRUD) проверяют `validate_csrf()`; скрытое поле `csrf_token` в формах. Delete из админки может передать `next` (через `safe_next_url`). `GET /auth/logout` — только redirect, без очистки сессии.
 3. Контент на витрине: фильтры `render_content` / `plain_excerpt` (`app/content_render.py` + nh3), не сырой `| safe` из БД. Страницы `/` и `/posts/<id>`: Open Graph / Twitter Card meta (`og:*`, `twitter:*`); description из `plain_excerpt`, image — `first_markdown_image_url` или `static/img/og-default.jpg`.
 4. Login: cookie session; без JWT. Без «Запомнить меня» — сессия до закрытия браузера (`session.permanent=False`). С чекбоксом / после register — permanent с TTL `PERMANENT_SESSION_LIFETIME` (config, дефолт 30 дней; env `PERMANENT_SESSION_LIFETIME_DAYS`). Query `next` после login — только через `safe_next_url` (whitelist relative `/…`; внешние и `//…` → home). Deploy-hook: Bearer `DEPLOY_SECRET` (не user-auth).
 
@@ -59,7 +63,8 @@
 |----------|-------|-------|
 | Свои посты/комментарии CRUD | да | да |
 | Чужие посты/комментарии | нет | да |
-| Список / правка / удаление пользователей | нет | да (не последнего admin) |
+| Список / правка / удаление пользователей | нет | да (не последнего admin); списки — `/admin/` |
+| Админ-панель `/admin/` (users / posts / comments) | нет | да |
 
 Identity: `name#NNNN`. Имя `admin` зарезервировано. Seed: `admin#0001`.
 
@@ -75,7 +80,8 @@ Identity: `name#NNNN`. Имя `admin` зарезервировано. Seed: `adm
 | `auth/` | register/login/logout + helpers |
 | `posts/` | лента, CRUD постов, markdown preview, OG meta на index/detail |
 | `comments/` | CRUD комментариев |
-| `users/` | профиль + admin CRUD |
+| `users/` | профиль; edit/delete (список → `/admin/users`) |
+| `admin/` | панель: dashboard, таблицы users/posts, comments по посту |
 | `deploy/` | `POST /internal/deploy` |
 | `templates/` | Jinja + Bootstrap 5 |
 | `static/css/app.css` | тема, бренд, код-блоки (исключения сверх BS5) |

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from flask import Blueprint, abort, flash, g, redirect, render_template, request, url_for
 
-from app.auth.helpers import is_owner_or_admin, login_required
+from app.auth.helpers import is_owner_or_admin, login_required, safe_next_url
 from app.csrf import validate_csrf
 from app.db import execute, query_one
 
@@ -83,4 +83,8 @@ def delete(comment_id: int):
     post_id = comment["post_id"]
     execute("DELETE FROM comments WHERE id = ?", (comment_id,))
     flash("Комментарий удалён.", "info")
-    return redirect(url_for("posts.detail", post_id=post_id))
+    back = safe_next_url(
+        request.form.get("next"),
+        default=url_for("posts.detail", post_id=post_id),
+    )
+    return redirect(back)

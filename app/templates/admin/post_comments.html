@@ -1,0 +1,64 @@
+{% extends "admin/layout.html" %}
+{% block title %}Комментарии · {{ post['title'] }} · Админка{% endblock %}
+{% block admin_content %}
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb mb-0">
+    <li class="breadcrumb-item">
+      <a href="{{ url_for('admin.posts') }}">Статьи</a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page">Комментарии #{{ post['id'] }}</li>
+  </ol>
+</nav>
+<h1 class="h3 mb-1">Комментарии</h1>
+<p class="text-secondary mb-4">
+  Статья:
+  <a href="{{ url_for('posts.detail', post_id=post['id']) }}">{{ post['title'] }}</a>
+  · автор {{ post['author_name'] }}#{{ post['author_disc'] }}
+</p>
+<div class="table-responsive border rounded">
+  <table class="table align-middle mb-0">
+    <thead>
+      <tr>
+        <th scope="col">ID</th>
+        <th scope="col">Автор</th>
+        <th scope="col">Текст</th>
+        <th scope="col">Создан</th>
+        <th scope="col" class="text-end">Действия</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in comments %}
+      <tr>
+        <td class="text-secondary">{{ c['id'] }}</td>
+        <td class="text-nowrap">
+          <a class="link-body-emphasis text-decoration-none"
+             href="{{ url_for('users.detail', user_id=c['user_id']) }}">
+            {{ c['author_name'] }}#{{ c['author_disc'] }}
+          </a>
+        </td>
+        <td class="small text-break">
+          {{ c['body_source']|plain_excerpt(120) }}
+        </td>
+        <td class="text-secondary small">{{ c['created_at'] }}</td>
+        <td class="text-end text-nowrap">
+          <a class="btn btn-outline-secondary btn-sm"
+             href="{{ url_for('comments.edit', comment_id=c['id']) }}">Изменить</a>
+          <form class="d-inline" method="post"
+                action="{{ url_for('comments.delete', comment_id=c['id']) }}"
+                onsubmit="return confirm('Удалить комментарий?');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="next"
+                   value="{{ url_for('admin.post_comments', post_id=post['id']) }}">
+            <button type="submit" class="btn btn-outline-danger btn-sm">Удалить</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="5" class="text-secondary text-center py-4">Нет комментариев.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

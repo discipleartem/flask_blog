@@ -1,0 +1,58 @@
+{% extends "admin/layout.html" %}
+{% block title %}Статьи · Админка · Flask Blog{% endblock %}
+{% block admin_content %}
+<h1 class="h3 mb-4">Статьи</h1>
+<div class="table-responsive border rounded">
+  <table class="table align-middle mb-0">
+    <thead>
+      <tr>
+        <th scope="col">ID</th>
+        <th scope="col">Заголовок</th>
+        <th scope="col">Автор</th>
+        <th scope="col">Комментарии</th>
+        <th scope="col">Создана</th>
+        <th scope="col" class="text-end">Действия</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in posts %}
+      <tr>
+        <td class="text-secondary">{{ p['id'] }}</td>
+        <td>
+          <a class="link-body-emphasis text-decoration-none fw-medium"
+             href="{{ url_for('posts.detail', post_id=p['id']) }}">
+            {{ p['title'] }}
+          </a>
+        </td>
+        <td class="text-secondary small">
+          {{ p['author_name'] }}#{{ p['author_disc'] }}
+        </td>
+        <td>
+          <a href="{{ url_for('admin.post_comments', post_id=p['id']) }}">
+            {{ p['comments_count'] }}
+          </a>
+        </td>
+        <td class="text-secondary small">{{ p['created_at'] }}</td>
+        <td class="text-end text-nowrap">
+          <a class="btn btn-outline-secondary btn-sm"
+             href="{{ url_for('posts.edit', post_id=p['id']) }}">Изменить</a>
+          <a class="btn btn-outline-secondary btn-sm"
+             href="{{ url_for('admin.post_comments', post_id=p['id']) }}">Комментарии</a>
+          <form class="d-inline" method="post"
+                action="{{ url_for('posts.delete', post_id=p['id']) }}"
+                onsubmit="return confirm('Удалить статью и её комментарии?');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="next" value="{{ url_for('admin.posts') }}">
+            <button type="submit" class="btn btn-outline-danger btn-sm">Удалить</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="6" class="text-secondary text-center py-4">Нет статей.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
