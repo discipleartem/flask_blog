@@ -211,7 +211,7 @@ def fetch_monitoring(settings: PaSettings | None = None) -> dict[str, Any]:
         return out
 
     specs: list[tuple[str, str, str, bool]] = [
-        ("cpu", "CPU", "cpu/", settings.monitor_cpu),
+        ("cpu", "Дневная квота CPU", "cpu/", settings.monitor_cpu),
         ("webapps", "Webapps", "webapps/", settings.monitor_webapps),
         ("schedule", "Schedule", "schedule/", settings.monitor_schedule),
         ("always_on", "Always-on", "always_on/", settings.monitor_always_on),
@@ -221,14 +221,36 @@ def fetch_monitoring(settings: PaSettings | None = None) -> dict[str, Any]:
         if not on:
             continue
         result = _api_get(settings, path)
-        out["blocks"].append(
-            {
-                "key": key,
-                "title": title,
-                "result": result,
-            }
-        )
+        block: dict[str, Any] = {
+            "key": key,
+            "title": title,
+            "result": result,
+        }
+        if key == "cpu" and result.ok and isinstance(result.data, dict):
+            block["cpu_view"] = _cpu_view(result.data)
+        out["blocks"].append(block)
     return out
+
+
+def _cpu_view(data: dict[str, Any]) -> dict[str, Any]:
+    """Человекочитаемая сводка дневной квоты CPU (секунды процессора)."""
+    used = data.get("daily_cpu_total_usage_seconds")
+    limit = data.get("daily_cpu_limit_seconds")
+    reset = data.get("next_reset_time")
+    percent: float | None = None
+    try:
+        used_f = float(used) if used is not None else None
+        limit_f = float(limit) if limit is not None else None
+    except (TypeError, ValueError):
+        used_f, limit_f = None, None
+    if used_f is not None and limit_f and limit_f > 0:
+        percent = round(100.0 * used_f / limit_f, 1)
+    return {
+        "used": used_f if used_f is not None else used,
+        "limit": limit_f if limit_f is not None else limit,
+        "percent": percent,
+        "reset": reset,
+    }
 
 
 def settings_from_form(form: Any) -> tuple[dict[str, Any], str | None]:

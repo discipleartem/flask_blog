@@ -59,14 +59,26 @@
           {% endif %}
         </div>
         {% if block.result.ok %}
-          {% if block.key == 'cpu' and block.result.data is mapping %}
+          {% if block.key == 'cpu' and block.cpu_view %}
+          <p class="small text-secondary mb-2">
+            Сколько секунд процессора израсходовано сегодня (квота PythonAnywhere), не «нагрузка в %» сервера.
+          </p>
           <dl class="row small mb-0">
-            <dt class="col-7 text-secondary">Использовано, с</dt>
-            <dd class="col-5 mb-1">{{ block.result.data.get('daily_cpu_total_usage_seconds', '—') }}</dd>
-            <dt class="col-7 text-secondary">Лимит, с</dt>
-            <dd class="col-5 mb-1">{{ block.result.data.get('daily_cpu_limit_seconds', '—') }}</dd>
-            <dt class="col-7 text-secondary">Сброс</dt>
-            <dd class="col-5 mb-0">{{ block.result.data.get('next_reset_time', '—') }}</dd>
+            <dt class="col-7 text-secondary">Израсходовано</dt>
+            <dd class="col-5 mb-1">
+              {% if block.cpu_view.used is not none %}
+              {{ block.cpu_view.used }} с
+              {% if block.cpu_view.percent is not none %}
+              <span class="text-secondary">({{ block.cpu_view.percent }}%)</span>
+              {% endif %}
+              {% else %}—{% endif %}
+            </dd>
+            <dt class="col-7 text-secondary">Дневной лимит</dt>
+            <dd class="col-5 mb-1">
+              {% if block.cpu_view.limit is not none %}{{ block.cpu_view.limit }} с{% else %}—{% endif %}
+            </dd>
+            <dt class="col-7 text-secondary">Обновление квоты</dt>
+            <dd class="col-5 mb-0">{{ block.cpu_view.reset or '—' }}</dd>
           </dl>
           {% elif block.key == 'webapps' and block.result.data is sequence %}
           <ul class="list-unstyled small mb-0">
